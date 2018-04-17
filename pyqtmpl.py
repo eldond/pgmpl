@@ -201,7 +201,13 @@ class Axes:
         self.__call__()
 
     def plot(self, *args, **kwargs):
-        self.axes.plot(*args, **kwargs)
+        self.axes.plot(*args, **plotkw_translator(**kwargs))
+
+    def set_xlabel(self, label):
+        self.axes.plot.setLabel('bottom', text=label)
+
+    def set_ylabel(self, label):
+        self.axes.plot.setLabel('left', text=label)
 
     def __call__(self):
         return self
