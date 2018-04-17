@@ -240,9 +240,9 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot
         if share in ['all', True]:
             return axs_[0, 0].axes
         elif share in ['col']:
-            return axs_[0, jj].axes
+            return axs_[0, jj].axes if ii > 0 else None
         elif share in ['row']:
-            return axs_[ii, 0].axes
+            return axs_[ii, 0].axes if jj > 0 else None
         else:
             return None
 
@@ -252,10 +252,10 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot
     for i in range(nrows):
         for j in range(ncols):
             index = i*ncols + j
+            axs[i, j] = fig.add_subplot(nrows, ncols, index, **subplot_kw)
             x_share_from = pick_share(sharex, i, j, axs)
             y_share_from = pick_share(sharey, i, j, axs)
             print('index {}, row {}, col {}, xshare = {}, yshare = {}'.format(index, i, j, x_share_from, y_share_from))
-            axs[i, j] = fig.add_subplot(nrows, ncols, index, **subplot_kw)
             if x_share_from is not None:
                 axs[i, j].axes.setXLink(x_share_from)
             if y_share_from is not None:
