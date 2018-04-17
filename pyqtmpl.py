@@ -260,6 +260,8 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot
                 axs[i, j].axes.setXLink(x_share_from)
             if y_share_from is not None:
                 axs[i, j].axes.setYLink(y_share_from)
+    if squeeze:
+        axs = np.squeeze(axs)
     return fig, axs
 
 
