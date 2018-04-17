@@ -157,10 +157,17 @@ def plotkw_translator(**plotkw):
 
 
 def figure(*args, **kwargs):
+    """
+    Imitates matplotlib.pyplot.figure, but creates a PyQtGraph window with the pyqtmpl.Figure class
+    :return: pyqtmpl.Figure instance
+    """
     return Figure(*args, **kwargs)
 
 
 class Figure:
+    """
+    Imitates matplotlib.figure.Figure using PyQtGraph
+    """
     def __init__(
             self, figsize=None, dpi=None,
             facecolor=None, edgecolor=None, linewidth=0.0,
@@ -175,11 +182,7 @@ class Figure:
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.win.setCentralItem(self.layout)
-        self.__call__()
 
-    def __call__(self):
-        print('call figure')
-        return self
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
 
@@ -193,24 +196,23 @@ class Figure:
 
 
 class Axes:
+    """
+    Imitates matplotlib.axes.Axes using PyQtGraph
+    """
     def __init__(self, fig=None, *args, **kwargs):
         if fig is None:
             fig = figure()
         self.fig = fig
         self.axes = self.fig.layout.addPlot(*args, **kwargs)
-        self.__call__()
 
     def plot(self, *args, **kwargs):
         self.axes.plot(*args, **plotkw_translator(**kwargs))
 
     def set_xlabel(self, label):
-        self.axes.plot.setLabel('bottom', text=label)
+        self.axes.setLabel('bottom', text=label)
 
     def set_ylabel(self, label):
-        self.axes.plot.setLabel('left', text=label)
-
-    def __call__(self):
-        return self
+        self.axes.setLabel('left', text=label)
 
 
 def axes(*args, **kwargs):
@@ -218,6 +220,19 @@ def axes(*args, **kwargs):
 
 
 def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
+    """
+    Imitates matplotlib.pyplot.subplots() using PyQtGraph
+    :param nrows: int, optional, default: 1
+    :param ncols: int, optional, default: 1
+    :param sharex: bool or {‘none’, ‘all’, ‘row’, ‘col’}, default: False
+    :param sharey: bool or {‘none’, ‘all’, ‘row’, ‘col’}, default: False
+    :param squeeze: bool, optional, default: True
+    :param subplot_kw: dict, optional
+    :param gridspec_kw: dict, optional
+    :param fig_kw:
+    :return: Figure object
+    :return: Axes object or array of Axes objects
+    """
 
     def pick_share(share, ii, jj, axs_):
         if ii == 0 and jj == 0:
@@ -317,7 +332,7 @@ class TestPyQtMpl(unittest.TestCase):
     def test_subplots(self):
         x = np.linspace(0, 1.2, 20)
         y = x**2 + 1
-        fig, axs = subplots(3, 2, sharex=True)
+        fig, axs = subplots(3, 2, sharex=True, sharey=True)
         axs[1, 1].plot(x, y)
 
 
