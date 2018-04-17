@@ -265,6 +265,34 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot
     return fig, axs
 
 
+def demo_plot():
+    x = np.linspace(0, 10, 151)
+    y1 = x**2 + 1
+    y2 = x*10 - 0.1 * x**3 + 50
+    y3 = 85 - y1
+    fig, axs = subplots(3, 2, sharex='col', sharey='row')
+    axs[-1, 0].set_xlabel('x')
+    axs[-1, 1].set_xlabel('X')
+    axs[0, 0].set_ylabel('y')
+    axs[1, 0].set_ylabel('y')
+    axs[2, 0].set_ylabel('y')
+
+    axs[0, 0].plot(x, y1)
+    axs[0, 1].plot(x, y2)
+    axs[0, 1].plot(x, y3)
+
+    axs[1, 0].plot(x, y1, color='r')
+    axs[1, 0].plot(x, y2, color='k')
+    axs[1, 1].plot(x, y2, linestyle='--', color='g')
+    axs[1, 1].plot(x, y3, linestyle='-.', color='b')
+
+    axs[2, 0].plot(x, y1, color='m', marker='o')
+    axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')
+    axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x')
+
+    return fig, axs
+
+
 class TestPyQtMpl(unittest.TestCase):
     """
     Test from the command line with
