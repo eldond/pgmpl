@@ -130,28 +130,28 @@ def plotkw_translator(**plotkw):
     if symbol is not None:
         pgkw['symbol'] = symbol
 
-    # Handle symbol edge
-    default_mec = plotkw.get('color', None) if plotkw.get('marker', None) in ['x', '+', '.', ','] else None
-    mec = plotkw.get('markeredgecolor', plotkw.get('mec', default_mec))
-    mew = plotkw.get('markeredgewidth', plotkw.get('mew', None))
-    penkw = {}
+        # Handle symbol edge
+        default_mec = plotkw.get('color', None) if plotkw.get('marker', None) in ['x', '+', '.', ','] else None
+        mec = plotkw.get('markeredgecolor', plotkw.get('mec', default_mec))
+        mew = plotkw.get('markeredgewidth', plotkw.get('mew', None))
+        penkw = {}
 
-    if mec is not None:
-        penkw['color'] = mec
-    if mew is not None:
-        penkw['width'] = mew
-    if 'alpha' in plotkw:
-        penkw['alpha'] = plotkw['alpha']
-    if len(penkw.keys()):
-        pgkw['symbolPen'] = setup_pen_kw(**penkw)
+        if mec is not None:
+            penkw['color'] = mec
+        if mew is not None:
+            penkw['width'] = mew
+        if 'alpha' in plotkw:
+            penkw['alpha'] = plotkw['alpha']
+        if len(penkw.keys()):
+            pgkw['symbolPen'] = setup_pen_kw(**penkw)
 
-    # Handle fill
-    brushkw = {}
-    brush_color = color_translator(**plotkw)
-    if brush_color is not None:
-        brushkw['color'] = brush_color
-    if len(brushkw.keys()):
-        pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
+        # Handle fill
+        brushkw = {}
+        brush_color = color_translator(**plotkw)
+        if brush_color is not None:
+            brushkw['color'] = brush_color
+        if len(brushkw.keys()):
+            pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
 
     return pgkw
 
