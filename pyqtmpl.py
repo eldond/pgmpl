@@ -181,28 +181,30 @@ class Figure:
         self.win.resizeEvent = self.resize_event
         if figsize is None:
             figsize = (800, 600)
-        self.win.resize(figsize[0], figsize[1])
+        self.width = figsize[0]
+        self.height = figsize[1]
+        self.win.resize(self.width, self.height)
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.win.setCentralItem(self.layout)
         self.margins = None
 
         if subplotpars is not None:
-            self.set_subplotpars(subplotpars, fx=figsize[0], fy=figsize[1])
+            self.set_subplotpars(subplotpars)
 
     def resize_event(self, event):
-        if hasattr(event, 'size') and self.patch_resize:
-            self.set_subplotpars(
-                None,
-                fx=event.size().width(), fy=event.size().height(),
-            )
+        if hasattr(event, 'size'):
+            self.width = event.size().width()
+            self.height = event.size().height()
+            if self.patch_resize:
+                self.set_subplotpars(None)
         self.win.resizeEvent_original(event)
 
-    def set_subplotpars(self, pars, fx=100, fy=100):
-        # todo : get actual window size instead of defaulting to 100
+    def set_subplotpars(self, pars):
+        fx = self.width
+        fy = self.height
         if pars is not None:
             print('pars = ', pars.left, pars.top, pars.right, pars.bottom)
-
             self.margins = {
                 'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
                 'hspace': pars.hspace, 'wspace': pars.wspace
@@ -260,7 +262,7 @@ def axes(*args, **kwargs):
     return Axes(*args, **kwargs)
 
 
-def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
+def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
     """
     Imitates matplotlib.pyplot.subplots() using PyQtGraph
     :param nrows: int, optional, default: 1
@@ -400,7 +402,7 @@ class TestPyQtMpl(unittest.TestCase):
             print('New pens:', newp)
 
     def test_plotkw_translator(self):
-        newk = [None] * self.nt
+        newk = [{}] * self.nt
         for i in range(self.nt):
             newk[i] = plotkw_translator(**self.plot_kw_tests[i])
         if self.verbose:
@@ -414,7 +416,7 @@ class TestPyQtMpl(unittest.TestCase):
     def test_subplots(self):
         x = np.linspace(0, 1.2, 20)
         y = x**2 + 1
-        fig, axs = subplots(3, 2, sharex=True, sharey=True)
+        fig, axs = subplots(3, 2, sharex='all', sharey='all')
         axs[1, 1].plot(x, y)
 
 
