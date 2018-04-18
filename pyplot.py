@@ -50,11 +50,11 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
         if ii == 0 and jj == 0:
             return None
         if share in ['all', True]:
-            return axs_[0, 0].axes
+            return axs_[0, 0]
         elif share in ['col']:
-            return axs_[0, jj].axes if ii > 0 else None
+            return axs_[0, jj] if ii > 0 else None
         elif share in ['row']:
-            return axs_[ii, 0].axes if jj > 0 else None
+            return axs_[ii, 0] if jj > 0 else None
         else:
             return None
 
@@ -77,11 +77,11 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
             y_share_from = pick_share(sharey, i, j, axs)
             printd('index {}, row {}, col {}, xshare = {}, yshare = {}'.format(index, i, j, x_share_from, y_share_from))
             if x_share_from is not None:
-                axs[i, j].axes.setXLink(x_share_from)
+                axs[i, j].setXLink(x_share_from)
             if y_share_from is not None:
-                axs[i, j].axes.setYLink(y_share_from)
+                axs[i, j].setYLink(y_share_from)
     if squeeze:
         axs = np.squeeze(axs)
         if len(np.shape(axs)) == 0:
-            axs = axs[()]
+            axs = axs[()]  # https://stackoverflow.com/a/35160426/6605826
     return fig, axs

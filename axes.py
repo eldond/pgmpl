@@ -13,31 +13,31 @@ import warnings
 # Calculation imports
 import numpy as np
 
+# Plotting imports
+import pyqtgraph as pg
+
 # pyqtmpl
 from translate import plotkw_translator
 
 
-class Axes:
+class Axes(pg.PlotItem):
     """
     Imitates matplotlib.axes.Axes using PyQtGraph
     """
-    def __init__(self, fig=None, *args, **kwargs):
-        if fig is None:
-            fig = figure()
-        self.fig = fig
-        self.axes = self.fig.layout.addPlot(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(Axes, self).__init__(**kwargs)
 
     def plot(self, *args, **kwargs):
-        self.axes.plot(*args, **plotkw_translator(**kwargs))
+        super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     def set_xlabel(self, label):
-        self.axes.setLabel('bottom', text=label)
+        self.setLabel('bottom', text=label)
 
     def set_ylabel(self, label):
-        self.axes.setLabel('left', text=label)
+        self.setLabel('left', text=label)
 
     def axhline(self, value, **kwargs):
-        self.axes.addLine(y=value, **plotkw_translator(**kwargs))
+        self.addLine(y=value, **plotkw_translator(**kwargs))
 
     def axvline(self, value, **kwargs):
-        self.axes.addLine(x=value, **plotkw_translator(**kwargs))
+        self.addLine(x=value, **plotkw_translator(**kwargs))

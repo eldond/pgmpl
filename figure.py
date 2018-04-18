@@ -102,5 +102,6 @@ class Figure:
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = index % ncols
-        ax = Axes(self, row, col, **kwargs)
+        ax = Axes(**kwargs)
+        self.layout.addItem(ax, row, col)
         return ax
