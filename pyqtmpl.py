@@ -176,6 +176,8 @@ class Figure:
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
         self.win = pg.GraphicsWindow()
+        self.win.resizeEvent_original = self.win.resizeEvent
+        self.win.resizeEvent = self.resize_event
         if figsize is None:
             figsize = (800, 600)
         self.win.resize(figsize[0], figsize[1])
@@ -184,14 +186,35 @@ class Figure:
         self.win.setCentralItem(self.layout)
 
         if subplotpars is not None:
-            self.set_subplotpars(subplotpars)
+            self.set_subplotpars(subplotpars, fx=figsize[0], fy=figsize[1])
 
-    def set_subplotpars(self, pars):
-        # left, top, right, bottom = self.layout.getContentsMargins()
-        fx = 100  # todo : get actual window size
-        fy = 100  # todo : see about making this update when the window is resized
-        self.layout.setSpacing((pars.wspace*fx + pars.hspace*fy)/2.0)
-        self.layout.setContentsMargins(pars.left*fx, (1-pars.top)*fy, (1-pars.right)*fx, pars.bottom*fy)
+    def resize_event(self, event):
+        try:
+            self.set_subplotpars(
+                None,
+                fx=event.size().width(), fy=event.size().height(),
+                oldx=event.oldSize().width(), oldy=event.oldSize().height(),
+            )
+        except AttributeError:
+            pass
+        self.win.resizeEvent_original(event)
+
+    def set_subplotpars(self, pars, fx=100, fy=100, oldx=100, oldy=100):
+        # todo : get actual window size instead of defaulting to 100
+        if pars is None:
+            left, top, right, bottom = self.layout.getContentsMargins()
+            left /= oldx
+            right = 1-right/oldx
+            top = 1-top/oldy
+            bottom /= oldy
+            # todo : figure out how to read spacing
+            # hspace = self.layout.spacing()  # This doesn't work
+            # wspace = self.layout.spacing()
+        else:
+            left, top, right, bottom = pars.left, pars.top, pars.right, pars.bottom
+            hspace, wspace = pars.hspace, pars.wspace
+            self.layout.setSpacing((wspace*fx + hspace*fy)/2.0)
+        self.layout.setContentsMargins(left*fx, (1-top)*fy, (1-right)*fx, bottom*fy)
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
 
@@ -293,7 +316,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.1, 'right': 0.9})
+    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.75})
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
