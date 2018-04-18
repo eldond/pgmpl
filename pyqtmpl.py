@@ -183,6 +183,15 @@ class Figure:
         self.layout = pg.GraphicsLayout()
         self.win.setCentralItem(self.layout)
 
+        if subplotpars is not None:
+            self.set_subplotpars(subplotpars)
+
+    def set_subplotpars(self, pars):
+        # left, top, right, bottom = self.layout.getContentsMargins()
+        fx = 100  # todo : get actual window size
+        fy = 100  # todo : see about making this update when the window is resized
+        self.layout.setSpacing((pars.wspace*fx + pars.hspace*fy)/2.0)
+        self.layout.setContentsMargins(pars.left*fx, (1-pars.top)*fy, (1-pars.right)*fx, pars.bottom*fy)
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
 
@@ -253,6 +262,14 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True, subplot
             return None
 
     fig = figure(**fig_kw)
+
+    if gridspec_kw is not None:
+        gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
+        if any([thing in gridspec_kw.keys() for thing in gridkw]):
+            from matplotlib.figure import SubplotParams
+            sp = SubplotParams(**{thing: gridspec_kw.pop(thing, None) for thing in gridkw})
+            fig.set_subplotpars(sp)
+
     axs = np.zeros((nrows, ncols), object)
     subplot_kw = subplot_kw if subplot_kw is not None else {}
     for i in range(nrows):
@@ -276,7 +293,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = subplots(3, 2, sharex='col', sharey='row')
+    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.1, 'right': 0.9})
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
