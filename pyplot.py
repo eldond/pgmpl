@@ -27,8 +27,8 @@ def figure(*args, **kwargs):
     return Figure(*args, **kwargs)
 
 
-def axes(*args, **kwargs):
-    return Axes(*args, **kwargs)
+def axes(**kwargs):
+    return Axes(**kwargs)
 
 
 def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
