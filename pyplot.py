@@ -82,4 +82,6 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
                 axs[i, j].axes.setYLink(y_share_from)
     if squeeze:
         axs = np.squeeze(axs)
+        if len(np.shape(axs)) == 0:
+            axs = axs[()]
     return fig, axs
