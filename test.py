@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import unittest
 import sys
 import warnings
+import os
 
 # Calculation imports
 import numpy as np
@@ -99,8 +100,14 @@ class TestPyQtMpl(unittest.TestCase):
         axs[1, 1].plot(x, y)
 
     def test_printd(self):
-        crazy_string = 'blargh hahah ralphing zerg'
-        printd(crazy_string)
+        test_string_1 = 'this string should print, but the other string should not'
+        test_string_2 = 'this string should NOT print, but the other string SHOULD'
+        debug = os.environ.get('PYQTMPL_DEBUG', "0")
+        os.environ['PYQTMPL_DEBUG'] = "1"
+        printd(test_string_1)
+        os.environ['PYQTMPL_DEBUG'] = "0"
+        printd(test_string_2)
+        os.environ['PYQTMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
 
     def test_demo_plot(self):
         demo_plot()
