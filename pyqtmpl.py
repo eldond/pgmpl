@@ -214,6 +214,12 @@ class Axes:
     def set_ylabel(self, label):
         self.axes.setLabel('left', text=label)
 
+    def axhline(self, value, **kwargs):
+        self.axes.addLine(y=value, **plotkw_translator(**kwargs))
+
+    def axvline(self, value, **kwargs):
+        self.axes.addLine(x=value, **plotkw_translator(**kwargs))
+
 
 def axes(*args, **kwargs):
     return Axes(*args, **kwargs)
@@ -290,6 +296,9 @@ def demo_plot():
     axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')
     axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x')
 
+    axs[1, 0].axvline(np.mean(x), linestyle=':', color='k')
+    axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k')
+
     return fig, axs
 
 
@@ -299,7 +308,7 @@ class TestPyQtMpl(unittest.TestCase):
     python -m unittest pyqtmpl
     """
 
-    verbose = True
+    verbose = False
 
     plot_kw_tests = [
         {'color': 'r'},
