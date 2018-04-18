@@ -24,7 +24,7 @@ from matplotlib.colors import to_rgba
 from translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator
 from pyplot import figure, subplots
 from util import printd
-from examples import demo_plot
+from examples import demo_plot, short_demo
 
 
 class TestPyQtMpl(unittest.TestCase):
@@ -110,6 +110,7 @@ class TestPyQtMpl(unittest.TestCase):
         os.environ['PYQTMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
 
     def test_demo_plot(self):
+        short_demo()
         demo_plot()
 
 

@@ -17,7 +17,7 @@ import numpy as np
 from PyQt4 import QtGui
 
 # pyqtmpl
-from pyplot import subplots
+import pyplot as plt
 
 
 def demo_plot():
@@ -25,7 +25,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
+    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
@@ -51,9 +51,18 @@ def demo_plot():
     return fig, axs
 
 
+def short_demo():
+    x = np.linspace(0, 2*np.pi, 36)
+    fig, axs = plt.subplots(1)
+    axs.plot(x, np.cos(x))
+    axs.plot(x, np.sin(x))
+    return fig, axs
+
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    demo_plot()
+    a = short_demo()
+    b = demo_plot()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if __name__ == '__main__':
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
