@@ -187,7 +187,11 @@ class Figure:
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.win.setCentralItem(self.layout)
-        self.margins = None
+        self.tight = tight_layout or constrained_layout
+        if self.tight:
+            self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
+        else:
+            self.margins = None
 
         if subplotpars is not None:
             self.set_subplotpars(subplotpars)
@@ -196,7 +200,7 @@ class Figure:
         if hasattr(event, 'size'):
             self.width = event.size().width()
             self.height = event.size().height()
-            if self.patch_resize:
+            if self.patch_resize and not self.tight:
                 self.set_subplotpars(None)
         self.win.resizeEvent_original(event)
 
@@ -207,20 +211,26 @@ class Figure:
             print('pars = ', pars.left, pars.top, pars.right, pars.bottom)
             self.margins = {
                 'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
-                'hspace': pars.hspace, 'wspace': pars.wspace
+                'hspace': pars.hspace, 'wspace': pars.wspace,
             }
         if self.margins is not None:
-            nrows = 3  # This isn't actually known, so we have to just guess
-            ncols = 3
-            spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * fx
-            spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * fy
-            self.layout.setSpacing((spx + spy)/2.0)
-            self.layout.setContentsMargins(
-                self.margins['left']*fx,
-                (1-self.margins['top'])*fy,
-                (1-self.margins['right'])*fx,
-                self.margins['bottom']*fy,
-            )
+            if self.tight:
+                self.layout.setContentsMargins(
+                    self.margins['left'], self.margins['top'], self.margins['right'], self.margins['bottom'],
+                )
+                self.layout.setSpacing((self.margins['wspace'] + self.margins['hspace'])/2.0)
+            else:
+                nrows = 3  # This isn't actually known, so we have to just guess
+                ncols = 3
+                spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * fx
+                spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * fy
+                self.layout.setSpacing((spx + spy)/2.0)
+                self.layout.setContentsMargins(
+                    self.margins['left']*fx,
+                    (1-self.margins['top'])*fy,
+                    (1-self.margins['right'])*fx,
+                    self.margins['bottom']*fy,
+                )
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
         if projection is not None and projection != 'rectilinear':
