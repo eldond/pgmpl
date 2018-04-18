@@ -223,12 +223,15 @@ class Figure:
             )
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
-
+        if projection is not None and projection != 'rectilinear':
+            raise NotImplementedError('projection keyword in add_subplot is not ready')
+        if polar is not None and polar is not False:
+            raise NotImplementedError('polar projection is not ready')
         row = int(np.floor(index/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = index % ncols
-        ax = axes(self, row, col)
+        ax = axes(self, row, col, **kwargs)
         return ax
 
 
