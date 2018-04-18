@@ -5,6 +5,7 @@
 from __future__ import print_function, division
 import unittest
 import sys
+import warnings
 
 # Calculation imports
 import numpy as np
@@ -13,6 +14,16 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 from matplotlib.colors import to_rgba
+
+
+def printd(*args):
+    """
+    Prints only if debug flag is turned on
+    :param args: Things to print
+    """
+    debug = False
+    if debug:
+        print(*args)
 
 
 def color_translator(**kw):
@@ -171,7 +182,7 @@ class Figure:
     def __init__(
             self, figsize=None, dpi=None,
             facecolor=None, edgecolor=None, linewidth=0.0,
-            frameon=None, subplotpars=None, tight_layout=None, constrained_layout=None,
+            frameon=True, subplotpars=None, tight_layout=None, constrained_layout=None,
     ):
         self.patch_resize = True  # Controls whether resize events mess with margins or not
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
@@ -196,6 +207,11 @@ class Figure:
         if subplotpars is not None:
             self.set_subplotpars(subplotpars)
 
+        if frameon is not False and linewidth > 0 and edgecolor:
+            warnings.warn('WARNING: frame around figure edge is not implemented yet')
+        if dpi is not None:
+            warnings.warn('WARNING: keyword DPI to class Figure is ignored.')
+
     def resize_event(self, event):
         if hasattr(event, 'size'):
             self.width = event.size().width()
@@ -208,7 +224,6 @@ class Figure:
         fx = self.width
         fy = self.height
         if pars is not None:
-            print('pars = ', pars.left, pars.top, pars.right, pars.bottom)
             self.margins = {
                 'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
                 'hspace': pars.hspace, 'wspace': pars.wspace,
@@ -319,7 +334,7 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
             axs[i, j] = fig.add_subplot(nrows, ncols, index, **subplot_kw)
             x_share_from = pick_share(sharex, i, j, axs)
             y_share_from = pick_share(sharey, i, j, axs)
-            print('index {}, row {}, col {}, xshare = {}, yshare = {}'.format(index, i, j, x_share_from, y_share_from))
+            printd('index {}, row {}, col {}, xshare = {}, yshare = {}'.format(index, i, j, x_share_from, y_share_from))
             if x_share_from is not None:
                 axs[i, j].axes.setXLink(x_share_from)
             if y_share_from is not None:
@@ -334,7 +349,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95})
+    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
