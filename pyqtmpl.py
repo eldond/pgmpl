@@ -173,6 +173,7 @@ class Figure:
             facecolor=None, edgecolor=None, linewidth=0.0,
             frameon=None, subplotpars=None, tight_layout=None, constrained_layout=None,
     ):
+        self.patch_resize = True  # Controls whether resize events mess with margins or not
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
         self.win = pg.GraphicsWindow()
@@ -184,37 +185,40 @@ class Figure:
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.win.setCentralItem(self.layout)
+        self.margins = None
 
         if subplotpars is not None:
             self.set_subplotpars(subplotpars, fx=figsize[0], fy=figsize[1])
 
     def resize_event(self, event):
-        try:
+        if hasattr(event, 'size') and self.patch_resize:
             self.set_subplotpars(
                 None,
                 fx=event.size().width(), fy=event.size().height(),
-                oldx=event.oldSize().width(), oldy=event.oldSize().height(),
             )
-        except AttributeError:
-            pass
         self.win.resizeEvent_original(event)
 
-    def set_subplotpars(self, pars, fx=100, fy=100, oldx=100, oldy=100):
+    def set_subplotpars(self, pars, fx=100, fy=100):
         # todo : get actual window size instead of defaulting to 100
-        if pars is None:
-            left, top, right, bottom = self.layout.getContentsMargins()
-            left /= oldx
-            right = 1-right/oldx
-            top = 1-top/oldy
-            bottom /= oldy
-            # todo : figure out how to read spacing
-            # hspace = self.layout.spacing()  # This doesn't work
-            # wspace = self.layout.spacing()
-        else:
-            left, top, right, bottom = pars.left, pars.top, pars.right, pars.bottom
-            hspace, wspace = pars.hspace, pars.wspace
-            self.layout.setSpacing((wspace*fx + hspace*fy)/2.0)
-        self.layout.setContentsMargins(left*fx, (1-top)*fy, (1-right)*fx, bottom*fy)
+        if pars is not None:
+            print('pars = ', pars.left, pars.top, pars.right, pars.bottom)
+
+            self.margins = {
+                'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
+                'hspace': pars.hspace, 'wspace': pars.wspace
+            }
+        if self.margins is not None:
+            nrows = 3  # This isn't actually known, so we have to just guess
+            ncols = 3
+            spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * fx
+            spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * fy
+            self.layout.setSpacing((spx + spy)/2.0)
+            self.layout.setContentsMargins(
+                self.margins['left']*fx,
+                (1-self.margins['top'])*fy,
+                (1-self.margins['right'])*fx,
+                self.margins['bottom']*fy,
+            )
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
 
@@ -222,7 +226,6 @@ class Figure:
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = index % ncols
-        # ax = self.layout.addPlot(row, col)
         ax = axes(self, row, col)
         return ax
 
@@ -316,7 +319,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.75})
+    fig, axs = subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95})
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
