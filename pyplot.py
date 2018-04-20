@@ -65,8 +65,8 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
         if any([thing in gridspec_kw.keys() for thing in gridkw]):
             from matplotlib.figure import SubplotParams
             spkw = {}
-            for thing in gridkw.keys():
-                spkw[thing] = gridkw.pop(thing)
+            for thing in gridkw:
+                spkw[thing] = gridspec_kw.pop(thing, None)
             sp = SubplotParams(**spkw)
             fig.set_subplotpars(sp)
 
