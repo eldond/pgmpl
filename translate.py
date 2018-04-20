@@ -16,7 +16,10 @@ import numpy as np
 # Plotting imports
 from PyQt4 import QtCore
 import pyqtgraph as pg
-from matplotlib.colors import to_rgba
+try:
+    from matplotlib.colors import to_rgba
+except ImportError:  # Older Matplotlib versions were organized differently
+    from matplotlib.colors.colorConverter import to_rgba
 
 
 def color_translator(**kw):
