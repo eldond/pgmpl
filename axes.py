@@ -18,7 +18,7 @@ import numpy as np
 import pyqtgraph as pg
 
 # pyqtmpl
-from translate import plotkw_translator
+from translate import plotkw_translator, color_translator, setup_pen_kw
 from util import printd
 
 
@@ -140,3 +140,65 @@ class Axes(pg.PlotItem):
         if linestyle not in [' '] and barsabove:
             self.plot(x, y, **kwargs)
         return errb
+
+    def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, hold=None, data=None, **kwargs):
+
+        # Set up xy data
+        if data is not None:
+            x = data['x']
+            y1 = data['y1']
+            y2 = data['y2']
+
+        x = np.atleast_1d(x)
+        y1 = np.atleast_1d(y1)
+        y2 = np.atleast_1d(y2)
+        if len(y2) == 1:
+            y2 += x*0
+
+        # Set up colors and display settings
+        ekw = copy.deepcopy(kwargs)
+        ekw['color'] = ekw.pop('edgecolor', ekw.pop('color', 'k'))
+
+        if 'facecolor' in kwargs:
+            brush = color_translator(color=kwargs['facecolor'], alpha=kwargs.get('alpha', None))
+        elif 'color' in kwargs:
+            brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
+        else:
+            brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
+        printd('  pyqtmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
+            brush, ekw, setup_pen_kw(**ekw)))
+
+        # Handle special keywords
+        if where is not None:
+            if interpolate:
+                warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
+            d = np.diff(np.append(0, where))
+            start_i = np.where(d == 1)[0]
+            end_i = np.where(d == -1)[0]
+            if len(end_i) < len(start_i):
+                end_i = np.append(end_i, len(d))
+            printd('  fill_between where: start_i = {}, end_i = {}'.format(start_i, end_i))
+
+        else:
+            start_i = [0]
+            end_i = [len(x)]
+
+        if step is not None:
+            warnings.warn('Warning: step keyword to fill_between is not handled yet.')
+        if hold is not None:
+            warnings.warn('Warning: hold keyword to fill_between is not handled yet.')
+
+        # Do plot
+        fb = []
+        for i in range(len(start_i)):
+            si = start_i[i]
+            ei = end_i[i]
+            fb += [pg.FillBetweenItem(
+                pg.PlotDataItem(x[si:ei], y1[si:ei]),
+                pg.PlotDataItem(x[si:ei], y2[si:ei]),
+                pen=setup_pen_kw(**ekw),
+                brush=brush,
+            )]
+            self.addItem(fb[i])
+
+        return fb

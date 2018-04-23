@@ -34,8 +34,11 @@ def demo_plot():
     axs[2, 0].set_ylabel('y')
 
     axs[0, 0].plot(x, y1)
-    axs[0, 1].plot(x, y2)
-    axs[0, 1].plot(x, y3)
+    axs[0, 0].plot(x, y2)
+    axs[0, 0].plot(x, y3)
+
+    axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
+    axs[0, 1].fill_between(x, y1+20, y2+25, color='r', alpha=0.4, edgecolor='k', linewidth=3, where=(x > 7) | (x < 4))
 
     axs[1, 0].plot(x, y1, color='r')
     axs[1, 0].plot(x, y2, color='k')
