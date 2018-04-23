@@ -19,7 +19,8 @@ import pyqtgraph as pg
 try:
     from matplotlib.colors import to_rgba
 except ImportError:  # Older Matplotlib versions were organized differently
-    from matplotlib.colors.colorConverter import to_rgba
+    from matplotlib.colors import colorConverter
+    to_rgba = colorConverter.to_rgba
 
 
 def color_translator(**kw):

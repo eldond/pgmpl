@@ -64,7 +64,10 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
         gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
         if any([thing in gridspec_kw.keys() for thing in gridkw]):
             from matplotlib.figure import SubplotParams
-            sp = SubplotParams(**{thing: gridspec_kw.pop(thing, None) for thing in gridkw})
+            spkw = {}
+            for thing in gridkw:
+                spkw[thing] = gridspec_kw.pop(thing, None)
+            sp = SubplotParams(**spkw)
             fig.set_subplotpars(sp)
 
     axs = np.zeros((nrows, ncols), object)
