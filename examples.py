@@ -9,6 +9,7 @@ Demonstrations and examples of pyqtmpl usage
 from __future__ import print_function, division
 import sys
 import warnings
+import os
 
 # Calculation imports
 import numpy as np
@@ -60,6 +61,8 @@ def short_demo():
 
 
 if __name__ == '__main__':
+    if os.environ.get('PYQTMPL_DEBUG', None) is None:
+        os.environ['PYQTMPL_DEBUG'] = "1"
     app = QtGui.QApplication(sys.argv)
     a = short_demo()
     b = demo_plot()
