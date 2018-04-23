@@ -72,6 +72,8 @@ def symbol_translator(**kw):
             's': 's',
             'p': 'p',
             'h': 'h',
+            '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
+            '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
         }.get(kw['marker'], 'o')
     else:
         symbol = None
@@ -138,7 +140,7 @@ def plotkw_translator(**plotkw):
         pgkw['symbol'] = symbol
 
         # Handle symbol edge
-        default_mec = plotkw.get('color', None) if plotkw.get('marker', None) in ['x', '+', '.', ','] else None
+        default_mec = plotkw.get('color', None) if plotkw.get('marker', None) in ['x', '+', '.', ',', '|', '_'] else None
         mec = plotkw.get('markeredgecolor', plotkw.get('mec', default_mec))
         mew = plotkw.get('markeredgewidth', plotkw.get('mew', None))
         penkw = {}
