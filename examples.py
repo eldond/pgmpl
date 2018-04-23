@@ -70,6 +70,5 @@ if __name__ == '__main__':
     a = short_demo()
     b = demo_plot()
     # Start Qt event loop unless running in interactive mode or using pyside.
-    if __name__ == '__main__':
-        if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             app.exec_()

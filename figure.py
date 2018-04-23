@@ -58,6 +58,9 @@ class Figure:
         if dpi is not None:
             warnings.warn('WARNING: keyword DPI to class Figure is ignored.')
 
+    def close(self):
+        self.win.close()  # https://stackoverflow.com/a/23444415/6605826
+
     def resize_event(self, event):
         if hasattr(event, 'size'):
             self.width = event.size().width()
