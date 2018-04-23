@@ -24,6 +24,14 @@ except ImportError:  # Older Matplotlib versions were organized differently
 
 
 def color_translator(**kw):
+    """
+    Translates colors specified in the Matplotlib system into pyqtgraph color descriptions
+    :param kw: dict
+        Dictionary of Matplotlib style plot keywords in which color may be specified. The entire set of mpl plot
+        keywords may be passed in, although only color-relevant ones will be used.
+    :return: iterable
+        An RGBA color description (each from 0 to 255) for use with pyqtgraph
+    """
     if 'color' in kw:
         if 'alpha' in kw:
             new_color = np.array(to_rgba(kw['color'])) * 255
@@ -39,6 +47,13 @@ def color_translator(**kw):
 
 
 def style_translator(**kw):
+    """
+    Translates linestyle descriptions from the Matplotlib system into Qt pen styles
+    :param kw: dict
+        Dictionary of Matplotlib style plot keywords in which linestyle may be specified. The entire set of mpl plot
+        keywords may be passed in, although only linestyle-relevant ones will be used.
+    :return: A Qt pen style suitable for use in pyqtgraph.mkPen()
+    """
     if 'linestyle' in kw.keys():
         style = {
             '-': QtCore.Qt.SolidLine,
@@ -54,6 +69,14 @@ def style_translator(**kw):
 
 
 def symbol_translator(**kw):
+    """
+    Translates Matplotlib markers into pyqtgraph symbols.
+    :param kw: dict
+        Dictionary of Matplotlib style plot keywords in which marker may be specified. The entire set of mpl plot
+        keywords may be passed in, although only linestyle-relevant ones will be used.
+    :return: string
+        Code for the relevant pyqtgraph symbol.
+    """
     if 'marker' in kw:
         theta = np.linspace(0, 2 * np.pi, 36)
         symbol = {  # mpl symbol : pyqt4 symbol
@@ -83,6 +106,15 @@ def symbol_translator(**kw):
 
 
 def setup_pen_kw(**kw):
+    """
+    Builds a pyqtgraph pen (object containing color, linestyle, etc. information) from Matplotlib keywords
+    :param kw: dict
+        Dictionary of Matplotlib style plot keywords in which line plot relevant settings may be specified. The entire
+        set of mpl plot keywords may be passed in, although only the keywords related to displaying line plots will be
+        used here.
+    :return: pyqtgraph pen instance
+        A pen which can be input with the pen keyword to many pyqtgraph functions
+    """
     penkw = {}
 
     # Move the easy keywords over directly
