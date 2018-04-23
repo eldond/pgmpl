@@ -61,6 +61,9 @@ class Figure:
     def close(self):
         self.win.close()  # https://stackoverflow.com/a/23444415/6605826
 
+    def show(self):
+        pass  # Provided for matplotlib compatibility
+
     def resize_event(self, event):
         if hasattr(event, 'size'):
             self.width = event.size().width()
