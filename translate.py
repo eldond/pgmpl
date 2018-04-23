@@ -22,6 +22,9 @@ except ImportError:  # Older Matplotlib versions were organized differently
     from matplotlib.colors import colorConverter
     to_rgba = colorConverter.to_rgba
 
+# pyqtmpl imports
+from util import printd
+
 
 def color_translator(**kw):
     """
@@ -33,13 +36,15 @@ def color_translator(**kw):
         An RGBA color description (each from 0 to 255) for use with pyqtgraph
     """
     if 'color' in kw:
-        if 'alpha' in kw:
+        printd('    color_translator input: kw["color"] = {}, to_rgba(kw.get("color", None)) = {}'.format(
+            kw.get('color', None), to_rgba(kw.get('color', None))), level=3)
+        if 'alpha' in kw and kw['alpha'] is not None:
             new_color = np.array(to_rgba(kw['color'])) * 255
             new_color[3] = kw['alpha'] * 255
         else:
-            new_color = kw['color']
+            new_color = np.array(to_rgba(kw['color'])) * 255
     else:
-        if 'alpha' in kw:
+        if 'alpha' in kw and kw['alpha'] is not None:
             new_color = (0, 0, 0, int(round(kw['alpha'] * 255)))
         else:
             new_color = None
