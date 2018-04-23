@@ -39,8 +39,11 @@ def demo_plot():
 
     axs[1, 0].plot(x, y1, color='r')
     axs[1, 0].plot(x, y2, color='k')
-    axs[1, 1].plot(x, y2, linestyle='--', color='g')
-    axs[1, 1].plot(x, y3, linestyle='-.', color='b')
+    axs[1, 0].plot(x, y2+y1, linestyle='--', color='g')
+    axs[1, 0].plot(x, y3, linestyle='-.', color='b')
+
+    axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
+    axs[1, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r')
 
     axs[2, 0].plot(x, y1, color='m', marker='o')
     axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')
