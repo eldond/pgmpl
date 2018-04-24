@@ -141,7 +141,7 @@ class Axes(pg.PlotItem):
             self.plot(x, y, **kwargs)
         return errb
 
-    def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, hold=None, data=None, **kwargs):
+    def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
 
         # Set up xy data
         if data is not None:
@@ -185,8 +185,6 @@ class Axes(pg.PlotItem):
 
         if step is not None:
             warnings.warn('Warning: step keyword to fill_between is not handled yet.')
-        if hold is not None:
-            warnings.warn('Warning: hold keyword to fill_between is not handled yet.')
 
         # Do plot
         fb = []

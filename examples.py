@@ -72,6 +72,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     a = short_demo()
     b = demo_plot()
+    a[0].close()  # This is not needed, but it makes testing faster.
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             app.exec_()
