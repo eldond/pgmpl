@@ -220,6 +220,8 @@ class Legend:
         #     opts = self.item.opts
         # AttributeError: 'InfiniteLine' object has no attribute 'opts'
         self.items_added = []
+        self.drag_enabled = True
+        self.leg = None
 
     def supported(self, item):
         return not any([isinstance(item, uic) for uic in self.unsupported_item_classes])
@@ -270,7 +272,7 @@ class Legend:
             handler_map=None,
     ):
         printd('  custom legend call')
-        leg = self.ax.addLegend()
+        self.leg = self.ax.addLegend()
 
         if handles is None:
             handles = self.ax.getViewBox().allChildren()
@@ -290,9 +292,18 @@ class Legend:
 
         for handle, label in zip(handles, labels):
             if self.supported(handle):
-                leg.addItem(handle, label)
-        return leg
+                self.leg.addItem(handle, label)
+        return self
 
     def addItem(self, item, name=None):
         self.items_added += [(item, name)]
+        return None
+
+    def draggable(self, on_off=True):
+        self.drag_enabled = on_off
+        if not on_off:
+            warnings.warn(
+                'Draggable switch is not enabled yet. The draggable() method is provided to prevent failures when '
+                'plotting routines are converted from matplotlib. pyqtgraph legends are draggable by default.'
+            )
         return None

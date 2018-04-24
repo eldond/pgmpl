@@ -54,7 +54,8 @@ def demo_plot():
     axs[1, 1].legend([beb, y2line], ['manual label for blue errorbar', 'manual label for y2line'])
 
     axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
-    axs[2, 0].legend()
+    leg = axs[2, 0].legend()
+    leg.draggable()
 
     axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+', label='y2 blk +')
     axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x', label='y3 blk x')
