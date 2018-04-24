@@ -9,6 +9,7 @@ Utilities for translating Matplotlib style keywords into PyQtGraph keywords
 from __future__ import print_function, division
 import sys
 import warnings
+import copy
 
 # Calculation imports
 import numpy as np
@@ -158,6 +159,7 @@ def plotkw_translator(**plotkw):
     """
 
     pgkw = {}
+    plotkw = copy.deepcopy(plotkw)  # Don't break the original in case it's needed for other calls
 
     # First define the pen -----------------------------------------------------------------------------------------
     pen = setup_pen_kw(**plotkw)
@@ -171,16 +173,16 @@ def plotkw_translator(**plotkw):
     }
     for direct in direct_translations:
         if direct in plotkw:
-            pgkw[direct] = plotkw[direct_translations[direct]]
+            pgkw[direct] = plotkw.pop(direct_translations[direct])
 
     symbol = symbol_translator(**plotkw)
     if symbol is not None:
         pgkw['symbol'] = symbol
 
         # Handle symbol edge
-        default_mec = plotkw.get('color', None) if plotkw.get('marker', None) in ['x', '+', '.', ',', '|', '_'] else None
-        mec = plotkw.get('markeredgecolor', plotkw.get('mec', default_mec))
-        mew = plotkw.get('markeredgewidth', plotkw.get('mew', None))
+        default_mec = plotkw.get('color', None) if plotkw.pop('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
+        mec = plotkw.pop('markeredgecolor', plotkw.pop('mec', default_mec))
+        mew = plotkw.pop('markeredgewidth', plotkw.pop('mew', None))
         penkw = {}
 
         if mec is not None:
@@ -188,7 +190,7 @@ def plotkw_translator(**plotkw):
         if mew is not None:
             penkw['width'] = mew
         if 'alpha' in plotkw:
-            penkw['alpha'] = plotkw['alpha']
+            penkw['alpha'] = plotkw.pop('alpha')
         if len(penkw.keys()):
             pgkw['symbolPen'] = setup_pen_kw(**penkw)
 
@@ -200,4 +202,11 @@ def plotkw_translator(**plotkw):
         if len(brushkw.keys()):
             pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
 
-    return pgkw
+    # Pass through other keywords
+    late_pops = ['color', 'alpha', 'lw', 'marker', 'linestyle']
+    for late_pop in late_pops:
+        # Didn't pop yet because used in a few places or popping above is inside of an if and may not have happened
+        plotkw.pop(late_pop, None)
+    plotkw.update(pgkw)
+
+    return plotkw
