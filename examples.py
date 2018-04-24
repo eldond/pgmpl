@@ -33,20 +33,22 @@ def demo_plot():
     axs[1, 0].set_ylabel('y')
     axs[2, 0].set_ylabel('y')
 
-    axs[0, 0].plot(x, y1)
-    axs[0, 0].plot(x, y2)
-    axs[0, 0].plot(x, y3)
+    axs[0, 0].plot(x, y1, label='y1 label', name='y1 name')
+    axs[0, 0].legend()
 
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
     axs[0, 1].fill_between(x, y1+20, y2+25, color='r', alpha=0.4, edgecolor='k', linewidth=3, where=(x > 7) | (x < 4))
 
-    axs[1, 0].plot(x, y1, color='r')
-    axs[1, 0].plot(x, y2, color='k')
-    axs[1, 0].plot(x, y2+y1, linestyle='--', color='g')
-    axs[1, 0].plot(x, y3, linestyle='-.', color='b')
+    axs[1, 0].plot(x, y1, color='r', label='y1')
+    axs[1, 0].plot(x, y2, color='k', label='y2')
+    axs[1, 0].plot(x, y2+y1, linestyle='--', color='g', label='y2+y1')
+    axs[1, 0].plot(x, y3, linestyle='-.', color='b', label='y3')
+    axs[1, 0].legend()
 
     axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
     axs[1, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r')
+    axs[1, 1].plot(x, y2)
+    axs[1, 1].plot(x, y3)
 
     axs[2, 0].plot(x, y1, color='m', marker='o')
     axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')

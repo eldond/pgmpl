@@ -28,9 +28,15 @@ class Axes(pg.PlotItem):
     """
     def __init__(self, **kwargs):
         super(Axes, self).__init__(**kwargs)
+        self.legend = self.legend1
 
     def plot(self, *args, **kwargs):
-        super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
+        try:
+            super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
+        except AttributeError:
+            # Happens when pg.PlotItem.plot() attempts self.legend.addItem() at the END of plot(),
+            # so the rest of plot completes.
+            pass
 
     def set_xlabel(self, label):
         self.setLabel('bottom', text=label)
@@ -200,3 +206,17 @@ class Axes(pg.PlotItem):
             self.addItem(fb[i])
 
         return fb
+
+    def legend1(self, *args, **kwargs):
+        def addItem(*args, **kwargs):
+            return None
+        printd('  custom legend call')
+        p = super(Axes, self)
+        leg = p.addLegend()
+        children = p.getViewBox().allChildren()
+
+        for child in children:
+            if hasattr(child, 'name') and child.name() is not None \
+                    and hasattr(child, 'isVisible') and child.isVisible():
+                leg.addItem(child, child.name())
+        return leg

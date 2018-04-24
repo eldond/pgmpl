@@ -170,6 +170,8 @@ def plotkw_translator(**plotkw):
 
     direct_translations = {  # pgkw: plotkw
         'symbolSize': 'markersize',
+        'label': 'pg_label',
+        'name': 'label',
     }
     for direct in direct_translations:
         if direct in plotkw:
