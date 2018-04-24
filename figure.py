@@ -19,9 +19,10 @@ import pyqtgraph as pg
 # pyqtmpl
 from translate import plotkw_translator
 from axes import Axes
+from util import printd
 
 
-class Figure:
+class Figure(pg.GraphicsWindow):
     """
     Imitates matplotlib.figure.Figure using PyQtGraph
     """
@@ -30,20 +31,20 @@ class Figure:
             facecolor=None, edgecolor=None, linewidth=0.0,
             frameon=True, subplotpars=None, tight_layout=None, constrained_layout=None,
     ):
+        super(Figure, self).__init__()
         self.patch_resize = True  # Controls whether resize events mess with margins or not
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
-        self.win = pg.GraphicsWindow()
-        self.win.resizeEvent_original = self.win.resizeEvent
-        self.win.resizeEvent = self.resize_event
+        self.resizeEvent_original = self.resizeEvent
+        self.resizeEvent = self.resize_event
         if figsize is None:
             figsize = (800, 600)
         self.width = figsize[0]
         self.height = figsize[1]
-        self.win.resize(self.width, self.height)
+        self.resize(self.width, self.height)
         self.axes = None
         self.layout = pg.GraphicsLayout()
-        self.win.setCentralItem(self.layout)
+        self.setCentralItem(self.layout)
         self.tight = tight_layout or constrained_layout
         if self.tight:
             self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
@@ -58,19 +59,13 @@ class Figure:
         if dpi is not None:
             warnings.warn('WARNING: keyword DPI to class Figure is ignored.')
 
-    def close(self):
-        self.win.close()  # https://stackoverflow.com/a/23444415/6605826
-
-    def show(self):
-        pass  # Provided for matplotlib compatibility
-
     def resize_event(self, event):
         if hasattr(event, 'size'):
             self.width = event.size().width()
             self.height = event.size().height()
             if self.patch_resize and not self.tight:
                 self.set_subplotpars(None)
-        self.win.resizeEvent_original(event)
+        self.resizeEvent_original(event)
 
     def set_subplotpars(self, pars):
         fx = self.width
@@ -111,3 +106,7 @@ class Figure:
         ax = Axes(**kwargs)
         self.layout.addItem(ax, row, col)
         return ax
+
+    def closeEvent(self, event):
+        printd('window closing')
+        event.accept()
