@@ -39,7 +39,7 @@ def demo_plot():
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
     axs[0, 1].fill_between(x, y1+20, y2+25, color='r', alpha=0.4, edgecolor='k', linewidth=3, where=(x > 7) | (x < 4))
 
-    axs[1, 0].plot(x, y1, color='r', label='y1')
+    axs[1, 0].plot(x, y1, color='r', label='y1', lw=3)
     axs[1, 0].plot(x, y2, color='k', label='y2')
     axs[1, 0].plot(x, y2+y1, linestyle='--', color='g', label='y2+y1')
     axs[1, 0].plot(x, y3, linestyle='-.', color='b', label='y3')

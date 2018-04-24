@@ -129,7 +129,7 @@ def setup_pen_kw(**kw):
     }
     for direct in direct_translations_pen:
         if direct in kw:
-            penkw[direct] = kw[direct_translations_pen[direct]]
+            penkw[direct_translations_pen[direct]] = kw[direct]
 
     # Handle colors
     newc = color_translator(**kw)
@@ -168,14 +168,14 @@ def plotkw_translator(**plotkw):
 
     # Next, translate symbol related keywords ----------------------------------------------------------------------
 
-    direct_translations = {  # pgkw: plotkw
-        'symbolSize': 'markersize',
-        'label': 'pg_label',
-        'name': 'label',
+    direct_translations = {  # mpl style plotkw: pg style pgkw
+        'markersize': 'symbolSize',
+        'pg_label': 'label',  # Not a real mpl keyword, but otherwise there would be no way to access pg's label
+        'label': 'name',
     }
     for direct in direct_translations:
         if direct in plotkw:
-            pgkw[direct] = plotkw.pop(direct_translations[direct])
+            pgkw[direct_translations[direct]] = plotkw.pop(direct)
 
     symbol = symbol_translator(**plotkw)
     if symbol is not None:
