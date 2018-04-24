@@ -140,6 +140,7 @@ class Axes(pg.PlotItem):
         # OR draw the line below the errorbars
         if linestyle not in [' '] and barsabove:
             self.plot(x, y, **kwargs)
+
         return errb
 
     def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
@@ -217,6 +218,18 @@ class Legend:
     def supported(self, item):
         return not any([isinstance(item, uic) for uic in self.unsupported_item_classes])
 
+    @staticmethod
+    def handle_info(handles, comment=None):
+        if comment is not None:
+            printd(comment)
+        for i, handle in enumerate(tolist(handles)):
+            printd('  {i:02d} handle name: {name:}, class: {cls:}, isVisible: {isvis:}'.format(
+                i=i,
+                name=handle.name() if hasattr(handle, 'name') else None,
+                cls=handle.__class__ if hasattr(handle, '__class__') else ' not found ',
+                isvis=handle.isVisible() if hasattr(handle, 'isVisible') else None,
+            ))
+
     def __call__(
             self,
             handles=None,
@@ -255,6 +268,7 @@ class Legend:
 
         if handles is None:
             handles = self.ax.getViewBox().allChildren()
+            self.handle_info(handles, comment='handles from allChildren')
             handles = [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
         else:
             handles = tolist(handles)
