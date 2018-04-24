@@ -213,8 +213,12 @@ class Legend:
         # pyqtgraph legends just don't work with some items yet. Avoid errors by trying to use these classes as handles:
         self.unsupported_item_classes = [
             pg.graphicsItems.FillBetweenItem.FillBetweenItem,
+            pg.InfiniteLine,
             ChildGroup,
         ]
+        #   File "/lib/python2.7/site-packages/pyqtgraph/graphicsItems/LegendItem.py", line 149, in paint
+        #     opts = self.item.opts
+        # AttributeError: 'InfiniteLine' object has no attribute 'opts'
         self.items_added = []
 
     def supported(self, item):

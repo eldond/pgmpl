@@ -43,6 +43,8 @@ def demo_plot():
     axs[1, 0].plot(x, y2, color='k', label='y2')
     axs[1, 0].plot(x, y2+y1, linestyle='--', color='g', label='y2+y1')
     axs[1, 0].plot(x, y3, linestyle='-.', color='b', label='y3')
+    axs[1, 0].axvline(np.mean(x), linestyle=':', color='k', label='vline')
+    axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k', label='hline')
     axs[1, 0].legend()
 
     beb = axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
@@ -58,9 +60,6 @@ def demo_plot():
     axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x', label='y3 blk x')
     axs[2, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r', label='-y2 red err bar')
     axs[2, 1].legend()
-
-    axs[1, 0].axvline(np.mean(x), linestyle=':', color='k')
-    axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k')
 
     return fig, axs
 
