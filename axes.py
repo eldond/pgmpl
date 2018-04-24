@@ -98,6 +98,8 @@ class Axes(pg.PlotItem):
             printd('  Axes.errorbar no caps')
         else:
             capkw = copy.deepcopy(kwargs)
+            capkw.pop('pg_label', None)
+            capkw.pop('label', None)
             capkw['linestyle'] = ' '
             if capsize is not None:
                 capkw['markersize'] = capsize
