@@ -17,8 +17,15 @@ import numpy as np
 # GUI imports
 from PyQt4 import QtGui
 
+# Plotting imports
+import pyqtgraph as pg
+
 # pyqtmpl
 import pyplot as plt
+from tracking import tracker
+
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
 
 
 def demo_plot():
@@ -79,7 +86,8 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     a = short_demo()
     b = demo_plot()
-    a[0].close()  # This is not needed, but it makes testing faster.
+    # a[0].close()  # This is not needed, but it makes testing faster.
+    tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             app.exec_()

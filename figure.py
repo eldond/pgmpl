@@ -17,6 +17,7 @@ import numpy as np
 import pyqtgraph as pg
 
 # pyqtmpl
+from tracking import tracker
 from translate import plotkw_translator
 from axes import Axes
 from util import printd
@@ -35,6 +36,7 @@ class Figure(pg.GraphicsWindow):
         self.patch_resize = True  # Controls whether resize events mess with margins or not
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
+        tracker.window_opened(self)
         self.resizeEvent_original = self.resizeEvent
         self.resizeEvent = self.resize_event
         if figsize is None:
@@ -109,4 +111,5 @@ class Figure(pg.GraphicsWindow):
 
     def closeEvent(self, event):
         printd('window closing')
+        tracker.window_closed(self)
         event.accept()

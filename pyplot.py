@@ -14,6 +14,7 @@ import warnings
 import numpy as np
 
 # pyqtmpl
+from tracking import tracker
 from figure import Figure
 from axes import Axes
 from util import printd
@@ -88,3 +89,10 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
         if len(np.shape(axs)) == 0:
             axs = axs[()]  # https://stackoverflow.com/a/35160426/6605826
     return fig, axs
+
+
+def gcf():
+    if len(tracker.open_windows):
+        return tracker.open_windows[-1]
+    else:
+        return figure()
