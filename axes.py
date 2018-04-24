@@ -19,7 +19,7 @@ import pyqtgraph as pg
 
 # pyqtmpl
 from translate import plotkw_translator, color_translator, setup_pen_kw
-from util import printd
+from util import printd, tolist
 
 
 class Axes(pg.PlotItem):
@@ -28,15 +28,10 @@ class Axes(pg.PlotItem):
     """
     def __init__(self, **kwargs):
         super(Axes, self).__init__(**kwargs)
-        self.legend = self.legend1
+        self.legend = Legend(ax=super(Axes, self))
 
     def plot(self, *args, **kwargs):
-        try:
-            super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
-        except AttributeError:
-            # Happens when pg.PlotItem.plot() attempts self.legend.addItem() at the END of plot(),
-            # so the rest of plot completes.
-            pass
+        return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     def set_xlabel(self, label):
         self.setLabel('bottom', text=label)
@@ -207,16 +202,77 @@ class Axes(pg.PlotItem):
 
         return fb
 
-    def legend1(self, *args, **kwargs):
-        def addItem(*args, **kwargs):
-            return None
-        printd('  custom legend call')
-        p = super(Axes, self)
-        leg = p.addLegend()
-        children = p.getViewBox().allChildren()
 
-        for child in children:
-            if hasattr(child, 'name') and child.name() is not None \
-                    and hasattr(child, 'isVisible') and child.isVisible():
-                leg.addItem(child, child.name())
+class Legend:
+    def __init__(self, ax=None):
+        from pyqtgraph.graphicsItems.ViewBox.ViewBox import ChildGroup
+        self.ax = ax
+        # pyqtgraph legends just don't work with some items yet. Avoid errors by trying to use these classes as handles:
+        self.unsupported_item_classes = [
+            pg.graphicsItems.FillBetweenItem.FillBetweenItem,
+            ChildGroup,
+        ]
+        self.items_added = []
+
+    def supported(self, item):
+        return not any([isinstance(item, uic) for uic in self.unsupported_item_classes])
+
+    def __call__(
+            self,
+            handles=None,
+            labels=None,
+            loc=None,
+            numpoints=None,    # the number of points in the legend line
+            markerscale=None,  # the relative size of legend markers vs. original
+            markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
+            scatterpoints=None,    # number of scatter points
+            scatteryoffsets=None,
+            prop=None,          # properties for the legend texts
+            fontsize=None,        # keyword to set font size directly
+            # spacing & pad defined as a fraction of the font-size
+            borderpad=None,      # the whitespace inside the legend border
+            labelspacing=None,   # the vertical space between the legend entries
+            handlelength=None,   # the length of the legend handles
+            handleheight=None,   # the height of the legend handles
+            handletextpad=None,  # the pad between the legend handle and text
+            borderaxespad=None,  # the pad between the axes and legend border
+            columnspacing=None,  # spacing between columns
+            ncol=1,     # number of columns
+            mode=None,  # mode for horizontal distribution of columns. None, "expand"
+            fancybox=None,  # True use a fancy box, false use a rounded box, none use rc
+            shadow=None,
+            title=None,  # set a title for the legend
+            framealpha=None,  # set frame alpha
+            edgecolor=None,  # frame patch edgecolor
+            facecolor=None,  # frame patch facecolor
+            bbox_to_anchor=None,  # bbox that the legend will be anchored.
+            bbox_transform=None,  # transform for the bbox
+            frameon=None,  # draw frame
+            handler_map=None,
+    ):
+        printd('  custom legend call')
+        leg = self.ax.addLegend()
+
+        if handles is None:
+            handles = self.ax.getViewBox().allChildren()
+            handles = [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
+        else:
+            handles = tolist(handles)
+
+        nlab = len(np.atleast_1d(labels))
+        if labels is not None and nlab == 1:
+            labels = tolist(labels)*len(handles)
+        elif labels is not None and nlab == len(handles):
+            labels = tolist(labels)
+        else:
+            handles = [item for item in handles if hasattr(item, 'name') and item.name() is not None]
+            labels = [item.name() for item in handles]
+
+        for handle, label in zip(handles, labels):
+            if self.supported(handle):
+                leg.addItem(handle, label)
         return leg
+
+    def addItem(self, item, name=None):
+        self.items_added += [(item, name)]
+        return None

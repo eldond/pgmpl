@@ -47,10 +47,13 @@ def demo_plot():
 
     axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
     axs[1, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r')
-    axs[1, 1].plot(x, y2)
+    y2line = axs[1, 1].plot(x, y2)
     axs[1, 1].plot(x, y3)
+    axs[1, 1].legend(y2line, 'manual label for y2line')
 
-    axs[2, 0].plot(x, y1, color='m', marker='o')
+    axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
+    axs[2, 0].legend()
+
     axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')
     axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x')
 
