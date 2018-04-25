@@ -38,29 +38,31 @@ class Figure(pg.GraphicsWindow):
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
         tracker.window_opened(self)
+        self.tight = tight_layout or constrained_layout
+        if self.tight:
+            self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
+        else:
+            self.margins = None
         self.resizeEvent_original = self.resizeEvent
         self.resizeEvent = self.resize_event
         if figsize is None:
-            figsize = (800, 600)
+            from matplotlib import rcParams
+            if dpi is None:
+                dpi = rcParams['figure.dpi']
+            figsize = np.array(rcParams['figure.figsize'])*dpi
+            printd('dpi = {}, figsize = {}'.format(dpi, figsize))
         self.width = figsize[0]
         self.height = figsize[1]
         self.resize(self.width, self.height)
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.setCentralItem(self.layout)
-        self.tight = tight_layout or constrained_layout
-        if self.tight:
-            self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
-        else:
-            self.margins = None
 
         if subplotpars is not None:
             self.set_subplotpars(subplotpars)
 
         if frameon is not False and linewidth > 0 and edgecolor:
             warnings.warn('WARNING: frame around figure edge is not implemented yet')
-        if dpi is not None:
-            warnings.warn('WARNING: keyword DPI to class Figure is ignored.')
 
     def resize_event(self, event):
         """

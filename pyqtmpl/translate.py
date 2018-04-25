@@ -27,6 +27,41 @@ except ImportError:  # Older Matplotlib versions were organized differently
 from util import printd
 
 
+def defaults_from_rcparams(plotkw):
+    """
+    Given a dictionary of Matplotlib style plotting keywords, any missing keywords (color, linestyle, etc.) will be
+    added using defaults determined by Matplotlib's rcParams.
+    :param plotkw: dict
+         Dictionary of Matplotlib style plot keywords
+    :return: dict
+        Input dictionary with missing keywords filled in using defaults
+    """
+    from matplotlib import rcParams
+    params = {  # rcParams key : list of plotkw keys; assign to first one if none are defined
+        'lines.linewidth': ['lw', 'linewidth'],
+    }
+    simples = [
+        'lines.linestyle',
+        'lines.marker',
+        'lines.markeredgewidth',
+        'lines.markersize',
+    ]
+    for simple in simples:
+        params[simple] = ['.'.join(simple.split('.')[1:])]
+
+    for param in params.keys():
+        if not any([k in plotkw.keys() for k in params[param]]):
+            # Keyword is missing
+            plotkw[params[param][0]] = rcParams[param]
+            printd("  assigned plotkw['{}'] = rcParams[{}] = {}".format(params[param][0], param, rcParams[param]),
+                   level=2)
+        else:
+            printd("  one of the keywords {} exists in plotkw; no need to assign default from rcParams['{}']".format(
+                params[param], param), level=2)
+
+    return plotkw
+
+
 def color_translator(**kw):
     """
     Translates colors specified in the Matplotlib system into pyqtgraph color descriptions
@@ -104,6 +139,9 @@ def symbol_translator(**kw):
             'h': 'h',
             '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
             '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
+            'None': None,
+            'none': None,
+            None: None,
         }.get(kw['marker'], 'o')
     else:
         symbol = None
@@ -160,6 +198,7 @@ def plotkw_translator(**plotkw):
 
     pgkw = {}
     plotkw = copy.deepcopy(plotkw)  # Don't break the original in case it's needed for other calls
+    plotkw = defaults_from_rcparams(plotkw)
 
     # First define the pen -----------------------------------------------------------------------------------------
     pen = setup_pen_kw(**plotkw)
@@ -177,14 +216,13 @@ def plotkw_translator(**plotkw):
         if direct in plotkw:
             pgkw[direct_translations[direct]] = plotkw.pop(direct)
 
+    # Handle symbol edge
+    default_mec = plotkw.get('color', None) if plotkw.get('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
+    mec = plotkw.pop('markeredgecolor', plotkw.pop('mec', default_mec))
+    mew = plotkw.pop('markeredgewidth', plotkw.pop('mew', None))
     symbol = symbol_translator(**plotkw)
     if symbol is not None:
         pgkw['symbol'] = symbol
-
-        # Handle symbol edge
-        default_mec = plotkw.get('color', None) if plotkw.pop('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
-        mec = plotkw.pop('markeredgecolor', plotkw.pop('mec', default_mec))
-        mew = plotkw.pop('markeredgewidth', plotkw.pop('mew', None))
         penkw = {}
 
         if mec is not None:
@@ -203,6 +241,8 @@ def plotkw_translator(**plotkw):
             brushkw['color'] = brush_color
         if len(brushkw.keys()):
             pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
+    else:
+        pgkw.pop('symbolSize', None)  # This isn't used, but it can cause problems, so get rid of it.
 
     # Pass through other keywords
     late_pops = ['color', 'alpha', 'lw', 'marker', 'linestyle']
@@ -211,4 +251,5 @@ def plotkw_translator(**plotkw):
         plotkw.pop(late_pop, None)
     plotkw.update(pgkw)
 
+    printd('plotkw symbol = {}; symbol = {}'.format(plotkw.get('symbol', 'no symbol defined'), symbol), level=1)
     return plotkw

@@ -31,14 +31,14 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
+    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=150)
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
     axs[1, 0].set_ylabel('y')
     axs[2, 0].set_ylabel('y')
 
-    axs[0, 0].plot(x, y1, label='y1 label', name='y1 name')
+    axs[0, 0].plot(x, y1, label='y1 label', name='y1 name', lw=2.5)
     axs[0, 0].legend()
 
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
@@ -80,8 +80,7 @@ def short_demo():
 
 if __name__ == '__main__':
     print('pyqtmpl examples...')
-    if os.environ.get('PYQTMPL_DEBUG', None) is None:
-        os.environ['PYQTMPL_DEBUG'] = "1"
+    pyqtmpl.set_debug(1)
     a = short_demo()
     b = demo_plot()
     # a[0].close()  # This is not needed, but it makes testing faster.

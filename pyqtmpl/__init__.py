@@ -11,10 +11,12 @@ from PyQt4 import QtGui
 
 # Plotting imports
 import pyqtgraph as pg
+from matplotlib import rcParams
 
 # pyqtmpl imports
 from info import *  # Defines __version__, etc.
 from util import printd
+from translate import color_translator
 
 __all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples']
 
@@ -28,8 +30,8 @@ def set_debug(enable=True):
 
 
 # Setup style, etc.
-pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k')
+pg.setConfigOption('background', color_translator(**{'color': rcParams['axes.facecolor']}))
+pg.setConfigOption('foreground', color_translator(**{'color': rcParams['axes.edgecolor']}))
 
 # Make a QApp so that windows can be opened
 app = QtGui.QApplication.instance()
