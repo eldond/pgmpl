@@ -28,13 +28,10 @@ else:
 
 if use_pyqtmpl:
     from PyQt4 import QtGui
-    try:
-        # This works if you're outside of the pyqtmpl folder, which is what we'd really like to demonstrate
-        import pyqtmpl as mpl
-        import pyqtmpl.pyplot as plt
-    except ImportError:
-        # Must be inside of the pyqtmpl area
-        import pyplot as plt
+    import pyqtmpl as mpl
+    import pyqtmpl.pyplot as plt
+    import pyqtmpl
+
 else:
     import matplotlib as mpl
     mpl.use('Qt4Agg')
@@ -82,13 +79,13 @@ if __name__ == '__main__':
     if os.environ.get('PYQTMPL_DEBUG', None) is None:
         os.environ['PYQTMPL_DEBUG'] = "1"
     if use_pyqtmpl:
-        app = QtGui.QApplication(sys.argv)
+        app = pyqtmpl.app  # QtGui.QApplication(sys.argv)
     else:
         app = None
     b = demo_plot()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (app is not None) and ((sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION')):
-            app.exec_()
+        app.exec_()
     if not use_pyqtmpl:
         plt.ioff()  # https://stackoverflow.com/a/38592888/6605826
         plt.show()

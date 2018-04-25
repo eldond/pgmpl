@@ -21,8 +21,9 @@ from PyQt4 import QtGui
 import pyqtgraph as pg
 
 # pyqtmpl
-import pyplot as plt
-from tracking import tracker
+import pyqtmpl
+import pyqtmpl.pyplot as plt
+from pyqtmpl.tracking import tracker
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -81,13 +82,17 @@ def short_demo():
 
 
 if __name__ == '__main__':
+    print('pyqtmpl examples...')
     if os.environ.get('PYQTMPL_DEBUG', None) is None:
         os.environ['PYQTMPL_DEBUG'] = "1"
-    app = QtGui.QApplication(sys.argv)
     a = short_demo()
     b = demo_plot()
     # a[0].close()  # This is not needed, but it makes testing faster.
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-            app.exec_()
+        print('Starting event loop for pyqtmpl examples...')
+        pyqtmpl.app.exec_()
+    else:
+        print('Done with pyqtmpl examples.')
+

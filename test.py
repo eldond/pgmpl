@@ -21,9 +21,9 @@ import pyqtgraph as pg
 from matplotlib.colors import to_rgba
 
 # pyqtmpl
-from translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator
-from pyplot import figure, subplots
-from util import printd
+from pyqtmpl.translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator
+from pyqtmpl.pyplot import figure, subplots
+from pyqtmpl.util import printd
 from examples import demo_plot, short_demo
 
 
