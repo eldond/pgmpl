@@ -136,5 +136,5 @@ class Figure(pg.GraphicsWindow):
         if self.axes is None:
             ax = self.add_subplot(1, 1, 0)
         else:
-            ax = flatten(self.axes)[-1]
+            ax = list(flatten(np.atleast_1d(self.axes)))[-1]
         return ax
