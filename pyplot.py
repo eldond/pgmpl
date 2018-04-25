@@ -105,3 +105,13 @@ def gca(fig=None):
     if fig is None:
         fig = gcf()
     return fig.gca()
+
+
+def plot(*args, **kwargs):
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        fig = kwargs.pop('fig', None)
+        if fig is None:
+            fig = gcf()
+        ax = fig.gca()
+    ax.plot(*args, **kwargs)
