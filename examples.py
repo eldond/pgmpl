@@ -14,9 +14,6 @@ import os
 # Calculation imports
 import numpy as np
 
-# GUI imports
-from PyQt4 import QtGui
-
 # Plotting imports
 import pyqtgraph as pg
 
