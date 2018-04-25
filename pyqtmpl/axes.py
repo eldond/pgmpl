@@ -16,6 +16,9 @@ import numpy as np
 
 # Plotting imports
 import pyqtgraph as pg
+from matplotlib import rcParams
+from cycler import cycler
+from collections import defaultdict
 
 # pyqtmpl
 from translate import plotkw_translator, color_translator, setup_pen_kw
@@ -30,8 +33,23 @@ class Axes(pg.PlotItem):
     def __init__(self, **kwargs):
         super(Axes, self).__init__(**kwargs)
         self.legend = Legend(ax=super(Axes, self))
+        self.prop_cycle = rcParams['axes.prop_cycle']
+        tmp = self.prop_cycle()
+        self.cyc = defaultdict(lambda: next(tmp))
+        self.prop_cycle_index = 0
 
     def plot(self, *args, **kwargs):
+        need_cycle = any([k not in kwargs.keys() for k in self.prop_cycle.keys])
+        if need_cycle:
+            printd('keys needed', list(self.prop_cycle.keys), level=2)
+            cur = self.cyc
+            for k in self.prop_cycle.keys:
+                if k not in kwargs.keys():
+                    kwargs[str(k)] = cur[self.prop_cycle_index][k]
+                    printd('kwargs["{}"] = {}'.format(k, kwargs[str(k)]), level=2)
+            self.prop_cycle_index += 1
+            if self.prop_cycle_index > len(self.prop_cycle):
+                self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     def set_xlabel(self, label):
@@ -226,6 +244,7 @@ class Axes(pg.PlotItem):
 
 class Legend:
     def __init__(self, ax=None):
+        # noinspection PyProtectedMember
         from pyqtgraph.graphicsItems.ViewBox.ViewBox import ChildGroup
         self.ax = ax
         # pyqtgraph legends just don't work with some items yet. Avoid errors by trying to use these classes as handles:
