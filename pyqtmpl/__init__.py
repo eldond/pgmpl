@@ -11,12 +11,7 @@ from PyQt4 import QtGui
 
 # Plotting imports
 import pyqtgraph as pg
-
-# Define module
-__version__ = '0.0.0'
-__maintainer__ = "David Eldon"
-__email__ = "eldond@fusion.gat.com"
-__status__ = "Development"
+from info import *  # Defines __version__, etc.
 
 __all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples']
 
