@@ -20,6 +20,12 @@ pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
 # Make a QApp so that windows can be opened
+app = QtGui.QApplication(sys.argv)
+
+# Handle debugging
 if os.environ.get('PYQTMPL_DEBUG', None) is None:
     os.environ['PYQTMPL_DEBUG'] = "0"
-app = QtGui.QApplication(sys.argv)
+
+
+def set_debug(enable=True):
+    os.environ['PYQTMPL_DEBUG'] = str(int(enable))
