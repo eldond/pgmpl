@@ -20,6 +20,7 @@ import pyqtgraph as pg
 # pyqtmpl
 from translate import plotkw_translator, color_translator, setup_pen_kw
 from util import printd, tolist
+from text import Text
 
 
 class Axes(pg.PlotItem):
@@ -38,6 +39,23 @@ class Axes(pg.PlotItem):
 
     def set_ylabel(self, label):
         self.setLabel('left', text=label)
+
+    def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
+        """
+        Imitates matplotlib.axes.Axes.text
+        :param x: scalar
+        :param y: scalar
+        :param s: str
+        :param fontdict: dict, optional
+        :param withdash: bool, optional
+        :param kwargs:
+        :return: Text instance
+        """
+        if withdash:
+            warnings.warn('  pyqtmpl.Axes.text withdash=True keyword is not not handled (yet?)')
+        text = Text(x, y, s, fontproperties=fontdict, **kwargs)
+        self.addItem(text)
+        return text
 
     def axhline(self, value, **kwargs):
         self.addLine(y=value, **plotkw_translator(**kwargs))

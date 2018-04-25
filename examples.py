@@ -39,6 +39,8 @@ def demo_plot():
     axs[2, 0].set_ylabel('y')
 
     axs[0, 0].plot(x, y1, label='y1 label', name='y1 name', lw=2.5)
+    axs[0, 0].text(5, 20, 'red text @ (5, 20)', color='r')
+    axs[0, 0].text(1, 30, '45 deg', color='b', rotation=45)
     axs[0, 0].legend()
 
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')

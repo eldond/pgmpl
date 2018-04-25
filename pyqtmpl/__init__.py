@@ -18,7 +18,7 @@ from info import *  # Defines __version__, etc.
 from util import printd
 from translate import color_translator
 
-__all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples']
+__all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples', 'text']
 
 # Handle debugging
 if os.environ.get('PYQTMPL_DEBUG', None) is None:
