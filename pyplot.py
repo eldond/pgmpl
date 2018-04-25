@@ -28,8 +28,11 @@ def figure(*args, **kwargs):
     return Figure(*args, **kwargs)
 
 
-def axes(**kwargs):
-    return Axes(**kwargs)
+def axes(fig=None, **kwargs):
+    if fig is None:
+        fig = gcf()
+    ax = fig.add_subplot(1, 1, 0, **kwargs)
+    return ax
 
 
 def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
@@ -96,3 +99,9 @@ def gcf():
         return tracker.open_windows[-1]
     else:
         return figure()
+
+
+def gca(fig=None):
+    if fig is None:
+        fig = gcf()
+    return fig.gca()

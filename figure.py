@@ -12,6 +12,7 @@ import warnings
 
 # Calculation imports
 import numpy as np
+from matplotlib.cbook import flatten
 
 # Plotting imports
 import pyqtgraph as pg
@@ -20,7 +21,7 @@ import pyqtgraph as pg
 from tracking import tracker
 from translate import plotkw_translator
 from axes import Axes
-from util import printd
+from util import printd, tolist
 
 
 class Figure(pg.GraphicsWindow):
@@ -62,12 +63,17 @@ class Figure(pg.GraphicsWindow):
             warnings.warn('WARNING: keyword DPI to class Figure is ignored.')
 
     def resize_event(self, event):
+        """
+        Intercepts resize events and updates tracked height and width. Needed for keeping subplotpars up to date.
+        :param event: window resize event
+        """
         if hasattr(event, 'size'):
             self.width = event.size().width()
             self.height = event.size().height()
             if self.patch_resize and not self.tight:
                 self.set_subplotpars(None)
         self.resizeEvent_original(event)
+        return
 
     def set_subplotpars(self, pars):
         fx = self.width
@@ -107,9 +113,28 @@ class Figure(pg.GraphicsWindow):
         col = index % ncols
         ax = Axes(**kwargs)
         self.layout.addItem(ax, row, col)
+        if self.axes is None:
+            self.axes = ax
+        else:
+            self.axes = tolist(self.axes) + [ax]
         return ax
 
     def closeEvent(self, event):
+        """
+        Intercepts window closing events and updates window tracker
+        :param event: window closing event
+        """
         printd('window closing')
         tracker.window_closed(self)
         event.accept()
+        return
+
+    def gca(self):
+        """
+        :return: Current axes for this figure, creating them if necessary
+        """
+        if self.axes is None:
+            ax = self.add_subplot(1, 1, 0)
+        else:
+            ax = flatten(self.axes)[-1]
+        return ax
