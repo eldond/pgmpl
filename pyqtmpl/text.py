@@ -52,13 +52,20 @@ class Text(pg.TextItem):
             Other keywords
         """
 
-        super(Text, self).__init__(
-            text=text,
-            color=color_translator(**{'color': color}),
-            angle=0 if rotation is None else rotation,
-            anchor=({'left': 0, 'center': 0.5, 'right': 1}.get(horizontalalignment, 0),
-                    {'top': 0, 'bottom': 1, 'center': 0.5, 'baseline': 0.1}.get(verticalalignment, 0.1)),
-        )
+        superkw = {
+            'text': text,
+        }
+        t_color = color_translator(**{'color': color})
+        if t_color is not None:
+            superkw['color'] = t_color
+        if rotation is not None:
+            superkw['angle'] = rotation
+        if horizontalalignment is not None or verticalalignment is not None:
+            superkw['anchor'] = (
+                {'left': 0, 'center': 0.5, 'right': 1}.get(horizontalalignment, 0),
+                {'top': 0, 'bottom': 1, 'center': 0.5, 'baseline': 0.1}.get(verticalalignment, 0.1),
+            )
+        super(Text, self).__init__(**superkw)
         self.setPos(x, y)
 
         if multialignment is not None:

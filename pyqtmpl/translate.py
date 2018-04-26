@@ -71,7 +71,7 @@ def color_translator(**kw):
     :return: iterable
         An RGBA color description (each from 0 to 255) for use with pyqtgraph
     """
-    if 'color' in kw:
+    if 'color' in kw and kw['color'] is not None:
         printd('    color_translator input: kw["color"] = {}, to_rgba(kw.get("color", None)) = {}'.format(
             kw.get('color', None), to_rgba(kw.get('color', None))), level=3)
         if 'alpha' in kw and kw['alpha'] is not None:
