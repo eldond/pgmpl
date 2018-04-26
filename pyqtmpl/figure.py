@@ -3,6 +3,9 @@
 
 """
 Imitates matplotlib.figure but using PyQtGraph to make the plots
+
+Classes and methods imitate Matplotlib counterparts as closely as possible, so please see Matplotlib documentation for
+more information.
 """
 
 # Basic imports
@@ -67,6 +70,7 @@ class Figure(pg.GraphicsWindow):
     def resize_event(self, event):
         """
         Intercepts resize events and updates tracked height and width. Needed for keeping subplotpars up to date.
+        Not a matplotlib imitation, but used for interfacing with pyqtgraph behavior.
         :param event: window resize event
         """
         if hasattr(event, 'size'):
@@ -78,6 +82,7 @@ class Figure(pg.GraphicsWindow):
         return
 
     def set_subplotpars(self, pars):
+        """Imitation of matplotlib.figure.Fiture.set_subplotpars"""
         fx = self.width
         fy = self.height
         if pars is not None:
@@ -105,6 +110,7 @@ class Figure(pg.GraphicsWindow):
                 )
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
+        """Imitation of matplotlib.figure.Figure.add_subplot"""
         if projection is not None and projection != 'rectilinear':
             raise NotImplementedError('projection keyword in add_subplot is not ready')
         if polar is not None and polar is not False:
@@ -124,6 +130,7 @@ class Figure(pg.GraphicsWindow):
     def closeEvent(self, event):
         """
         Intercepts window closing events and updates window tracker
+        Not an imitation of matplotlib, but used for interfacing with pyqtgraph behavior
         :param event: window closing event
         """
         printd('window closing')
@@ -133,6 +140,7 @@ class Figure(pg.GraphicsWindow):
 
     def gca(self):
         """
+        Imitation of matplotlib gca()
         :return: Current axes for this figure, creating them if necessary
         """
         if self.axes is None:

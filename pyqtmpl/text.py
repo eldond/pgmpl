@@ -3,6 +3,9 @@
 
 """
 Imitates matplotlib.text but using PyQtGraph
+
+Classes and methods imitate Matplotlib counterparts as closely as possible, so please see Matplotlib documentation for
+more information.
 """
 
 # Basic imports
@@ -27,6 +30,26 @@ class Text(pg.TextItem):
     ):
         """
         Imitates matplotlib.axes.Axes.text
+        :param x: scalar
+            Horizontal position in data coordinates
+        :param y: scalar
+            Vertical position in data coordinates
+        :param text: string
+            Text to write on the plot
+        :param color: string or color spec
+            Color of text
+        :param verticalalignment: string {top | bottom | center | baseline}
+        :param horizontalalignment: string {left | center | right}
+        :param multialignment: (not implemented in pyqtmpl wrapper)
+        :param fontproperties: dict (not yet implemented)
+        :param rotation: scalar
+            Text angle in degrees. 0 is horizontal and upright
+        :param linespacing: (not implemented in pyqtmpl wrapper)
+        :param rotation_mode: (not implemented in pyqtmpl wrapper)
+        :param usetex: (not implemented in pyqtmpl wrapper)
+        :param wrap: (not yet implemented in pyqtmpl wrapper)
+        :param kwargs: dict
+            Other keywords
         """
 
         super(Text, self).__init__(

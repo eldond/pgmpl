@@ -2,7 +2,10 @@
 # # -*- coding: utf-8 -*-
 
 """
-Imitates matplotlib.axes but using PyQtGraph to make the plots
+Imitates matplotlib.axes but using PyQtGraph to make the plots.
+
+Classes and methods imitate Matplotlib counterparts as closely as possible, so please see Matplotlib documentation for
+more information.
 """
 
 # Basic imports
@@ -39,6 +42,13 @@ class Axes(pg.PlotItem):
         self.prop_cycle_index = 0
 
     def plot(self, *args, **kwargs):
+        """
+        Translates arguments and keywords to matplotlib.axes.Axes.plot() method so they can be passed to
+        pg.PlotItem.plot() instead.
+        :param args: Plot arguments
+        :param kwargs: Plot keywords
+        :return: plotItem instance
+        """
         need_cycle = any([k not in kwargs.keys() for k in self.prop_cycle.keys])
         if need_cycle:
             printd('keys needed', list(self.prop_cycle.keys), level=2)
@@ -53,9 +63,11 @@ class Axes(pg.PlotItem):
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     def set_xlabel(self, label):
+        """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
         self.setLabel('bottom', text=label)
 
     def set_ylabel(self, label):
+        """Imitates basic use of matplotlib.axes.Axes.set_ylabel()"""
         self.setLabel('left', text=label)
 
     def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
@@ -76,9 +88,11 @@ class Axes(pg.PlotItem):
         return text
 
     def axhline(self, value, **kwargs):
+        """Direct imitation of matplotlib axhline"""
         self.addLine(y=value, **plotkw_translator(**kwargs))
 
     def axvline(self, value, **kwargs):
+        """Direct imitation of matplotlib axvline"""
         self.addLine(x=value, **plotkw_translator(**kwargs))
 
     def errorbar(
@@ -86,6 +100,12 @@ class Axes(pg.PlotItem):
             barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
             errorevery=1, capthick=None, data=None, **kwargs
     ):
+        """
+        Imitates matplotlib.axes.Axes.errorbar
+        :return: pyqtgraph.ErrorBarItem instance
+            Does not include the line through nominal values as would be included in matplotlib's errorbar; this is
+            drawn, but it is a separate object.
+        """
         linestyle = kwargs.get('linestyle', kwargs.get('ls', None))
 
         if data is not None:
@@ -112,6 +132,11 @@ class Axes(pg.PlotItem):
 
         # Draw the errorbars
         def prep(v):
+            """
+            Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
+            :param v: x, y, xerr, or yerr value or values
+            :return: properly dimensioned and filtered array corresponding to v
+            """
             v = np.atleast_1d(v)
             xx = np.atleast_1d(x)
             n = len(xx)
@@ -182,7 +207,12 @@ class Axes(pg.PlotItem):
         return errb
 
     def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
-
+        """
+        Imitates matplotlib.axes.Axes.fill_between
+        :return: list of pyqtgraph.FillBetweenItem instances
+            If the where keyword is not used or has no effect, this will be a list of one item. If where splits the
+            range into n segments, then the list will have n elements.
+        """
         # Set up xy data
         if data is not None:
             x = data['x']
@@ -243,7 +273,20 @@ class Axes(pg.PlotItem):
 
 
 class Legend:
+    """
+    Post-generated legend for pyqtmpl.axes.Axes. This is not a direct imitation of Matplotlib's Legend as it has to
+    accept events from pyqtgraph. It also has to bridge the gap between Matplotlib style calling legend after plotting
+    and pyqtgraph style calling legend first.
+
+    The call method is supposed to imitate matplotlib.axes.Axes.legend(), though. Bind a Legend class instance to an
+    Axes instance as Axes.legend = Legend() and then call Axes.legend() as in matplotlib.
+    The binding is done in Axes class __init__.
+    """
     def __init__(self, ax=None):
+        """
+        :param ax: Axes instance
+            Reference to the plot axes to which this legend is attached (required).
+        """
         # noinspection PyProtectedMember
         from pyqtgraph.graphicsItems.ViewBox.ViewBox import ChildGroup
         self.ax = ax
@@ -261,10 +304,12 @@ class Legend:
         self.leg = None
 
     def supported(self, item):
+        """Quick test for whether or not item (which is some kind of plot object) is supported by this legend class"""
         return not any([isinstance(item, uic) for uic in self.unsupported_item_classes])
 
     @staticmethod
     def handle_info(handles, comment=None):
+        """For debugging: prints information on legend handles"""
         if comment is not None:
             printd(comment)
         for i, handle in enumerate(tolist(handles)):
@@ -308,6 +353,10 @@ class Legend:
             frameon=None,  # draw frame
             handler_map=None,
     ):
+        """
+        Adds a legend to the plot axes. This class should be added to axes as they are created so that calling it acts
+        like a method of the class and adds a legend, imitating matplotlib legend calling.
+        """
         printd('  custom legend call')
         self.leg = self.ax.addLegend()
 
@@ -333,10 +382,21 @@ class Legend:
         return self
 
     def addItem(self, item, name=None):
-        self.items_added += [(item, name)]
+        """
+        pyqtgraph calls this method of legend and so it must be provided.
+        :param item: plot object instance
+        :param name: string
+        """
+        self.items_added += [(item, name)]  # This could be used in place of the search for items, maybe.
         return None
 
     def draggable(self, on_off=True):
+        """
+        Provided for compatibility with matplotlib legends, which have this method.
+        pyqtgraph legends are always draggable.
+        :param on_off: bool
+            Throws a warning if user attempts to disable draggability
+        """
         self.drag_enabled = on_off
         if not on_off:
             warnings.warn(
