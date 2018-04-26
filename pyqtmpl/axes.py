@@ -414,4 +414,8 @@ class Legend:
 
     def clear(self):
         """Removes the legend from Axes instance"""
-        self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
+        printd('  Clearing legend {}...'.format(self.leg))
+        try:
+            self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
+        except AttributeError:
+            pass
