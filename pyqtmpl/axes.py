@@ -42,8 +42,10 @@ class Axes(pg.PlotItem):
         self.prop_cycle_index = 0
 
     def clear(self):
+        printd('  Clearing Axes instance {}...'.format(self))
         super(Axes, self).clear()
         self.legend.clear()
+        self.prop_cycle_index = 0
 
     def plot(self, *args, **kwargs):
         """
