@@ -27,6 +27,7 @@ if os.environ.get('PYQTMPL_DEBUG', None) is None:
 
 def set_debug(enable=True):
     os.environ['PYQTMPL_DEBUG'] = str(int(enable))
+    printd('pyqtmpl debugging set to {}'.format(str(int(enable))))
 
 
 # Setup style, etc.

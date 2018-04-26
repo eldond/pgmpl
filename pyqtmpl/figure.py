@@ -37,7 +37,7 @@ class Figure(pg.PlotWidget):
             frameon=True, subplotpars=None, tight_layout=None, constrained_layout=None,
     ):
         super(Figure, self).__init__()
-        self.patch_resize = True  # Controls whether resize events mess with margins or not
+        self.patch_resize = True  # Controls whether resize events mess with margins or not (this works well now)
         pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
         pg.setConfigOption('foreground', 'k')
         tracker.window_opened(self)
@@ -61,12 +61,20 @@ class Figure(pg.PlotWidget):
         self.layout = pg.GraphicsLayout()
         self.setCentralItem(self.layout)
         self.show()
+        self.clear = self.clearfig  # Just defining the thing as clear doesn't work; needs to be done this way.
 
         if subplotpars is not None:
             self.set_subplotpars(subplotpars)
 
         if frameon is not False and linewidth > 0 and edgecolor:
             warnings.warn('WARNING: frame around figure edge is not implemented yet')
+
+    def clearfig(self):
+        """Method for clearing the figure. Gets assigned to self.clear"""
+        del self.layout
+        self.layout = pg.GraphicsLayout()
+        self.setCentralItem(self.layout)
+        self.show()
 
     def resize_event(self, event):
         """

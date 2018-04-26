@@ -82,6 +82,11 @@ def short_demo():
     fig, axs = plt.subplots(1)
     axs.plot(x, np.cos(x))
     axs.plot(x, np.sin(x))
+    fig.clear()
+    axs = fig.add_subplot(1, 1, 0)
+    axs.plot(x, np.sin(x)+1)
+    axs.plot(x, np.cos(x)-1)
+    axs.text(0, 0, 'figure cleared then re-used')
     return fig, axs
 
 
