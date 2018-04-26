@@ -79,14 +79,11 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
     for i in range(nrows):
         for j in range(ncols):
             index = i*ncols + j
-            axs[i, j] = fig.add_subplot(nrows, ncols, index, **subplot_kw)
-            x_share_from = pick_share(sharex, i, j, axs)
-            y_share_from = pick_share(sharey, i, j, axs)
-            printd('index {}, row {}, col {}, xshare = {}, yshare = {}'.format(index, i, j, x_share_from, y_share_from))
-            if x_share_from is not None:
-                axs[i, j].setXLink(x_share_from)
-            if y_share_from is not None:
-                axs[i, j].setYLink(y_share_from)
+            axs[i, j] = fig.add_subplot(
+                nrows, ncols, index,
+                sharex=pick_share(sharex, i, j, axs), sharey=pick_share(sharey, i, j, axs),
+                **subplot_kw)
+            printd('index {}, row {}, col {}'.format(index, i, j))
     if squeeze:
         axs = np.squeeze(axs)
         if len(np.shape(axs)) == 0:
