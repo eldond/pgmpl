@@ -124,10 +124,10 @@ class Figure(pg.PlotWidget):
             raise NotImplementedError('projection keyword in add_subplot is not ready')
         if polar is not None and polar is not False:
             raise NotImplementedError('polar projection is not ready')
-        row = int(np.floor(index/ncols))
+        row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
-        col = index % ncols
+        col = (index-1) % ncols
         ax = Axes(**kwargs)
         self.layout.addItem(ax, row, col)
         if self.axes is None:

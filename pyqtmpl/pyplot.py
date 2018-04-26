@@ -78,7 +78,7 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
     subplot_kw = subplot_kw if subplot_kw is not None else {}
     for i in range(nrows):
         for j in range(ncols):
-            index = i*ncols + j
+            index = i*ncols + j + 1
             axs[i, j] = fig.add_subplot(
                 nrows, ncols, index,
                 sharex=pick_share(sharex, i, j, axs), sharey=pick_share(sharey, i, j, axs),
