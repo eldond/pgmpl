@@ -69,6 +69,11 @@ def demo_plot():
     axs[2, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r', label='-y2 red err bar')
     axs[2, 1].legend()
 
+    axs[2, 1].clear()
+    axs[2, 1].text(0, 0, 'these axes were cleared', color='k')
+    axs[2, 1].plot([0, 1], [1, 0], label='re-added after clear')
+    axs[2, 1].legend()
+
     return fig, axs
 
 

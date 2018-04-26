@@ -35,11 +35,15 @@ class Axes(pg.PlotItem):
     """
     def __init__(self, **kwargs):
         super(Axes, self).__init__(**kwargs)
-        self.legend = Legend(ax=super(Axes, self))
+        self.legend = Legend(ax=self)
         self.prop_cycle = rcParams['axes.prop_cycle']
         tmp = self.prop_cycle()
         self.cyc = defaultdict(lambda: next(tmp))
         self.prop_cycle_index = 0
+
+    def clear(self):
+        super(Axes, self).clear()
+        self.legend.clear()
 
     def plot(self, *args, **kwargs):
         """
@@ -89,11 +93,11 @@ class Axes(pg.PlotItem):
 
     def axhline(self, value, **kwargs):
         """Direct imitation of matplotlib axhline"""
-        self.addLine(y=value, **plotkw_translator(**kwargs))
+        return self.addLine(y=value, **plotkw_translator(**kwargs))
 
     def axvline(self, value, **kwargs):
         """Direct imitation of matplotlib axvline"""
-        self.addLine(x=value, **plotkw_translator(**kwargs))
+        return self.addLine(x=value, **plotkw_translator(**kwargs))
 
     def errorbar(
             self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
@@ -359,6 +363,9 @@ class Legend:
         """
         printd('  custom legend call')
         self.leg = self.ax.addLegend()
+        # ax.addLegend modifies ax.legend, so we have to put it back in order to
+        # preserve a reference to pyqtmpl.axes.Legend.
+        self.ax.legend = self
 
         if handles is None:
             handles = self.ax.getViewBox().allChildren()
@@ -404,3 +411,7 @@ class Legend:
                 'plotting routines are converted from matplotlib. pyqtgraph legends are draggable by default.'
             )
         return None
+
+    def clear(self):
+        """Removes the legend from Axes instance"""
+        self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
