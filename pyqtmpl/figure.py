@@ -27,7 +27,7 @@ from axes import Axes
 from util import printd, tolist
 
 
-class Figure(pg.GraphicsWindow):
+class Figure(pg.PlotWidget):
     """
     Imitates matplotlib.figure.Figure using PyQtGraph
     """
@@ -60,6 +60,7 @@ class Figure(pg.GraphicsWindow):
         self.axes = None
         self.layout = pg.GraphicsLayout()
         self.setCentralItem(self.layout)
+        self.show()
 
         if subplotpars is not None:
             self.set_subplotpars(subplotpars)
