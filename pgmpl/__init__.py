@@ -18,7 +18,7 @@ from info import *  # Defines __version__, etc.
 from util import printd
 from translate import color_translator
 
-__all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples', 'text']
+__all__ = ['figure', 'axes', 'pyplot', 'translate', 'text', 'util']
 
 # Handle debugging
 if os.environ.get('PGMPL_DEBUG', None) is None:

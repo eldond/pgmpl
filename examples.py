@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import sys
 import warnings
 import os
+import unittest
 
 # Calculation imports
 import numpy as np
@@ -88,6 +89,19 @@ def short_demo():
     axs.plot(x, np.cos(x)-1)
     axs.text(0, 0, 'figure cleared then re-used')
     return fig, axs
+
+
+class TestPgmplExamples(unittest.TestCase):
+    """
+    Test from the command line with
+    python -m unittest examples
+    """
+
+    verbose = False
+
+    def test_demo_plot(self):
+        short_demo()
+        demo_plot()
 
 
 if __name__ == '__main__':

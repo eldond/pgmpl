@@ -13,13 +13,18 @@ from __future__ import print_function, division
 import pgmpl as mpl
 import pgmpl.pyplot as plt
 
+import numpy as np
+
 print(mpl.__version__)
 mpl.set_debug(True)
 
-x = linspace(0, 10, 101)
-y = sin(x*pi)
+x = np.linspace(0, 10, 101)
+y = np.sin(x*np.pi)
 
 plt.plot(x, y)
-scratch['qtapp'] = mpl.app
-
-mpl.app.exec_()
+try:
+    scratch['qtapp'] = mpl.app
+except NameError:
+    print('You must be trying to run the omfit_demo outside of OMFIT, for some reason. amirite?')
+else:
+    mpl.app.exec_()

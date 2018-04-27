@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import sys
 import warnings
 import copy
+import unittest
 
 # Calculation imports
 import numpy as np
@@ -287,3 +288,75 @@ def plotkw_translator(**plotkw):
 
     printd('plotkw symbol = {}; symbol = {}'.format(plotkw.get('symbol', 'no symbol defined'), symbol), level=1)
     return plotkw
+
+
+class TestPgmplTranslate(unittest.TestCase):
+    """
+    Test from the command line with
+    python -m unittest translate
+    """
+
+    verbose = False
+
+    plot_kw_tests = [
+        {'color': 'r'},
+        {'color': 'r', 'alpha': 0.5},
+        {'color': 'b', 'linestyle': '--', 'marker': 'x'},
+        {'color': 'g', 'linestyle': ':', 'marker': 'o'},
+        {'color': 'm', 'linestyle': ' ', 'marker': 'd', 'mew': 2},
+    ]
+
+    nt = len(plot_kw_tests)
+
+    if verbose:
+        print('-' * 79)
+        print('\nTestPgmpl has {} test sets of plot keywords ready to go!\n'.format(nt))
+        print('-' * 79)
+
+    def test_color_translator(self):
+        newc = [None] * self.nt
+        for i in range(self.nt):
+            newc[i] = color_translator(**self.plot_kw_tests[i])
+        if self.verbose:
+            print('New colors:', newc)
+
+    def test_style_translator(self):
+        news = [None] * self.nt
+        for i in range(self.nt):
+            news[i] = style_translator(**self.plot_kw_tests[i])
+        if self.verbose:
+            print('New styles:', news)
+            print('QtCore.Qt.DashDotLine = {}'.format(QtCore.Qt.DashDotLine))
+            print('style_translator(linestyle="-.") = {}'.format(style_translator(linestyle="-.")))
+        assert style_translator(linestyle="-.") == QtCore.Qt.DashDotLine
+
+    def test_symbol_translator(self):
+        news = [None] * self.nt
+        for i in range(self.nt):
+            news[i] = symbol_translator(**self.plot_kw_tests[i])
+        if self.verbose:
+            print('New symbols:', news)
+
+    def test_setup_pen_kw(self):
+        newp = [None] * self.nt
+        for i in range(self.nt):
+            newp[i] = setup_pen_kw(**self.plot_kw_tests[i])
+        if self.verbose:
+            print('New pens:', newp)
+
+    def test_plotkw_translator(self):
+        newk = [{}] * self.nt
+        for i in range(self.nt):
+            newk[i] = plotkw_translator(**self.plot_kw_tests[i])
+        if self.verbose:
+            print('New keyword dictionaries:', newk)
+
+    def test_dealias(self):
+        test_dict = {'lw': 5, 'ls': '--', 'mec': 'r', 'markeredgewidth': 1, 'blah': 0}
+        correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
+        test_answer = dealias(**test_dict)
+        assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
+
+
+if __name__ == '__main__':
+    unittest.main()

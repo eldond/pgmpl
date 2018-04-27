@@ -9,6 +9,7 @@ Imitates matplotlib.pyplot but using PyQtGraph to make the plots
 from __future__ import print_function, division
 import sys
 import warnings
+import unittest
 
 # Calculation imports
 import numpy as np
@@ -124,3 +125,27 @@ def close(fig=None):
     except AttributeError:
         # pyqtgraph.PlotWidget.close() fails every other time it's called, so double tap for the win.
         fig.close()
+
+
+class TestPgmplFigure(unittest.TestCase):
+    """
+    Test from the command line with
+    python -m unittest pyplot
+    """
+
+    verbose = False
+
+    def test_figure(self):
+        fig = figure()
+        if self.verbose:
+            print('test_figure: fig = {}'.format(fig))
+
+    def test_subplots(self):
+        x = np.linspace(0, 1.2, 20)
+        y = x**2 + 1
+        fig, axs = subplots(3, 2, sharex='all', sharey='all')
+        axs[1, 1].plot(x, y)
+
+
+if __name__ == '__main__':
+    unittest.main()
