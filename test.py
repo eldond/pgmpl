@@ -122,7 +122,7 @@ class TestPyQtMpl(unittest.TestCase):
         test_dict = {'lw': 5, 'ls': '--', 'mec': 'r', 'markeredgewidth': 1, 'blah': 0}
         correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
         test_answer = dealias(**test_dict)
-        assert correct_answer == test_answer
+        assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
 
 
 if __name__ == '__main__':

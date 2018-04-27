@@ -114,3 +114,9 @@ def plot(*args, **kwargs):
             fig = gcf()
         ax = fig.gca()
     ax.plot(*args, **kwargs)
+
+
+def close(fig=None):
+    if fig is None:
+        fig = gcf()
+    fig.close()
