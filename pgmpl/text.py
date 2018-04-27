@@ -22,7 +22,7 @@ class Text(pg.TextItem):
     Imitates matplotlib.text.Text using PyQtGraph
     """
     def __init__(
-            self, x=0, y=0, text='',
+            self, x=0.0, y=0.0, text='',
             color=None,
             verticalalignment='baseline', horizontalalignment='left', multialignment=None,
             fontproperties=None, rotation=None, linespacing=None, rotation_mode=None, usetex=None, wrap=False,
@@ -60,6 +60,10 @@ class Text(pg.TextItem):
             superkw['color'] = t_color
         if rotation is not None:
             superkw['angle'] = rotation
+        ha = kwargs.pop('ha', None)
+        va = kwargs.pop('va', None)
+        horizontalalignment = ha if horizontalalignment is None else horizontalalignment
+        verticalalignment = va if verticalalignment is None else verticalalignment
         if horizontalalignment is not None or verticalalignment is not None:
             superkw['anchor'] = (
                 {'left': 0, 'center': 0.5, 'right': 1}.get(horizontalalignment, 0),
