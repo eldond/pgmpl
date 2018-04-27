@@ -119,4 +119,8 @@ def plot(*args, **kwargs):
 def close(fig=None):
     if fig is None:
         fig = gcf()
-    fig.close()
+    try:
+        fig.close()
+    except AttributeError:
+        # pyqtgraph.PlotWidget.close() fails every other time it's called, so double tap for the win.
+        fig.close()
