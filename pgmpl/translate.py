@@ -41,6 +41,10 @@ def dealias(**kws):
         'markerfacecoloralt': ['mfcalt'],
         'antialiased': ['aa'],
         'color': ['c'],
+        'edgecolor': ['ec'],
+        'facecolor': ['fc'],
+        'verticalalignment': ['va'],
+        'horizontalalignment': ['ha'],
     }
     for primary, aliases in alias_lists.iteritems():
         aliasv = {alias: kws.pop(alias, missing_value_mark) for alias in aliases}
