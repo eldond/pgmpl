@@ -165,6 +165,11 @@ class Axes(pg.PlotItem):
         )
         self.addItem(errb)
 
+        if kwargs.get('mew', None) is not None:
+            capthick = kwargs.pop('mew')
+        if kwargs.get('markeredgewidth', None) is not None:
+            capthick = kwargs.pop('markeredgewidth')
+
         # Draw the caps. pyqtgraph does the caps differently from matplotlib, so we'll put this together manually
         # instead of using pyqtgraph ErrorBarItem's caps.
         if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):

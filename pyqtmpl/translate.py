@@ -27,36 +27,64 @@ except ImportError:  # Older Matplotlib versions were organized differently
 from util import printd
 
 
+def dealias(**kws):
+    missing_value_mark = 'This value is missing; it is not just None. We want to allow for the possibility that ' \
+                         'keyword=None is treated differently than a missing keyword in some function, because a ' \
+                         'function might not accept unrecognized keywords.'
+    alias_lists = {  # If there is more than one alias, then the first one in the list is used
+        'linewidth': ['lw'],
+        'linestyle': ['ls'],
+        'markeredgewith': ['mew'],
+        'markeredgecolor': ['mec'],
+        'markerfacecolor': ['mfc'],
+        'markersize': ['ms'],
+        'markerfacecoloralt': ['mfcalt'],
+        'antialiased': ['aa'],
+        'color': ['c'],
+    }
+    for primary, aliases in alias_lists.iteritems():
+        aliasv = {alias: kws.pop(alias, missing_value_mark) for alias in aliases}
+        not_missing = [v != missing_value_mark for v in aliasv.values()]
+        if primary not in kws.keys() and any(not_missing):
+            # The aliases only need be considered if the primary is missing.
+            aliasu = np.atleast_1d(aliasv.keys())[np.atleast_1d(not_missing)][0]
+            kws[primary] = aliasv[aliasu]
+            printd("  assigned kws['{}'] = kws.pop('{}')".format(primary, aliasu))
+        else:
+            printd(' did not asssign {}'.format(primary))
+    return kws
+
+
 def defaults_from_rcparams(plotkw):
     """
     Given a dictionary of Matplotlib style plotting keywords, any missing keywords (color, linestyle, etc.) will be
-    added using defaults determined by Matplotlib's rcParams.
+    added using defaults determined by Matplotlib's rcParams. Please dealias plotkw first.
     :param plotkw: dict
          Dictionary of Matplotlib style plot keywords
     :return: dict
         Input dictionary with missing keywords filled in using defaults
     """
     from matplotlib import rcParams
-    params = {  # rcParams key : list of plotkw keys; assign to first one if none are defined
-        'lines.linewidth': ['lw', 'linewidth'],
+    params = {  # If you have a parameter that can't be assigned simply by just splitting after ., then set it up here.
+        'lines.linestyle': 'linestyle',  # This could've gone in simples, but then there'd be no example.
     }
     simples = [
-        'lines.linestyle',
+        'lines.linewidth',
         'lines.marker',
         'lines.markeredgewidth',
         'lines.markersize',
     ]
     for simple in simples:
-        params[simple] = ['.'.join(simple.split('.')[1:])]
+        params[simple] = '.'.join(simple.split('.')[1:])
 
     for param in params.keys():
-        if not any([k in plotkw.keys() for k in params[param]]):
+        if not params[param] in plotkw.keys():
             # Keyword is missing
-            plotkw[params[param][0]] = rcParams[param]
-            printd("  assigned plotkw['{}'] = rcParams[{}] = {}".format(params[param][0], param, rcParams[param]),
+            plotkw[params[param]] = rcParams[param]
+            printd("  assigned plotkw['{}'] = rcParams[{}] = {}".format(params[param], param, rcParams[param]),
                    level=2)
         else:
-            printd("  one of the keywords {} exists in plotkw; no need to assign default from rcParams['{}']".format(
+            printd("  keywords {} exists in plotkw; no need to assign default from rcParams['{}']".format(
                 params[param], param), level=2)
 
     return plotkw
@@ -89,7 +117,7 @@ def color_translator(**kw):
 
 def style_translator(**kw):
     """
-    Translates linestyle descriptions from the Matplotlib system into Qt pen styles
+    Translates linestyle descriptions from the Matplotlib system into Qt pen styles. Please dealias first.
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which linestyle may be specified. The entire set of mpl plot
         keywords may be passed in, although only linestyle-relevant ones will be used.
@@ -151,7 +179,9 @@ def symbol_translator(**kw):
 
 def setup_pen_kw(**kw):
     """
-    Builds a pyqtgraph pen (object containing color, linestyle, etc. information) from Matplotlib keywords
+    Builds a pyqtgraph pen (object containing color, linestyle, etc. information) from Matplotlib keywords.
+    Please dealias first.
+
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which line plot relevant settings may be specified. The entire
         set of mpl plot keywords may be passed in, although only the keywords related to displaying line plots will be
@@ -163,7 +193,7 @@ def setup_pen_kw(**kw):
 
     # Move the easy keywords over directly
     direct_translations_pen = {  # plotkw: pgkw
-        'lw': 'width',
+        'linewidth': 'width',
     }
     for direct in direct_translations_pen:
         if direct in kw:
@@ -197,7 +227,7 @@ def plotkw_translator(**plotkw):
     """
 
     pgkw = {}
-    plotkw = copy.deepcopy(plotkw)  # Don't break the original in case it's needed for other calls
+    plotkw = dealias(**copy.deepcopy(plotkw))  # Copy: Don't break the original in case it's needed for other calls
     plotkw = defaults_from_rcparams(plotkw)
 
     # First define the pen -----------------------------------------------------------------------------------------
@@ -218,8 +248,8 @@ def plotkw_translator(**plotkw):
 
     # Handle symbol edge
     default_mec = plotkw.get('color', None) if plotkw.get('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
-    mec = plotkw.pop('markeredgecolor', plotkw.pop('mec', default_mec))
-    mew = plotkw.pop('markeredgewidth', plotkw.pop('mew', None))
+    mec = plotkw.pop('markeredgecolor', default_mec)
+    mew = plotkw.pop('markeredgewidth', None)
     symbol = symbol_translator(**plotkw)
     if symbol is not None:
         pgkw['symbol'] = symbol
@@ -245,7 +275,7 @@ def plotkw_translator(**plotkw):
         pgkw.pop('symbolSize', None)  # This isn't used, but it can cause problems, so get rid of it.
 
     # Pass through other keywords
-    late_pops = ['color', 'alpha', 'lw', 'marker', 'linestyle']
+    late_pops = ['color', 'alpha', 'linewidth', 'marker', 'linestyle']
     for late_pop in late_pops:
         # Didn't pop yet because used in a few places or popping above is inside of an if and may not have happened
         plotkw.pop(late_pop, None)

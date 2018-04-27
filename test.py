@@ -3,6 +3,9 @@
 
 """
 Tests key features of pyqtmpl
+
+Test from the command line with:
+python -m unittest test
 """
 
 # Basic imports
@@ -14,6 +17,7 @@ import os
 
 # Calculation imports
 import numpy as np
+from collections import Counter
 
 # Plotting imports
 from PyQt4 import QtGui, QtCore
@@ -21,7 +25,8 @@ import pyqtgraph as pg
 from matplotlib.colors import to_rgba
 
 # pyqtmpl
-from pyqtmpl.translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator
+from pyqtmpl.translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator, \
+    dealias
 from pyqtmpl.pyplot import figure, subplots
 from pyqtmpl.util import printd
 from examples import demo_plot, short_demo
@@ -112,6 +117,12 @@ class TestPyQtMpl(unittest.TestCase):
     def test_demo_plot(self):
         short_demo()
         demo_plot()
+
+    def test_dealias(self):
+        test_dict = {'lw': 5, 'ls': '--', 'mec': 'r', 'markeredgewidth': 1, 'blah': 0}
+        correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
+        test_answer = dealias(**test_dict)
+        assert correct_answer == test_answer
 
 
 if __name__ == '__main__':
