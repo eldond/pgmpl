@@ -283,6 +283,48 @@ class Axes(pg.PlotItem):
 
         return fb
 
+    def set_xlim(self, left=None, right=None, emit=True, auto=False, **kw):
+        """Direct imitation of matplotlib set_xlim"""
+        if right is None and len(np.atleast_1d(left)) == 2:
+            new_xlims = tuple(left)  # X limits were passed in as first argument
+        elif right is not None and left is not None \
+                and len(np.atleast_1d(left)) == 1 and len(np.atleast_1d(right)) == 1:
+            new_xlims = (left, right)
+        else:
+            new_xlims = None
+
+        if not emit:
+            warnings.warn('emit keyword to set_xlim is not handled yet')
+        if auto:
+            warnings.warn('auto keyword to set_xlim is not handled yet')
+        if len(kw.keys()):
+            warnings.warn('set_xlim ignores any extra keywords in **kw')
+
+        if new_xlims is not None:
+            self.setXRange(new_xlims[0], new_xlims[1])
+        return new_xlims
+
+    def set_ylim(self, bottom=None, top=None, emit=True, auto=False, **kw):
+        """Direct imitation of matplotlib set_ylim"""
+        if top is None and len(np.atleast_1d(bottom)) == 2:
+            new_ylims = tuple(bottom)  # Y limits were passed in as first argument
+        elif top is not None and bottom is not None \
+                and len(np.atleast_1d(bottom)) == 1 and len(np.atleast_1d(top)) == 1:
+            new_ylims = (bottom, top)
+        else:
+            new_ylims = None
+
+        if not emit:
+            warnings.warn('emit keyword to set_ylim is not handled yet')
+        if auto:
+            warnings.warn('auto keyword to set_ylim is not handled yet')
+        if len(kw.keys()):
+            warnings.warn('set_ylim ignores any extra keywords in **kw')
+
+        if new_ylims is not None:
+            self.setYRange(new_ylims[0], new_ylims[1])
+        return new_ylims
+
 
 class Legend:
     """
