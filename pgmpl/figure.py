@@ -153,7 +153,15 @@ class Figure(pg.PlotWidget):
         :return: Current axes for this figure, creating them if necessary
         """
         if self.axes is None:
-            ax = self.add_subplot(1, 1, 0)
+            ax = self.add_subplot(1, 1, 1)
         else:
             ax = list(flatten(np.atleast_1d(self.axes)))[-1]
         return ax
+
+    def close(self):
+        try:
+            super(Figure, self).close()
+        except AttributeError:
+            # Sometimes this fails the first time, so give 'er the ol' double tap
+            super(Figure, self).close()
+
