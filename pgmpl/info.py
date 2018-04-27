@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Information for the pyqtmpl module.
+Information for the pgmpl module.
 
 This would normally go in __init__.py, but importing __init__ in setup.py to get info causes a segfault during package
 installation. So, this information is placed here and imported into __init__.py and into setup.py.

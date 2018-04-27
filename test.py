@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Tests key features of pyqtmpl
+Tests key features of pgmpl
 
 Test from the command line with:
 python -m unittest test
@@ -24,15 +24,15 @@ from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 from matplotlib.colors import to_rgba
 
-# pyqtmpl
-from pyqtmpl.translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator, \
+# pgmpl
+from pgmpl.translate import style_translator, color_translator, symbol_translator, setup_pen_kw, plotkw_translator, \
     dealias
-from pyqtmpl.pyplot import figure, subplots
-from pyqtmpl.util import printd
+from pgmpl.pyplot import figure, subplots
+from pgmpl.util import printd
 from examples import demo_plot, short_demo
 
 
-class TestPyQtMpl(unittest.TestCase):
+class TestPgmpl(unittest.TestCase):
     """
     Test from the command line with
     python -m unittest test
@@ -52,7 +52,7 @@ class TestPyQtMpl(unittest.TestCase):
 
     if verbose:
         print('-' * 79)
-        print('\nTestPyQtMpl has {} test sets of plot keywords ready to go!\n'.format(nt))
+        print('\nTestPgmpl has {} test sets of plot keywords ready to go!\n'.format(nt))
         print('-' * 79)
 
     def test_color_translator(self):
@@ -107,12 +107,12 @@ class TestPyQtMpl(unittest.TestCase):
     def test_printd(self):
         test_string_1 = 'this string should print, but the other string should not'
         test_string_2 = 'this string should NOT print, but the other string SHOULD'
-        debug = os.environ.get('PYQTMPL_DEBUG', "0")
-        os.environ['PYQTMPL_DEBUG'] = "1"
+        debug = os.environ.get('PGMPL_DEBUG', "0")
+        os.environ['PGMPL_DEBUG'] = "1"
         printd(test_string_1)
-        os.environ['PYQTMPL_DEBUG'] = "0"
+        os.environ['PGMPL_DEBUG'] = "0"
         printd(test_string_2)
-        os.environ['PYQTMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
+        os.environ['PGMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
 
     def test_demo_plot(self):
         short_demo()

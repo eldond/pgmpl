@@ -14,7 +14,7 @@ def printd(*args, **kw):
     :param level: int
         Debugging level
     """
-    debug = os.environ.get('PYQTMPL_DEBUG', "0")
+    debug = os.environ.get('PGMPL_DEBUG', "0")
     if int(debug) >= kw.pop('level', 1):
         print(*args)
 

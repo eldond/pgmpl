@@ -5,9 +5,9 @@ exec python2.7 "$0" "$@"
 The single quotes on this docstring are a way to trick bash
     https://www.rodneybeede.com/How_to_use_command_line_arguments_with_shebang__usr_bin_env_python.html
 
-To use this script, do ./pyqtmpl_vs_mpl for matplotlib or ./pyqtmpl_vs_mpl pg for pyqtmpl.
+To use this script, do ./pgmpl_vs_mpl for matplotlib or ./pgmpl_vs_mpl pg for pgmpl.
 
-This script should work if copied outside of the pyqtmpl folder
+This script should work if copied outside of the pgmpl folder
 '''
 # # -*- coding: utf-8 -*-
 
@@ -22,15 +22,15 @@ import numpy as np
 
 print(sys.argv)
 if len(sys.argv) > 1:
-    use_pyqtmpl = sys.argv[1].lower() in ['pyqtmpl', '1', 'pg', 'p']
+    use_pgmpl = sys.argv[1].lower() in ['pgmpl', '1', 'pg', 'p']
 else:
-    use_pyqtmpl = False
+    use_pgmpl = False
 
-if use_pyqtmpl:
+if use_pgmpl:
     from PyQt4 import QtGui
-    import pyqtmpl as mpl
-    import pyqtmpl.pyplot as plt
-    import pyqtmpl
+    import pgmpl as mpl
+    import pgmpl.pyplot as plt
+    import pgmpl
 
 else:
     import matplotlib as mpl
@@ -69,23 +69,23 @@ def demo_plot():
     axs[1, 0].axvline(np.mean(x), linestyle=':', color='k')
     axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k')
 
-    if not use_pyqtmpl:
+    if not use_pgmpl:
         fig.show()
 
     return fig, axs
 
 
 if __name__ == '__main__':
-    if os.environ.get('PYQTMPL_DEBUG', None) is None:
-        os.environ['PYQTMPL_DEBUG'] = "1"
-    if use_pyqtmpl:
-        app = pyqtmpl.app  # QtGui.QApplication(sys.argv)
+    if os.environ.get('PGMPL_DEBUG', None) is None:
+        os.environ['PGMPL_DEBUG'] = "1"
+    if use_pgmpl:
+        app = pgmpl.app  # QtGui.QApplication(sys.argv)
     else:
         app = None
     b = demo_plot()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (app is not None) and ((sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION')):
         app.exec_()
-    if not use_pyqtmpl:
+    if not use_pgmpl:
         plt.ioff()  # https://stackoverflow.com/a/38592888/6605826
         plt.show()

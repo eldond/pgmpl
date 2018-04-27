@@ -23,7 +23,7 @@ except ImportError:  # Older Matplotlib versions were organized differently
     from matplotlib.colors import colorConverter
     to_rgba = colorConverter.to_rgba
 
-# pyqtmpl imports
+# pgmpl imports
 from util import printd
 
 

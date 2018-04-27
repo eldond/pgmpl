@@ -9,7 +9,7 @@ For keeping track of things at the module level
 from __future__ import print_function, division
 import warnings
 
-# pyqtmpl
+# pgmpl
 from util import printd
 
 

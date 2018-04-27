@@ -13,7 +13,7 @@ from PyQt4 import QtGui
 import pyqtgraph as pg
 from matplotlib import rcParams
 
-# pyqtmpl imports
+# pgmpl imports
 from info import *  # Defines __version__, etc.
 from util import printd
 from translate import color_translator
@@ -21,13 +21,13 @@ from translate import color_translator
 __all__ = ['figure', 'axes', 'pyplot', 'translate', 'examples', 'text']
 
 # Handle debugging
-if os.environ.get('PYQTMPL_DEBUG', None) is None:
-    os.environ['PYQTMPL_DEBUG'] = "0"
+if os.environ.get('PGMPL_DEBUG', None) is None:
+    os.environ['PGMPL_DEBUG'] = "0"
 
 
 def set_debug(enable=True):
-    os.environ['PYQTMPL_DEBUG'] = str(int(enable))
-    printd('pyqtmpl debugging set to {}'.format(str(int(enable))))
+    os.environ['PGMPL_DEBUG'] = str(int(enable))
+    printd('pgmpl debugging set to {}'.format(str(int(enable))))
 
 
 # Setup style, etc.

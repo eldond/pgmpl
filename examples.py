@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Demonstrations and examples of pyqtmpl usage
+Demonstrations and examples of pgmpl usage
 """
 
 # Basic imports
@@ -17,10 +17,10 @@ import numpy as np
 # Plotting imports
 import pyqtgraph as pg
 
-# pyqtmpl
-import pyqtmpl
-import pyqtmpl.pyplot as plt
-from pyqtmpl.tracking import tracker
+# pgmpl
+import pgmpl
+import pgmpl.pyplot as plt
+from pgmpl.tracking import tracker
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -91,16 +91,16 @@ def short_demo():
 
 
 if __name__ == '__main__':
-    print('pyqtmpl examples...')
-    pyqtmpl.set_debug(1)
+    print('pgmpl examples...')
+    pgmpl.set_debug(1)
     a = short_demo()
     b = demo_plot()
     # a[0].close()  # This is not needed, but it makes testing faster.
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        print('Starting event loop for pyqtmpl examples...')
-        pyqtmpl.app.exec_()
+        print('Starting event loop for pgmpl examples...')
+        pgmpl.app.exec_()
     else:
-        print('Done with pyqtmpl examples.')
+        print('Done with pgmpl examples.')
 

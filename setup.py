@@ -6,8 +6,8 @@ from setuptools import setup
 import glob
 import os
 
-# pyqtmpl imports
-from pyqtmpl.info import *
+# pgmpl imports
+from pgmpl.info import *
 
 
 # http://python-packaging.readthedocs.io/en/latest/dependencies.html
@@ -19,18 +19,18 @@ with open('requirements.txt') as f:
     required = filter(None, map(lambda x: x.split("#")[0].strip(), f.read().splitlines()))
 
 print required
-print('pyqtmpl setup.py...')
+print('pgmpl setup.py...')
 
 # Run setup
 setup(
-    name='pyqtmpl',
+    name='pgmpl',
     version=__version__,
     description='Wrapper for calling PyQtGraph with Matplotlib syntax',
-    url='https://github.com/eldond/pyqtmpl',
+    url='https://github.com/eldond/pgmpl',
     author=__maintainer__,
     author_email=__email__,
     packages=[
-        'pyqtmpl',
+        'pgmpl',
     ],
     keywords='plotting plot matplotlib pyqtgraph',
     install_requires=required,

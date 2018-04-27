@@ -13,7 +13,7 @@ import warnings
 # Calculation imports
 import numpy as np
 
-# pyqtmpl
+# pgmpl
 from tracking import tracker
 from figure import Figure
 from axes import Axes
@@ -22,8 +22,8 @@ from util import printd
 
 def figure(*args, **kwargs):
     """
-    Imitates matplotlib.pyplot.figure, but creates a PyQtGraph window with the pyqtmpl.Figure class
-    :return: pyqtmpl.Figure instance
+    Imitates matplotlib.pyplot.figure, but creates a PyQtGraph window with the pgmpl.Figure class
+    :return: pgmpl.Figure instance
     """
     return Figure(*args, **kwargs)
 

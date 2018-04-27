@@ -20,7 +20,7 @@ from matplotlib.cbook import flatten
 # Plotting imports
 import pyqtgraph as pg
 
-# pyqtmpl
+# pgmpl
 from tracking import tracker
 from translate import plotkw_translator
 from axes import Axes

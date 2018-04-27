@@ -23,7 +23,7 @@ from matplotlib import rcParams
 from cycler import cycler
 from collections import defaultdict
 
-# pyqtmpl
+# pgmpl
 from translate import plotkw_translator, color_translator, setup_pen_kw
 from util import printd, tolist
 from text import Text
@@ -94,7 +94,7 @@ class Axes(pg.PlotItem):
         :return: Text instance
         """
         if withdash:
-            warnings.warn('  pyqtmpl.Axes.text withdash=True keyword is not not handled (yet?)')
+            warnings.warn('  pgmpl.Axes.text withdash=True keyword is not not handled (yet?)')
         text = Text(x, y, s, fontproperties=fontdict, **kwargs)
         self.addItem(text)
         return text
@@ -252,7 +252,7 @@ class Axes(pg.PlotItem):
             brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
         else:
             brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
-        printd('  pyqtmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
+        printd('  pgmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
             brush, ekw, setup_pen_kw(**ekw)))
 
         # Handle special keywords
@@ -333,7 +333,7 @@ class Axes(pg.PlotItem):
 
 class Legend:
     """
-    Post-generated legend for pyqtmpl.axes.Axes. This is not a direct imitation of Matplotlib's Legend as it has to
+    Post-generated legend for pgmpl.axes.Axes. This is not a direct imitation of Matplotlib's Legend as it has to
     accept events from pyqtgraph. It also has to bridge the gap between Matplotlib style calling legend after plotting
     and pyqtgraph style calling legend first.
 
@@ -419,7 +419,7 @@ class Legend:
         printd('  custom legend call')
         self.leg = self.ax.addLegend()
         # ax.addLegend modifies ax.legend, so we have to put it back in order to
-        # preserve a reference to pyqtmpl.axes.Legend.
+        # preserve a reference to pgmpl.axes.Legend.
         self.ax.legend = self
 
         if handles is None:

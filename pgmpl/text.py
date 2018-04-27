@@ -40,14 +40,14 @@ class Text(pg.TextItem):
             Color of text
         :param verticalalignment: string {top | bottom | center | baseline}
         :param horizontalalignment: string {left | center | right}
-        :param multialignment: (not implemented in pyqtmpl wrapper)
+        :param multialignment: (not implemented in pgmpl wrapper)
         :param fontproperties: dict (not yet implemented)
         :param rotation: scalar
             Text angle in degrees. 0 is horizontal and upright
-        :param linespacing: (not implemented in pyqtmpl wrapper)
-        :param rotation_mode: (not implemented in pyqtmpl wrapper)
-        :param usetex: (not implemented in pyqtmpl wrapper)
-        :param wrap: (not yet implemented in pyqtmpl wrapper)
+        :param linespacing: (not implemented in pgmpl wrapper)
+        :param rotation_mode: (not implemented in pgmpl wrapper)
+        :param usetex: (not implemented in pgmpl wrapper)
+        :param wrap: (not yet implemented in pgmpl wrapper)
         :param kwargs: dict
             Other keywords
         """
@@ -69,21 +69,21 @@ class Text(pg.TextItem):
         self.setPos(x, y)
 
         if multialignment is not None:
-            warnings.warn('  pyqtmpl.text.Text does not support multialignment keyword')
+            warnings.warn('  pgmpl.text.Text does not support multialignment keyword')
         if rotation_mode is not None:
-            warnings.warn('  pyqtmpl.text.Text does not support rotation_mode keyword')
+            warnings.warn('  pgmpl.text.Text does not support rotation_mode keyword')
         if usetex is not None:
-            warnings.warn('  pyqtmpl.text.Text does not support usetex keyword')
+            warnings.warn('  pgmpl.text.Text does not support usetex keyword')
         if linespacing is not None:
-            warnings.warn('  pyqtmpl.text.Text does not support linespacing keyword')
+            warnings.warn('  pgmpl.text.Text does not support linespacing keyword')
 
         if wrap is not None:
-            warnings.warn('  pyqtmpl.text.Text does not support wrap keyword yet (may be possible later)')
+            warnings.warn('  pgmpl.text.Text does not support wrap keyword yet (may be possible later)')
         if fontproperties is not None:
-            warnings.warn('  pyqtmpl.text.Text does not handle font changes yet (to be implemented later)')
+            warnings.warn('  pgmpl.text.Text does not handle font changes yet (to be implemented later)')
 
         if len(kwargs.keys()):
-            warnings.warn('  pyqtmpl.text.Text got unhandled kwargs: {}'.format(kwargs.keys()))
+            warnings.warn('  pgmpl.text.Text got unhandled kwargs: {}'.format(kwargs.keys()))
 
     def __call__(self):
         return self
