@@ -77,7 +77,7 @@ class Text(pg.TextItem):
         if linespacing is not None:
             warnings.warn('  pgmpl.text.Text does not support linespacing keyword')
 
-        if wrap is not None:
+        if wrap:
             warnings.warn('  pgmpl.text.Text does not support wrap keyword yet (may be possible later)')
         if fontproperties is not None:
             warnings.warn('  pgmpl.text.Text does not handle font changes yet (to be implemented later)')
