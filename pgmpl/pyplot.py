@@ -135,16 +135,36 @@ class TestPgmplFigure(unittest.TestCase):
 
     verbose = False
 
+    x = np.linspace(0, 1.2, 20)
+    y = x**2 + 1
+
     def test_figure(self):
         fig = figure()
         if self.verbose:
             print('test_figure: fig = {}'.format(fig))
 
     def test_subplots(self):
-        x = np.linspace(0, 1.2, 20)
-        y = x**2 + 1
         fig, axs = subplots(3, 2, sharex='all', sharey='all')
-        axs[1, 1].plot(x, y)
+        axs[1, 1].plot(self.x, self.y)
+
+    def test_axes(self):
+        ax = axes()
+        ax.plot(self.x, self.y)
+
+    def test_gcf(self):
+        fig = gcf()
+        assert isinstance(fig, Figure)
+
+    def test_gca(self):
+        ax = gca()
+        assert isinstance(ax, Axes)
+
+    def test_close(self):
+        fig = gcf()
+        close(fig)
+
+    def test_plot(self):
+        plot(self.x, self.y)
 
 
 if __name__ == '__main__':

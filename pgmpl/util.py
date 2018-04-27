@@ -42,6 +42,19 @@ class TestPgmplFigure(unittest.TestCase):
         printd(test_string_2)
         os.environ['PGMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
 
+    def test_tolist(self):
+        ar = np.array([1, 2, 3])
+        a2 = np.zeros((3, 3))
+        bo = True
+        li = [1, 2, 3]
+        no = None
+        sc = 0
+        st = 'blah'
+        tu = (1, 2)
+        for thing in [ar, a2, bo, li, no, sc, st, tu]:
+            assert isinstance(tolist(thing), list)
+            assert isinstance(tolist(thing) + [1, 2, 3], list)
+
 
 if __name__ == '__main__':
     unittest.main()

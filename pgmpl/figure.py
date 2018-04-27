@@ -12,6 +12,7 @@ more information.
 from __future__ import print_function, division
 import sys
 import warnings
+import unittest
 
 # Calculation imports
 import numpy as np
@@ -165,3 +166,33 @@ class Figure(pg.PlotWidget):
             # Sometimes this fails the first time, so give 'er the ol' double tap
             super(Figure, self).close()
 
+
+class TestPgmplFigure(unittest.TestCase):
+    """
+    Test from the command line with
+    python -m unittest figure
+    """
+
+    verbose = False
+
+    def test_figure(self):
+        fig1 = Figure()
+        assert isinstance(fig1, Figure)
+        fig1.close()
+
+    def test_fig_methods(self):
+        fig = Figure()
+        ax = fig.gca()
+        assert isinstance(ax, Axes)
+        ax2 = fig.gca()
+        assert ax2 == ax
+        fig.clear()
+
+    def test_fig_plot(self):
+        fig = Figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot([0, 1])
+
+
+if __name__ == '__main__':
+    unittest.main()
