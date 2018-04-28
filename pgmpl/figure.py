@@ -189,12 +189,16 @@ class TestPgmplFigure(unittest.TestCase):
         assert ax2 == ax
         fig.clear()
         fig.close()
+        assert fig.clearfig == fig.clear  # Make sure this assignment didn't break.
 
     def test_fig_plot(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
         fig.close()
+
+    def test_set_subplotpars(self):
+        raise NotImplementedError('this test is incomplete, sorry (but we do not want to forget to add it)')
 
 
 if __name__ == '__main__':

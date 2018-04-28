@@ -13,6 +13,7 @@ from __future__ import print_function, division
 import sys
 import warnings
 import copy
+import unittest
 
 # Calculation imports
 import numpy as np
@@ -474,3 +475,74 @@ class Legend:
             self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
         except AttributeError:
             pass
+
+
+class TestPgmplAxes(unittest.TestCase):
+    """
+    Test from the command line with
+    python -m unittest axes
+    """
+
+    verbose = False
+
+    x = np.linspace(0, 1.8, 30)
+    y = x**2 + 2.5
+
+    def test_axes_init(self):
+        ax = Axes()
+        if self.verbose:
+            print('test_axes_init: ax = {}'.format(ax))
+
+    def test_axes_plot(self):
+        ax = Axes()
+        ax.plot(self.x, self.y, color='r')
+        if self.verbose:
+            print('test_axes_plot: ax = {}'.format(ax))
+
+    def test_axes_err(self):
+        ax = Axes()
+        yerr = self.y*0.1
+        ax.errorbar(self.x, self.y, yerr, color='r')
+        ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
+        if self.verbose:
+            print('test_axes_err: ax = {}'.format(ax))
+
+    def test_axes_lines(self):
+        ax = Axes()
+        ax.axhline(0.5, linestyle='--', color='k')
+        ax.axvline(0.5)
+        ax.axvline(0.75, linestyle='-', color='b')
+        if self.verbose:
+            print('test_axes_lines: ax = {}'.format(ax))
+
+    def test_axes_xyaxes(self):
+        ax = Axes()
+        ax.plot([0, 1], [0, 1])
+        ax.set_ylabel('ylabel')
+        ax.set_xlabel('xlabel')
+        ax.set_xlim([-1, 2])
+        ax.set_ylim([-2, 4])
+        if self.verbose:
+            print('test_axes_xyaxes: ax = {}'.format(ax))
+
+    def test_axes_clear(self):
+        ax = Axes()
+        ax.plot(self.y, self.x)  # Switch them so the test doesn't get bored.
+        ax.clear()
+        # Should add something to try to get the number of objects on the test and assert that there are none
+        if self.verbose:
+            print('test_axes_clear: ax = {}'.format(ax))
+
+    def test_Legend(self):
+        ax = Axes()
+        line = ax.plot(self.x, self.y, label='y(x) plot')
+        leg = ax.legend()
+        leg.addItem(line, name='yx plot')
+        leg.draggable()
+        leg.clear()
+        if self.verbose:
+            print('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+
+
+if __name__ == '__main__':
+    unittest.main()
