@@ -32,7 +32,7 @@ def figure(*args, **kwargs):
 def axes(fig=None, **kwargs):
     if fig is None:
         fig = gcf()
-    ax = fig.add_subplot(1, 1, 0, **kwargs)
+    ax = fig.add_subplot(1, 1, 1, **kwargs)
     return ax
 
 
