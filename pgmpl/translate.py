@@ -18,6 +18,7 @@ import numpy as np
 # Plotting imports
 from PyQt4 import QtCore
 import pyqtgraph as pg
+from matplotlib import rcParams
 try:
     from matplotlib.colors import to_rgba
 except ImportError:  # Older Matplotlib versions were organized differently
@@ -69,7 +70,6 @@ def defaults_from_rcparams(plotkw):
     :return: dict
         Input dictionary with missing keywords filled in using defaults
     """
-    from matplotlib import rcParams
     params = {  # If you have a parameter that can't be assigned simply by just splitting after ., then set it up here.
         'lines.linestyle': 'linestyle',  # This could've gone in simples, but then there'd be no example.
     }
@@ -312,6 +312,18 @@ class TestPgmplTranslate(unittest.TestCase):
         print('-' * 79)
         print('\nTestPgmpl has {} test sets of plot keywords ready to go!\n'.format(nt))
         print('-' * 79)
+
+    def test_defaults_from_rcparams(self):
+        unique_linewidth = 5.1234958293
+        ans0 = defaults_from_rcparams({})
+        ans1 = defaults_from_rcparams({'linewidth': unique_linewidth})
+        ans0b = copy.deepcopy(ans0)
+        ans0b['linewidth'] = unique_linewidth
+        assert ans1 == ans0b
+        if rcParams['lines.linewidth'] == unique_linewidth:
+            assert ans1 == ans0
+        else:
+            assert ans1 != ans0
 
     def test_color_translator(self):
         newc = [None] * self.nt

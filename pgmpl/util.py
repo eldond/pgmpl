@@ -24,10 +24,10 @@ def tolist(x):
     return np.ndarray.tolist(np.atleast_1d(x))
 
 
-class TestPgmplFigure(unittest.TestCase):
+class TestPgmplUtil(unittest.TestCase):
     """
     Test from the command line with
-    python -m unittest figure
+    python -m unittest util
     """
 
     verbose = False

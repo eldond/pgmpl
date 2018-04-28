@@ -22,6 +22,7 @@ from matplotlib.cbook import flatten
 import pyqtgraph as pg
 
 # pgmpl
+import __init__
 from tracking import tracker
 from translate import plotkw_translator
 from axes import Axes
@@ -187,11 +188,13 @@ class TestPgmplFigure(unittest.TestCase):
         ax2 = fig.gca()
         assert ax2 == ax
         fig.clear()
+        fig.close()
 
     def test_fig_plot(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
+        fig.close()
 
 
 if __name__ == '__main__':

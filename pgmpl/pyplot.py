@@ -127,7 +127,7 @@ def close(fig=None):
         fig.close()
 
 
-class TestPgmplFigure(unittest.TestCase):
+class TestPgmplPyplot(unittest.TestCase):
     """
     Test from the command line with
     python -m unittest pyplot
@@ -142,29 +142,48 @@ class TestPgmplFigure(unittest.TestCase):
         fig = figure()
         if self.verbose:
             print('test_figure: fig = {}'.format(fig))
+        fig.close()
 
     def test_subplots(self):
         fig, axs = subplots(3, 2, sharex='all', sharey='all')
         axs[1, 1].plot(self.x, self.y)
+        if self.verbose:
+            print('test_subplots: axs = {}'.format(axs))
+        fig.close()
 
     def test_axes(self):
         ax = axes()
         ax.plot(self.x, self.y)
+        if self.verbose:
+            print('test_axes: ax = {}'.format(ax))
+        close()
 
     def test_gcf(self):
         fig = gcf()
         assert isinstance(fig, Figure)
+        if self.verbose:
+            print('test_gcf: fig = {}'.format(fig))
+        fig.close()
 
     def test_gca(self):
         ax = gca()
         assert isinstance(ax, Axes)
+        if self.verbose:
+            print('test_gca: ax = {}'.format(ax))
+        close()
 
     def test_close(self):
         fig = gcf()
         close(fig)
+        if self.verbose:
+            print('test_close: fig = {}'.format(fig))
+        close()  # It should do its own gcf
 
     def test_plot(self):
         plot(self.x, self.y)
+        if self.verbose:
+            print('test_plot: done')
+        close()
 
 
 if __name__ == '__main__':
