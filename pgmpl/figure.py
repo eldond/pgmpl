@@ -50,12 +50,13 @@ class Figure(pg.PlotWidget):
             self.margins = None
         self.resizeEvent_original = self.resizeEvent
         self.resizeEvent = self.resize_event
+        if dpi is None:
+            dpi = rcParams['figure.dpi']
         if figsize is None:
             from matplotlib import rcParams
-            if dpi is None:
-                dpi = rcParams['figure.dpi']
-            figsize = np.array(rcParams['figure.figsize'])*dpi
-            printd('dpi = {}, figsize = {}'.format(dpi, figsize))
+            figsize = rcParams['figure.figsize']
+        printd('dpi = {}, figsize = {}'.format(dpi, figsize))
+        figsize = np.array(figsize)*dpi
         self.width = figsize[0]
         self.height = figsize[1]
         self.resize(self.width, self.height)
