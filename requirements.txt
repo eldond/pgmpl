@@ -1,3 +1,4 @@
 pyqtgraph>=0.9.10
 matplotlib>=1.5.3
 numpy>=1.11.0
+unittest

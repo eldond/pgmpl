@@ -34,7 +34,7 @@ install:
     - conda update conda --yes
     - conda create -n test_env python=${PYTHON} --yes
     - source activate test_env
-    - conda install numpy scipy pyopengl pytest flake8 six coverage --yes
+    - conda install --yes --file requirements.txt
     - echo ${QT}
     - echo ${TEST}
     - echo ${PYTHON}
@@ -47,13 +47,6 @@ install:
       fi;
     - if [ "${QT}" == "pyside" ]; then
           conda install pyside --yes;
-      fi;
-    - pip install pytest-xdist # multi-thread py.test
-    - pip install pytest-cov # add coverage stats
-
-    # required for example testing on python 2.6
-    - if [ "${PYTHON}" == "2.6" ]; then
-        pip install importlib;
       fi;
 
     # Debugging helpers
