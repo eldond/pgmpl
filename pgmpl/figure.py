@@ -208,7 +208,15 @@ class TestPgmplFigure(unittest.TestCase):
         fig.close()
 
     def test_set_subplotpars(self):
-        raise NotImplementedError('this test is incomplete, sorry (but we do not want to forget to add it)')
+        from matplotlib.figure import SubplotParams
+        sp = SubplotParams(left=0.5, right=0.99, bottom=0.01, top=0.5, wspace=0.2, hspace=0.2)
+        fig = Figure()
+        ax = fig.add_subplot(2, 2, 1)
+        ax.plot([0, 1, 0, 1, 0, 1])
+        ax2 = fig.add_subplot(2, 2, 4)
+        ax2.plot([1, 0, 1])
+        fig.set_subplotpars(sp)
+        fig.close()
 
 
 if __name__ == '__main__':

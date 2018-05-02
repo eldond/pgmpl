@@ -92,6 +92,13 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
     return fig, axs
 
 
+def subplots_adjust(**kwargs):
+    """Imitates matplotlib.pyplot.subplots_adjust. Also accepts fig keyword."""
+    from matplotlib.figure import SubplotParams
+    fig = kwargs.pop('fig', gcf())
+    fig.set_subplotpars(SubplotParams(**kwargs))
+
+
 def gcf():
     # Improvement may be possible. See:
     # QWidget *QApplication::activeWindow()  http://doc.qt.io/qt-5/qapplication.html#activeWindow
@@ -183,6 +190,13 @@ class TestPgmplPyplot(unittest.TestCase):
         plot(self.x, self.y)
         if self.verbose:
             print('test_plot: done')
+        close()
+
+    def test_subplots_adjust(self):
+        plot(self.x, self.y**2+self.x**2+250)
+        subplots_adjust(left=0.5, right=0.99)
+        if self.verbose:
+            print('test_subplots_adjust: done')
         close()
 
 
