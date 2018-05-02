@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/eldond/pgmpl.svg?branch=master)](https://travis-ci.org/eldond/pgmpl)
 
-https://travis-ci.org/eldond/pgmpl.svg?branch=master
-
 PgMpl
 =====
 A set of wrappers to allow calling of pyqtgraph functions with matplotlib syntax
