@@ -1,26 +1,69 @@
 language: python
-python:
-  - "2.7"
+sudo: false
+# .travis.yml lifted from pyqtgraph
+notifications:
+  email: false
+
+virtualenv:
+    system_site_packages: true
+env:
+    - PYTHON=2.7 QT=pyqt4 TEST=standard
 before_install:
-  # PyQt4 install help from https://stackoverflow.com/a/35700999/6605826
-  - sudo mkdir -p /downloads
-  - sudo chmod a+rw /downloads
-  - curl -L http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz -o /downloads/pyqt4.tar.gz
-  # Builds
-  - sudo mkdir -p /builds
-  - sudo chmod a+rw /builds
+    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
+    - chmod +x miniconda.sh
+    - ./miniconda.sh -b -p /home/travis/mc
+    - export PATH=/home/travis/mc/bin:$PATH
+
+    # not sure what is if block is for
+    - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
+          GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
+          GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
+      else
+          GIT_TARGET_EXTRA="";
+          GIT_SOURCE_EXTRA="";
+      fi;
+
+    # to aid in debugging
+    - echo ${TRAVIS_BRANCH}
+    - echo ${TRAVIS_REPO_SLUG}
+    - echo ${GIT_TARGET_EXTRA}
+    - echo ${GIT_SOURCE_EXTRA}
+
 install:
-  # Qt4
-  - pushd /builds
-  # PyQt4
-  - tar xzf /downloads/pyqt4.tar.gz --keep-newer-files
-  - pushd PyQt-x11-gpl-4.11.3
-  - python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtTest
-  - make
-  - sudo make install
-  - popd
-  # Builds Complete
-  - popd
-  - pip install -r requirements.txt
+    - export GIT_FULL_HASH=`git rev-parse HEAD`
+    - conda update conda --yes
+    - conda create -n test_env python=${PYTHON} --yes
+    - source activate test_env
+    - conda install numpy scipy pyopengl pytest flake8 six coverage --yes
+    - echo ${QT}
+    - echo ${TEST}
+    - echo ${PYTHON}
+
+    - if [ "${QT}" == "pyqt5" ]; then
+          conda install pyqt --yes;
+      fi;
+    - if [ "${QT}" == "pyqt4" ]; then
+          conda install pyqt=4 --yes;
+      fi;
+    - if [ "${QT}" == "pyside" ]; then
+          conda install pyside --yes;
+      fi;
+    - pip install pytest-xdist # multi-thread py.test
+    - pip install pytest-cov # add coverage stats
+
+    # required for example testing on python 2.6
+    - if [ "${PYTHON}" == "2.6" ]; then
+        pip install importlib;
+      fi;
+
+    # Debugging helpers
+    - uname -a
+    - cat /etc/issue
+    - if [ "${PYTHON}" == "2.7" ]; then
+        python --version;
+      else
+        python3 --version;
+      fi;
+
 script:
   - ./test.sh
