@@ -20,6 +20,7 @@ from matplotlib.cbook import flatten
 
 # Plotting imports
 import pyqtgraph as pg
+from matplotlib import rcParams
 
 # pgmpl
 import __init__
@@ -53,7 +54,6 @@ class Figure(pg.PlotWidget):
         if dpi is None:
             dpi = rcParams['figure.dpi']
         if figsize is None:
-            from matplotlib import rcParams
             figsize = rcParams['figure.figsize']
         printd('dpi = {}, figsize = {}'.format(dpi, figsize))
         figsize = np.array(figsize)*dpi
