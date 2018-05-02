@@ -1,62 +1,9 @@
 language: python
-sudo: false
-# .travis.yml lifted from pyqtgraph
-notifications:
-  email: false
-
-virtualenv:
-    system_site_packages: true
-env:
-    - PYTHON=2.7 QT=pyqt4 TEST=standard
-before_install:
-    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
-    - chmod +x miniconda.sh
-    - ./miniconda.sh -b -p /home/travis/mc
-    - export PATH=/home/travis/mc/bin:$PATH
-
-    # not sure what is if block is for
-    - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
-          GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
-          GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
-      else
-          GIT_TARGET_EXTRA="";
-          GIT_SOURCE_EXTRA="";
-      fi;
-
-    # to aid in debugging
-    - echo ${TRAVIS_BRANCH}
-    - echo ${TRAVIS_REPO_SLUG}
-    - echo ${GIT_TARGET_EXTRA}
-    - echo ${GIT_SOURCE_EXTRA}
-
+python:
+  - "2.7"
 install:
-    - export GIT_FULL_HASH=`git rev-parse HEAD`
-    - conda update conda --yes
-    - conda create -n test_env python=${PYTHON} --yes
-    - source activate test_env
-    - conda install --yes --file requirements.txt
-    - echo ${QT}
-    - echo ${TEST}
-    - echo ${PYTHON}
-
-    - if [ "${QT}" == "pyqt5" ]; then
-          conda install pyqt --yes;
-      fi;
-    - if [ "${QT}" == "pyqt4" ]; then
-          conda install pyqt=4 --yes;
-      fi;
-    - if [ "${QT}" == "pyside" ]; then
-          conda install pyside --yes;
-      fi;
-
-    # Debugging helpers
-    - uname -a
-    - cat /etc/issue
-    - if [ "${PYTHON}" == "2.7" ]; then
-        python --version;
-      else
-        python3 --version;
-      fi;
-
+  # Qt4
+  - sudo apt-get install python-qt4
+  - pip install -r requirements.txt
 script:
   - ./test.sh
