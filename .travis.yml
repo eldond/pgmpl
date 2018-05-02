@@ -1,24 +1,39 @@
 language: python
 python:
   - "2.7"
-# .travis.yml pyqt install from https://gist.github.com/KenjiTakahashi/4049085
+# https://stackoverflow.com/a/35700999/6605826
 before_install:
-  - cd ..
-  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
-  - tar -xvf sip-4.14.1.tar.gz
-  - cd sip-4.14.1
-  - python configure.py
-  - make -j 2
-  - sudo make install
-  - cd ..
-  - curl -L -O http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.9.5/PyQt-x11-gpl-4.9.5.tar.gz
-  - tar -xvf PyQt-x11-gpl-4.9.5.tar.gz
-  - cd PyQt-x11-gpl-4.9.5
-  - python configure.py --confirm-license
-  - make -j 2
-  - sudo make install
-  - cd ../gayeogi
+    - sudo mkdir -p /downloads
+    - sudo chmod a+rw /downloads
+    - curl -L http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.5/sip-4.16.5.tar.gz -o /downloads/sip.tar.gz
+    - curl -L http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz -o /downloads/pyqt4.tar.gz
+    # Builds
+    - sudo mkdir -p /builds
+    - sudo chmod a+rw /builds
 install:
-  - pip install -r requirements.txt
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    - sudo apt-get install -y libqt4-dev
+    - sudo apt-get install -y mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
+#    - sudo apt-get install -y python3-sip python3-sip-dev python3-pyqt4 cmake
+    # Qt4
+    - pushd /builds
+    # SIP
+    - tar xzf /downloads/sip.tar.gz --keep-newer-files
+    - pushd sip-4.16.5
+    - python configure.py
+    - make
+    - sudo make install
+    - popd
+    # PyQt4
+    - tar xzf /downloads/pyqt4.tar.gz --keep-newer-files
+    - pushd PyQt-x11-gpl-4.11.3
+    - python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtTest
+    - make
+    - sudo make install
+    - popd
+    # Builds Complete
+    - popd
+    - pip install -r requirements.txt
 script:
   - ./test.sh
