@@ -99,6 +99,9 @@ class Figure(pg.PlotWidget):
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
+        if self.layout is None:
+            # The layout has already been set to None because the figure is closing. Don't do any margin adjustments.
+            return
         fx = self.width
         fy = self.height
         if pars is not None:
@@ -167,6 +170,7 @@ class Figure(pg.PlotWidget):
         return ax
 
     def close(self):
+        self.layout = None
         try:
             super(Figure, self).close()
         except AttributeError:
