@@ -1,9 +1,24 @@
 language: python
 python:
   - "2.7"
+# .travis.yml pyqt install from https://gist.github.com/KenjiTakahashi/4049085
+before_install:
+  - cd ..
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
+  - tar -xvf sip-4.14.1.tar.gz
+  - cd sip-4.14.1
+  - python configure.py
+  - make -j 2
+  - sudo make install
+  - cd ..
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.9.5/PyQt-x11-gpl-4.9.5.tar.gz
+  - tar -xvf PyQt-x11-gpl-4.9.5.tar.gz
+  - cd PyQt-x11-gpl-4.9.5
+  - python configure.py --confirm-license
+  - make -j 2
+  - sudo make install
+  - cd ../gayeogi
 install:
-  # Qt4
-  - sudo apt-get install python-qt4
   - pip install -r requirements.txt
 script:
   - ./test.sh
