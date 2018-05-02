@@ -32,7 +32,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=150)
+    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row')#, gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=150)
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
@@ -42,6 +42,7 @@ def demo_plot():
     axs[0, 0].plot(x, y1, label='y1 label', name='y1 name', lw=2.5)
     axs[0, 0].text(5, 20, 'red text @ (5, 20)', color='r')
     axs[0, 0].text(1, 30, '45 deg', color='b', rotation=45)
+    axs[0, 0].set_title('axs00 title')
     axs[0, 0].legend()
 
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
@@ -75,6 +76,9 @@ def demo_plot():
     axs[2, 1].plot([0, 1], [1, 0], label='re-added after clear')
     axs[2, 1].legend()
 
+    fig.suptitle('super title of the figure')
+    fig.suptitle('suptitle 2: the replacement suptitle (the old one should be gone)')
+
     return fig, axs
 
 
@@ -88,6 +92,7 @@ def short_demo():
     axs.plot(x, np.sin(x)+1)
     axs.plot(x, np.cos(x)-1)
     axs.text(0, 0, 'figure cleared then re-used')
+    fig.suptitle('suptitle')
     return fig, axs
 
 

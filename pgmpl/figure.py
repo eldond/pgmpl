@@ -61,9 +61,11 @@ class Figure(pg.PlotWidget):
         self.height = figsize[1]
         self.resize(self.width, self.height)
         self.axes = None
-        self.layout = pg.GraphicsLayout()
-        self.setCentralItem(self.layout)
-        self.show()
+        self.layout = None
+        self.suptitle_label = None
+        self.suptitle_text = ''
+        self.fig_colspan = 1
+        self.mklay()
         self.clear = self.clearfig  # Just defining the thing as clear doesn't work; needs to be done this way.
 
         if subplotpars is not None:
@@ -75,9 +77,18 @@ class Figure(pg.PlotWidget):
     def clearfig(self):
         """Method for clearing the figure. Gets assigned to self.clear"""
         del self.layout
+        self.suptitle_text = ''
+        self.fig_colspan = 1
+        self.mklay()
+
+    def mklay(self):
+        """Method for creating layout; used in __init__ and after clear"""
         self.layout = pg.GraphicsLayout()
         self.setCentralItem(self.layout)
         self.show()
+        # Reserve a space for a super title
+        #self.suptitle_label = self.layout.addLabel(self.suptitle_text)
+        #self.layout.nextRow()
 
     def resize_event(self, event):
         """
@@ -140,12 +151,29 @@ class Figure(pg.PlotWidget):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = (index-1) % ncols
         ax = Axes(**kwargs)
-        self.layout.addItem(ax, row, col)
+        self.layout.addItem(ax, row+1, col)
         if self.axes is None:
             self.axes = ax
         else:
             self.axes = tolist(self.axes) + [ax]
+        self.fig_colspan = max([ncols, self.fig_colspan])
+        self.refresh_suptitle()
         return ax
+
+    def suptitle(self, t, **kwargs):
+        if len(kwargs.keys()):
+            warnings.warn('suptitle keywords are not supported.')
+        self.suptitle_text = t
+        self.refresh_suptitle()
+
+    def refresh_suptitle(self):
+        if self.suptitle_label is not None:
+            # noinspection PyBroadException
+            try:
+                self.layout.removeItem(self.suptitle_label)
+            except Exception:  # pyqtgraph raises this type, so we can't be narrower
+                pass
+        self.suptitle_label = self.layout.addLabel(self.suptitle_text, 0, 0, 1, self.fig_colspan)
 
     def closeEvent(self, event):
         """
@@ -195,6 +223,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig = Figure()
         ax = fig.gca()
         assert isinstance(ax, Axes)
+        fig.suptitle('suptitle text in unittest')
         ax2 = fig.gca()
         assert ax2 == ax
         fig.clear()

@@ -83,6 +83,10 @@ class Axes(pg.PlotItem):
         """Imitates basic use of matplotlib.axes.Axes.set_ylabel()"""
         self.setLabel('left', text=label)
 
+    def set_title(self, label):
+        """Imitates basic use of matplotlib.axes.Axes.set_title()"""
+        self.setTitle(label)
+
     def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
@@ -520,6 +524,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
         ax.set_ylabel('ylabel')
         ax.set_xlabel('xlabel')
+        ax.set_title('title title title')
         ax.set_xlim([-1, 2])
         ax.set_ylim([-2, 4])
         if self.verbose:

@@ -99,6 +99,10 @@ def subplots_adjust(**kwargs):
     fig.set_subplotpars(SubplotParams(**kwargs))
 
 
+def suptitle(t, **kwargs):
+    gcf().suptitle(t, **kwargs)
+
+
 def gcf():
     # Improvement may be possible. See:
     # QWidget *QApplication::activeWindow()  http://doc.qt.io/qt-5/qapplication.html#activeWindow
@@ -197,6 +201,12 @@ class TestPgmplPyplot(unittest.TestCase):
         subplots_adjust(left=0.5, right=0.99)
         if self.verbose:
             print('test_subplots_adjust: done')
+        close()
+
+    def test_text_functions(self):
+        suptitle('super title text')
+        if self.verbose:
+            print('test_text_functions: done')
         close()
 
 
