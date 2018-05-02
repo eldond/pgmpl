@@ -139,7 +139,7 @@ class Axes(pg.PlotItem):
         epgkw = plotkw_translator(**ekwargs)
         w = [True if i % int(round(errorevery)) == 0 else False for i in range(len(np.atleast_1d(x)))]
 
-        # Draw the line above the errorbars
+        # Draw the line below the errorbars
         if linestyle not in [' '] and not barsabove:
             self.plot(x, y, **kwargs)
 
@@ -218,7 +218,7 @@ class Axes(pg.PlotItem):
                     self.plot(x + xerr, y, **capkw)
                     self.plot(x - xerr, y, **capkw)
 
-        # OR draw the line below the errorbars
+        # OR draw the line above the errorbars
         if linestyle not in [' '] and barsabove:
             self.plot(x, y, **kwargs)
 

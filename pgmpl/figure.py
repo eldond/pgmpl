@@ -94,7 +94,11 @@ class Figure(pg.PlotWidget):
         return
 
     def set_subplotpars(self, pars):
-        """Imitation of matplotlib.figure.Fiture.set_subplotpars"""
+        """
+        Sets margins and spacing between Axes. Not a direct matplotlib imitation.
+        :param pars: SubplotParams instance
+            The subplotpars keyword to __init__ goes straight to here.
+        """
         fx = self.width
         fy = self.height
         if pars is not None:
@@ -120,6 +124,7 @@ class Figure(pg.PlotWidget):
                     (1-self.margins['right'])*fx,
                     self.margins['bottom']*fy,
                 )
+        return
 
     def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
