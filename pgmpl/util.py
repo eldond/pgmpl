@@ -29,6 +29,16 @@ def tolist(x):
     return np.ndarray.tolist(np.atleast_1d(x))
 
 
+def is_iterable(x):  # https://stackoverflow.com/a/1952481/6605826
+    """Test if x is iterable"""
+    try:
+        iter(x)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
 class TestPgmplUtil(unittest.TestCase):
     """
     Test from the command line with
@@ -59,6 +69,14 @@ class TestPgmplUtil(unittest.TestCase):
         for thing in [ar, a2, bo, li, no, sc, st, tu]:
             assert isinstance(tolist(thing), list)
             assert isinstance(tolist(thing) + [1, 2, 3], list)
+
+    def test_is_iterable(self):
+        assert is_iterable([1, 2, 3])
+        assert is_iterable(np.array([1, 2, 3]))
+        assert is_iterable({'ralph': 'blah', 'bob': 'spork'})
+        assert is_iterable('blah')
+        assert not is_iterable(1)
+        assert not is_iterable(0.1)
 
 
 if __name__ == '__main__':
