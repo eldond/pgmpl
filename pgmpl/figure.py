@@ -86,9 +86,6 @@ class Figure(pg.PlotWidget):
         self.layout = pg.GraphicsLayout()
         self.setCentralItem(self.layout)
         self.show()
-        # Reserve a space for a super title
-        #self.suptitle_label = self.layout.addLabel(self.suptitle_text)
-        #self.layout.nextRow()
 
     def resize_event(self, event):
         """

@@ -96,6 +96,18 @@ def short_demo():
     return fig, axs
 
 
+def log_demo():
+    x = np.linspace(0, 10, 101)
+    y = np.exp(x)
+    fig, ax = plt.subplots(1)
+    ax.plot(x, y)
+    ax.set_yscale('log')
+    ax.set_title('log demo')
+    ax.set_ylabel('should be log scaled')
+    ax.set_xlabel('should be linearly scaled')
+    return fig, ax
+
+
 class TestPgmplExamples(unittest.TestCase):
     """
     Test from the command line with
@@ -107,13 +119,15 @@ class TestPgmplExamples(unittest.TestCase):
     def test_demo_plot(self):
         short_demo()
         demo_plot()
+        log_demo()
 
 
 if __name__ == '__main__':
     print('pgmpl examples...')
     pgmpl.set_debug(1)
-    a = short_demo()
+    # a = short_demo()
     b = demo_plot()
+    # c = log_demo()
     # a[0].close()  # This is not needed, but it makes testing faster.
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.

@@ -335,6 +335,36 @@ class Axes(pg.PlotItem):
             self.setYRange(new_ylims[0], new_ylims[1])
         return new_ylims
 
+    def set_xscale(self, value, **kwargs):
+        if value == 'linear':
+            self.setLogMode(x=False)
+        elif value == 'log':
+            self.setLogMode(x=True)
+        elif value == 'symlog':
+            warnings.warn('symlog scaling is not supported')
+        elif value == 'logit':
+            warnings.warn('logistic transform scaling is not supported')
+        else:
+            warnings.warn('Unrecognized scale value received by set_xscale: {}. '
+                          'Please try again with "linear" or "log".'.format(value))
+        if len(kwargs.keys()):
+            warnings.warn('Keywords to set_xscale were ignored.')
+
+    def set_yscale(self, value, **kwargs):
+        if value == 'linear':
+            self.setLogMode(y=False)
+        elif value == 'log':
+            self.setLogMode(y=True)
+        elif value == 'symlog':
+            warnings.warn('symlog scaling is not supported')
+        elif value == 'logit':
+            warnings.warn('logistic transform scaling is not supported')
+        else:
+            warnings.warn('Unrecognized scale value received by set_yscale: {}. '
+                          'Please try again with "linear" or "log".'.format(value))
+        if len(kwargs.keys()):
+            warnings.warn('Keywords to set_yscale were ignored.')
+
 
 class Legend:
     """
