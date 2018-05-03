@@ -18,7 +18,9 @@ import numpy as np
 # Plotting imports
 from PyQt4 import QtCore
 import pyqtgraph as pg
+import matplotlib.cm
 from matplotlib import rcParams
+from matplotlib.colors import Normalize
 try:
     from matplotlib.colors import to_rgba
 except ImportError:  # Older Matplotlib versions were organized differently
@@ -26,7 +28,7 @@ except ImportError:  # Older Matplotlib versions were organized differently
     to_rgba = colorConverter.to_rgba
 
 # pgmpl imports
-from util import printd
+from util import set_debug, printd, tolist
 
 
 def dealias(**kws):
@@ -118,6 +120,28 @@ def color_translator(**kw):
         else:
             new_color = None
     return new_color
+
+
+def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256):
+    """
+    Translates colors for a matplotlib colormap and a dataset
+    :param x: numeric scalar or iterable
+        Data to be mapped. Very boring if scalar.
+    :param cmap: string
+    :param norm: matplotlib normalization class. Defaults to new instance of mpl.colors.Normalize if None
+    :param vmin: number: lower limit passed to Normalize if norm is None
+    :param vmax: number: lower limit passed to Normalize if norm is None
+    :param clip: bool
+    :param ncol: int: passed to Colormap to set number of colors
+    :return: List of pyqtgraph-compatible color specifications with length matching x
+    """
+    printd('color_map_translator...')
+    if norm is None:
+        printd('  norm was None, normalizing...')
+        norm = Normalize(vmin=vmin, vmax=vmax, clip=clip)
+    comap = matplotlib.cm.get_cmap(cmap, lut=ncol)
+    colors = comap(norm(np.atleast_1d(x)))
+    return [color_translator(color=color) for color in tolist(colors)]
 
 
 def style_translator(**kw):
@@ -296,7 +320,7 @@ class TestPgmplTranslate(unittest.TestCase):
     python -m unittest translate
     """
 
-    verbose = False
+    verbose = True
 
     plot_kw_tests = [
         {'color': 'r'},
@@ -312,6 +336,7 @@ class TestPgmplTranslate(unittest.TestCase):
         print('-' * 79)
         print('\nTestPgmpl has {} test sets of plot keywords ready to go!\n'.format(nt))
         print('-' * 79)
+        set_debug(True)
 
     def test_defaults_from_rcparams(self):
         unique_linewidth = 5.1234958293
@@ -368,6 +393,21 @@ class TestPgmplTranslate(unittest.TestCase):
         correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
         test_answer = dealias(**test_dict)
         assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
+        if self.verbose:
+            print('test_dealias: test_answer = {}'.format(test_answer))
+
+    def test_color_map_translator(self):
+        x = [0, 1, 2, 3, 5, 9, 10, 22]
+        m1 = color_map_translator(1.579, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
+        m2 = color_map_translator([1, 2, 3], cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
+        m3 = color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
+        m4 = color_map_translator(x, cmap='plasma', norm=None, vmin=None, vmax=None, clip=False, ncol=256)
+        assert len(m1) == 1
+        assert len(m2) == 3
+        assert len(m3) == len(x)
+        assert any((np.atleast_1d(m3) != np.atleast_1d(m4)).flatten())
+        if self.verbose:
+            print('test_color_map_translator: m4 = {}'.format(m4))
 
 
 if __name__ == '__main__':
