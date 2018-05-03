@@ -24,12 +24,6 @@ __all__ = ['figure', 'axes', 'pyplot', 'translate', 'text', 'util']
 if os.environ.get('PGMPL_DEBUG', None) is None:
     os.environ['PGMPL_DEBUG'] = "0"
 
-
-def set_debug(enable=True):
-    os.environ['PGMPL_DEBUG'] = str(int(enable))
-    printd('pgmpl debugging set to {}'.format(str(int(enable))))
-
-
 # Setup style, etc.
 pg.setConfigOption('background', color_translator(**{'color': rcParams['axes.facecolor']}))
 pg.setConfigOption('foreground', color_translator(**{'color': rcParams['axes.edgecolor']}))

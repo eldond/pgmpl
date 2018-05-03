@@ -8,6 +8,11 @@ import numpy as np
 import unittest
 
 
+def set_debug(enable=True):
+    os.environ['PGMPL_DEBUG'] = str(int(enable))
+    printd('pgmpl debugging set to {}'.format(str(int(enable))))
+
+
 def printd(*args, **kw):
     """
     Prints only if debug flag is turned on (greater than level)

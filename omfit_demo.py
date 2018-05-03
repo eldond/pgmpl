@@ -12,11 +12,12 @@ Load this thing into the OMFIT by executing the following in the OMFIT command b
 from __future__ import print_function, division
 import pgmpl as mpl
 import pgmpl.pyplot as plt
+import pgmpl.util
 
 import numpy as np
 
 print(mpl.__version__)
-mpl.set_debug(True)
+mpl.util.set_debug(True)
 
 x = np.linspace(0, 10, 101)
 y = np.sin(x*np.pi)

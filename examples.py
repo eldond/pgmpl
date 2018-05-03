@@ -20,6 +20,7 @@ import pyqtgraph as pg
 
 # pgmpl
 import pgmpl
+import pgmpl.util
 import pgmpl.pyplot as plt
 from pgmpl.tracking import tracker
 
@@ -63,6 +64,7 @@ def demo_plot():
     axs[1, 1].legend([beb, y2line], ['manual label for blue errorbar', 'manual label for y2line'])
 
     axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
+    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 5], c=['r', 'b', 'g', 'k', 'm', 'y'])
     leg = axs[2, 0].legend()
     leg.draggable()
 
@@ -124,7 +126,7 @@ class TestPgmplExamples(unittest.TestCase):
 
 if __name__ == '__main__':
     print('pgmpl examples...')
-    pgmpl.set_debug(1)
+    pgmpl.util.set_debug(1)
     # a = short_demo()
     b = demo_plot()
     # c = log_demo()
