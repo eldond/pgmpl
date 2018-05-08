@@ -107,9 +107,14 @@ def color_translator(**kw):
         An RGBA color description (each from 0 to 255) for use with pyqtgraph
     """
     if 'color' in kw and kw['color'] is not None:
-        printd('    color_translator input: kw["color"] = {}, to_rgba(kw.get("color", None)) = {}'.format(
-            kw.get('color', None), to_rgba(kw.get('color', None))), level=3)
-        if 'alpha' in kw and kw['alpha'] is not None:
+        try:
+            printd('    color_translator input: kw["color"] = {}, to_rgba(kw.get("color", None)) = {}'.format(
+                kw.get('color', None), to_rgba(kw.get('color', None))), level=3)
+        except ValueError:
+            printd('    color_translator input: kw["color"] = {}'.format(kw.get('color', None)), level=3)
+        if kw['color'] in ['', ' ']:
+            new_color = (0, 0, 0, 0)  # Empty strings and spaces are code for invisible (alpha = 0)
+        elif 'alpha' in kw and kw['alpha'] is not None:
             new_color = np.array(to_rgba(kw['color'])) * 255
             new_color[3] = kw['alpha'] * 255
         else:
@@ -122,9 +127,9 @@ def color_translator(**kw):
     return new_color
 
 
-def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256):
+def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256, alpha=None):
     """
-    Translates colors for a matplotlib colormap and a dataset
+    Translates colors for a matplotlib colormap and a dataset, such as would be used for scatter, imshow, contour, etc.
     :param x: numeric scalar or iterable
         Data to be mapped. Very boring if scalar.
     :param cmap: string
@@ -133,6 +138,7 @@ def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=Fal
     :param vmax: number: lower limit passed to Normalize if norm is None
     :param clip: bool
     :param ncol: int: passed to Colormap to set number of colors
+    :param alpha: float: opacity from 0 to 1 or None
     :return: List of pyqtgraph-compatible color specifications with length matching x
     """
     printd('color_map_translator...')
@@ -141,7 +147,7 @@ def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=Fal
         norm = Normalize(vmin=vmin, vmax=vmax, clip=clip)
     comap = matplotlib.cm.get_cmap(cmap, lut=ncol)
     colors = comap(norm(np.atleast_1d(x)))
-    return [color_translator(color=color) for color in tolist(colors)]
+    return [color_translator(color=color, alpha=alpha) for color in tolist(colors)]
 
 
 def style_translator(**kw):
@@ -301,7 +307,7 @@ def plotkw_translator(**plotkw):
         if len(brushkw.keys()):
             pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
     else:
-        pgkw.pop('symbolSize', None)  # This isn't used, but it can cause problems, so get rid of it.
+        pgkw.pop('symbolSize', None)  # This isn't used when symbol is undefined, but it can cause problems, so remove.
 
     # Pass through other keywords
     late_pops = ['color', 'alpha', 'linewidth', 'marker', 'linestyle']
@@ -328,6 +334,7 @@ class TestPgmplTranslate(unittest.TestCase):
         {'color': 'b', 'linestyle': '--', 'marker': 'x'},
         {'color': 'g', 'linestyle': ':', 'marker': 'o'},
         {'color': 'm', 'linestyle': ' ', 'marker': 'd', 'mew': 2},
+        {'color': ' ', 'markeredgewidth': 1.5},
     ]
 
     nt = len(plot_kw_tests)
@@ -398,7 +405,7 @@ class TestPgmplTranslate(unittest.TestCase):
 
     def test_color_map_translator(self):
         x = [0, 1, 2, 3, 5, 9, 10, 22]
-        m1 = color_map_translator(1.579, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
+        m1 = color_map_translator(1.579, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256, alpha=0.5)
         m2 = color_map_translator([1, 2, 3], cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
         m3 = color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256)
         m4 = color_map_translator(x, cmap='plasma', norm=None, vmin=None, vmax=None, clip=False, ncol=256)
