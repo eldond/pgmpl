@@ -39,6 +39,19 @@ def is_iterable(x):  # https://stackoverflow.com/a/1952481/6605826
         return True
 
 
+def is_numeric(value):
+    """
+    Convenience function check if value is numeric, taken from OMFIT
+    :param value: value to check
+    :return: True/False
+    """
+    try:
+        0+value
+        return True
+    except TypeError:
+        return False
+
+
 class TestPgmplUtil(unittest.TestCase):
     """
     Test from the command line with
