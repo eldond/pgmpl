@@ -33,7 +33,7 @@ def demo_plot():
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
-    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row')#, gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=150)
+    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=150)
     axs[-1, 0].set_xlabel('x')
     axs[-1, 1].set_xlabel('X')
     axs[0, 0].set_ylabel('y')
@@ -64,7 +64,14 @@ def demo_plot():
     axs[1, 1].legend([beb, y2line], ['manual label for blue errorbar', 'manual label for y2line'])
 
     axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
-    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 5], c=['r', 'b', 'g', 'k', 'm', 'y'])
+    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 05], c=['r', 'b', 'g', 'k', 'm', 'y'], linewidths=1)
+    axs[2, 0].scatter(x, x*0+60, c=x, marker='v', s=4, edgecolors=' ')
+    axs[2, 0].scatter(x, x*0+50, c=x, marker='s', s=5, cmap='plasma', linewidths=0)
+    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [50, 90, 80, 00, 50, 90], c=[90, 0, 50, 20, 75, 66],
+                      marker='^', linewidths=2, edgecolors='r')
+    axs[2, 0].scatter(x, x*0-10, c=x, cmap='jet', marker=None,
+                      verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
+
     leg = axs[2, 0].legend()
     leg.draggable()
 
@@ -138,4 +145,3 @@ if __name__ == '__main__':
         pgmpl.app.exec_()
     else:
         print('Done with pgmpl examples.')
-

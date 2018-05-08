@@ -25,8 +25,8 @@ from cycler import cycler
 from collections import defaultdict
 
 # pgmpl
-from translate import plotkw_translator, color_translator, setup_pen_kw
-from util import printd, tolist
+from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, symbol_translator
+from util import printd, tolist, is_iterable, is_numeric
 from text import Text
 
 
@@ -74,6 +74,88 @@ class Axes(pg.PlotItem):
             if self.prop_cycle_index > len(self.prop_cycle):
                 self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
+
+    def scatter(
+            self, x, y, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
+            linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
+    ):
+        """
+        Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
+        :param x: array like with length n
+        :param y: array like with length n
+        :param s: scalar or array like with length n, optional
+        :param c: color, sequence, or sequence of color, optional
+        :param marker: string, optional
+        :param cmap: string, optional
+        :param norm: Normalize class instance, optional
+        :param vmin: scalar, optional
+        :param vmax: scalar, optional
+        :param alpha: scalar, optional
+        :param linewidths: scalar or array like with length n, optional
+        :param verts: sequence of (x, y), optional
+        :param edgecolors: color or sequence of color
+        :param data: dict, optional
+        :param kwargs:
+        :return: plotItem instance
+        """
+        if data is not None:
+            x = data.get('x')
+            y = data.get('y')
+            s = data.get('s', None)
+            c = data.get('c', None)
+            edgecolors = data.get('edgecolors', None)
+            linewidths = data.get('linewidths', None)
+            # The following keywords are apparently valid within `data`,
+            # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
+        n = len(x)
+
+        # Translate face colors
+        if c is None:
+            # All same default color
+            brush_colors = [color_translator(color='b')] * n
+        elif is_numeric(tolist(c)[0]):
+            brush_colors = color_map_translator(
+                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=alpha,
+            )
+        else:
+            # Assume that c is a list/array of colors
+            brush_colors = [color_translator(color=cc) for cc in tolist(c)]
+
+        # Translate edge colors
+        if edgecolors is None:
+            brush_edges = [color_translator(color='k')] * n
+        else:
+            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+
+        # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
+        if (len(tolist(brush_colors)) == 1) and (n > 1):
+            brush_colors = tolist(brush_colors) * n
+        if (len(tolist(brush_edges)) == 1) and (n > 1):
+            brush_edges = tolist(brush_edges) * n
+        if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
+            linewidths = tolist(linewidths) * n
+
+        # Catch & translate other keywords
+        kwargs['markersize'] = s
+        if marker is not None:
+            kwargs['marker'] = marker
+        plotkw = plotkw_translator(**kwargs)
+
+        # Fill in keywords we already prepared
+        sympen_kw = [{'color': cc} for cc in brush_edges]
+        if linewidths is not None:
+            for i in range(n):
+                sympen_kw[i]['width'] = linewidths[i]
+        plotkw['pen'] = None
+        plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
+        plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
+        if marker is None:
+            verts_x = np.array([vert[0] for vert in verts])
+            verts_y = np.array([vert[1] for vert in verts])
+            plotkw['symbol'] = pg.arrayToQPath(verts_x, verts_y, connect='all')
+
+        return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def set_xlabel(self, label):
         """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
@@ -521,6 +603,7 @@ class TestPgmplAxes(unittest.TestCase):
 
     x = np.linspace(0, 1.8, 30)
     y = x**2 + 2.5
+    z = x**3 - x**2 * 1.444
 
     def test_axes_init(self):
         ax = Axes()
@@ -532,6 +615,15 @@ class TestPgmplAxes(unittest.TestCase):
         ax.plot(self.x, self.y, color='r')
         if self.verbose:
             print('test_axes_plot: ax = {}'.format(ax))
+
+    def test_axes_scatter(self):
+        ax = Axes()
+        ax.scatter(self.x, self.y, c=self.z)
+        ax.scatter(self.x, self.y, c='b')
+        ax.scatter(self.x, self.y, c=self.z, cmap='plasma', marker='s', linewidths=1, edgecolors='r')
+        # noinspection PyTypeChecker
+        ax.scatter(self.x, self.x*0, c=self.x, cmap='jet', marker=None,
+                   verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
 
     def test_axes_err(self):
         ax = Axes()
@@ -551,12 +643,14 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_xyaxes(self):
         ax = Axes()
-        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [1, 2])
         ax.set_ylabel('ylabel')
         ax.set_xlabel('xlabel')
         ax.set_title('title title title')
         ax.set_xlim([-1, 2])
         ax.set_ylim([-2, 4])
+        ax.set_xscale('linear')
+        ax.set_yscale('log')
         if self.verbose:
             print('test_axes_xyaxes: ax = {}'.format(ax))
 
