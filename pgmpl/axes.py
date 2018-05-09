@@ -157,56 +157,10 @@ class Axes(pg.PlotItem):
 
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
-    def imshow(
-            self, x, cmap=None, norm=None, aspect=None, interpolation=None, alpha=None, vmin=None, vmax=None,
-            origin=None, extent=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, resample=None, url=None,
-            data=None, **kwargs
-    ):
-        if data is not None:
-            x = data['x']
-            if len(data.keys()) > 1:
-                warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
-
-        xs = copy.copy(x)
-
-        if shape is not None:
-            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
-                          'so I had nothing to emulate.')
-        if imlim is not None:
-            warnings.warn('Axes.imshow ignored keyword: imlim.')
-        if interpolation is not None:
-            warnings.warn('Axes.imshow ignored keyword: interpolation.')
-        if filternorm != 1 or filterrad != 4.0:
-            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
-        if resample is not None:
-            warnings.warn('Axes.imshow ignored keyword: resample.')
-        if url is not None:
-            warnings.warn('Axes.imshow ignored keyword: url.')
-
+    def imshow(self, x, aspect=None, **kwargs):
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
-
-        if origin in ['upper', None]:
-            xs = xs[::-1]
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
-        else:
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
-
-        if len(np.shape(xs)) == 3:
-            xs = np.transpose(xs, (2, 0, 1))
-        else:
-            xs = np.array(color_map_translator(
-                xs.flatten(), cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
-            )).T.reshape([4] + tolist(xs.shape))
-
-        img = pg.ImageItem(np.transpose(xs))
-        if extent is not None:
-            img.resetTransform()
-            img.translate(extent[0], extent[2])
-            img.scale((extent[1] - extent[0]) / img.width(), (extent[3] - extent[2]) / img.height())
+        img = AxesImage(x, **kwargs)
         self.addItem(img)
         return img
 
@@ -514,6 +468,60 @@ class Axes(pg.PlotItem):
                           'Please try again with "linear" or "log".'.format(value))
         if len(kwargs.keys()):
             warnings.warn('Keywords to set_yscale were ignored.')
+
+
+class AxesImage(pg.ImageItem):
+    def __init__(
+            self, x, cmap=None, norm=None, interpolation=None, alpha=None, vmin=None, vmax=None,
+            origin=None, extent=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, resample=None, url=None,
+            data=None, **kwargs
+    ):
+        if data is not None:
+            x = data['x']
+            if len(data.keys()) > 1:
+                warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
+
+        xs = copy.copy(x)
+
+        if shape is not None:
+            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
+                          'so I had nothing to emulate.')
+        if imlim is not None:
+            warnings.warn('Axes.imshow ignored keyword: imlim.')
+        if interpolation is not None:
+            warnings.warn('Axes.imshow ignored keyword: interpolation.')
+        if filternorm != 1 or filterrad != 4.0:
+            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
+        if resample is not None:
+            warnings.warn('Axes.imshow ignored keyword: resample.')
+        if url is not None:
+            warnings.warn('Axes.imshow ignored keyword: url.')
+
+        if origin in ['upper', None]:
+            xs = xs[::-1]
+            if extent is None:
+                extent = (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+        else:
+            if extent is None:
+                extent = (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
+
+        if len(np.shape(xs)) == 3:
+            xs = np.transpose(xs, (2, 0, 1))
+        else:
+            xs = np.array(color_map_translator(
+                xs.flatten(), cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=alpha,
+            )).T.reshape([4] + tolist(xs.shape))
+
+        super(AxesImage, self).__init__(np.transpose(xs))
+        if extent is not None:
+            self.resetTransform()
+            self.translate(extent[0], extent[2])
+            self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
+
+        self.cmap = cmap
+        self.norm = norm
+        self.alpha = alpha
 
 
 class Legend:
