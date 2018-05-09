@@ -117,6 +117,34 @@ def log_demo():
     return fig, ax
 
 
+def twod_demo():
+    nx = 40
+    ny = 20
+    a = np.zeros((ny, nx, 3))
+    a[0, 0, :] = 0.9
+    a[4, 4, :] = 1
+    a[3, 3, :] = 0.5
+    a[10, 1, :] = 0.7
+    a[2, 11, 0] = 0.65
+    a[15, 5, :] = 0.1
+    a[5, 15, :] = 0.2
+    a[18:20, 0:2, 0] = 0.55
+    a[18, 1, 0:2] = 0.9
+    for i in range(3):
+        a[:, int(np.floor(nx*5.0/6))+i, i] = np.linspace(0, 1, ny)
+    fig, axs = plt.subplots(2, 2)
+    axs[0, 0].imshow(a[:, :, 0], origin='lower')
+    axs[0, 1].imshow(a[:, :, 0], origin='upper')
+    axs[1, 0].imshow(a[:, :, 0], extent=[10, 12, 20, 22], origin='lower')
+    axs[1, 1].imshow(a, extent=[10, 12, 20, 22], origin='lower')
+    axs[0, 0].set_aspect('equal', adjustable='box')
+    axs[0, 1].set_aspect('auto', adjustable='box')
+    axs[1, 0].set_aspect('equal', adjustable='box')
+    axs[1, 1].set_aspect('auto', adjustable='box')
+
+    return fig, axs
+
+
 class TestPgmplExamples(unittest.TestCase):
     """
     Test from the command line with
@@ -137,6 +165,7 @@ if __name__ == '__main__':
     # a = short_demo()
     b = demo_plot()
     # c = log_demo()
+    d = twod_demo()
     # a[0].close()  # This is not needed, but it makes testing faster.
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
