@@ -133,7 +133,7 @@ def twod_demo():
     for i in range(3):
         a[:, int(np.floor(nx*5.0/6))+i, i] = np.linspace(0, 1, ny)
     fig, axs = plt.subplots(2, 2)
-    axs[0, 0].imshow(a[:, :, 0], origin='lower')
+    img = axs[0, 0].imshow(a[:, :, 0], origin='lower')
     axs[0, 1].imshow(a[:, :, 0], origin='upper')
     axs[1, 0].imshow(a[:, :, 0], extent=[10, 12, 20, 22], origin='lower')
     axs[1, 1].imshow(a, extent=[10, 12, 20, 22], origin='lower')
@@ -141,6 +141,7 @@ def twod_demo():
     axs[0, 1].set_aspect('auto', adjustable='box')
     axs[1, 0].set_aspect('equal', adjustable='box')
     axs[1, 1].set_aspect('auto', adjustable='box')
+    fig.colorbar(img, ax=axs[0, 0], label='colorbar label~~~')
 
     return fig, axs
 

@@ -28,6 +28,7 @@ from tracking import tracker
 from translate import plotkw_translator
 from axes import Axes
 from util import printd, tolist
+from colorbar import Colorbar
 
 
 class Figure(pg.PlotWidget):
@@ -157,6 +158,30 @@ class Figure(pg.PlotWidget):
         self.refresh_suptitle()
         return ax
 
+    def colorbar(self, mappable, cax=None, ax=None, **kwargs):
+        if ax is None:
+            if self.axes is None:
+                ax = add_subplot(1, 1, 1)
+            else:
+                ax = np.atleast_1d(self.axes).flatten()[-1]
+        if cax is None:
+            row = int(np.floor((ax.index - 1) / ax.ncols))
+            col = (ax.index - 1) % ax.ncols
+
+            cax = Axes(nrows=ax.nrows, ncols=ax.ncols, index=ax.index)
+            sub_layout = pg.GraphicsLayout()
+            sub_layout.addItem(ax, row=0, col=0)
+            sub_layout.addItem(cax, row=0, col=1)
+            sub_layout.layout.setColumnFixedWidth(1, 50)  # https://stackoverflow.com/a/36897295/6605826
+
+            # noinspection PyBroadException
+            try:
+                self.layout.removeItem(ax)
+            except Exception:
+                pass
+            self.layout.addItem(sub_layout, row + 1, col)
+        return Colorbar(cax, mappable, **kwargs)
+
     def suptitle(self, t, **kwargs):
         if len(kwargs.keys()):
             warnings.warn('suptitle keywords are not supported.')
@@ -242,6 +267,18 @@ class TestPgmplFigure(unittest.TestCase):
         ax2 = fig.add_subplot(2, 2, 4)
         ax2.plot([1, 0, 1])
         fig.set_subplotpars(sp)
+        fig.close()
+
+    def test_fig_colorbar(self):
+        fig = Figure()
+        ax = fig.add_subplot(1, 1, 1)
+        x = np.linspace(0, 1, 10)
+        y = np.linspace(0, 1, 5)
+        a = x[:, np.newaxis] * y[np.newaxis, :]
+        img = ax.imshow(a)
+        fig.colorbar(img)
+        if self.verbose:
+            print('test_fig_colorbar: ax = ax')
         fig.close()
 
 
