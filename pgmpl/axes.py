@@ -169,6 +169,21 @@ class Axes(pg.PlotItem):
         """Imitates basic use of matplotlib.axes.Axes.set_title()"""
         self.setTitle(label)
 
+    def set_aspect(self, aspect, adjustable=None, anchor=None, share=False):
+        vb = self.getViewBox()
+        if aspect == 'equal':
+            vb.setAspectLocked(lock=True, ratio=1)
+        elif aspect == 'auto':
+            vb.setAspectLocked(lock=False)
+        else:
+            vb.setAspectLocked(lock=True, ratio=aspect)
+        if adjustable not in ['box', None]:
+            warnings.warn('Axes.set_aspect ignored keyword: adjustable')
+        if anchor is not None:
+            warnings.warn('Axes.set_aspect ignored keyword: anchor')
+        if share:
+            warnings.warn('Axes.set_aspect ignored keyword: share')
+
     def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
@@ -653,6 +668,13 @@ class TestPgmplAxes(unittest.TestCase):
         ax.set_yscale('log')
         if self.verbose:
             print('test_axes_xyaxes: ax = {}'.format(ax))
+
+    def test_axes_aspect(self):
+        ax = Axes()
+        ax.plot([0, 10, 0, 1])
+        ax.set_aspect('equal')
+        if self.verbose:
+            print('test_axes_aspect: ax = {}'.format(ax))
 
     def test_axes_clear(self):
         ax = Axes()

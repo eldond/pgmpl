@@ -326,7 +326,7 @@ class TestPgmplTranslate(unittest.TestCase):
     python -m unittest translate
     """
 
-    verbose = True
+    verbose = False
 
     plot_kw_tests = [
         {'color': 'r'},
