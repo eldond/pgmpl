@@ -37,6 +37,9 @@ class Axes(pg.PlotItem):
     def __init__(self, **kwargs):
         sharex = kwargs.pop('sharex', None)
         sharey = kwargs.pop('sharey', None)
+        self.nrows = kwargs.pop('nrows', 1)
+        self.ncols = kwargs.pop('ncols', 1)
+        self.index = kwargs.pop('index', 1)
         super(Axes, self).__init__(**kwargs)
         self.legend = Legend(ax=self)
         self.prop_cycle = rcParams['axes.prop_cycle']
@@ -522,6 +525,8 @@ class AxesImage(pg.ImageItem):
         self.cmap = cmap
         self.norm = norm
         self.alpha = alpha
+        self.vmin = x.min() if vmin is None else vmin
+        self.vmax = x.max() if vmax is None else vmax
 
 
 class Legend:

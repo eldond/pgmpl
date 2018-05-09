@@ -147,7 +147,7 @@ class Figure(pg.PlotWidget):
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = (index-1) % ncols
-        ax = Axes(**kwargs)
+        ax = Axes(nrows=nrows, ncols=ncols, index=index, **kwargs)
         self.layout.addItem(ax, row+1, col)
         if self.axes is None:
             self.axes = ax
