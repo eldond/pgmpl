@@ -10,7 +10,6 @@ more information.
 
 # Basic imports
 from __future__ import print_function, division
-import sys
 import warnings
 import copy
 import unittest
@@ -21,12 +20,13 @@ import numpy as np
 # Plotting imports
 import pyqtgraph as pg
 from matplotlib import rcParams
-from cycler import cycler
 from collections import defaultdict
 
 # pgmpl
-from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, symbol_translator
-from util import printd, tolist, is_iterable, is_numeric
+# noinspection PyUnresolvedReferences
+import __init__  # __init__ does setup stuff like making sure a QApp exists
+from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator
+from util import printd, tolist, is_numeric
 from text import Text
 
 

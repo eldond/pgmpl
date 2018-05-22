@@ -10,7 +10,6 @@ more information.
 
 # Basic imports
 from __future__ import print_function, division
-import sys
 import warnings
 import unittest
 
@@ -23,9 +22,9 @@ import pyqtgraph as pg
 from matplotlib import rcParams
 
 # pgmpl
-import __init__
+# noinspection PyUnresolvedReferences
+import __init__  # __init__ does setup stuff like making sure a QApp exists
 from tracking import tracker
-from translate import plotkw_translator
 from axes import Axes
 from util import printd, tolist
 from colorbar import Colorbar
@@ -239,6 +238,8 @@ class TestPgmplFigure(unittest.TestCase):
     def test_figure(self):
         fig1 = Figure()
         assert isinstance(fig1, Figure)
+        if self.verbose:
+            print('test_figure: fig1 = {}'.format(fig1))
         fig1.close()
 
     def test_fig_methods(self):
@@ -251,11 +252,15 @@ class TestPgmplFigure(unittest.TestCase):
         fig.clear()
         fig.close()
         assert fig.clearfig == fig.clear  # Make sure this assignment didn't break.
+        if self.verbose:
+            print('test_fig_methods: fig = {}, ax = {}'.format(fig, ax))
 
     def test_fig_plot(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
+        if self.verbose:
+            print('test_fig_plot: fig = {}, ax = {}'.format(fig, ax))
         fig.close()
 
     def test_set_subplotpars(self):
@@ -267,6 +272,8 @@ class TestPgmplFigure(unittest.TestCase):
         ax2 = fig.add_subplot(2, 2, 4)
         ax2.plot([1, 0, 1])
         fig.set_subplotpars(sp)
+        if self.verbose:
+            print('test_set_subplotpars: fig = {}, ax = {}, ax2 = {}'.format(fig, ax, ax2))
         fig.close()
 
     def test_fig_colorbar(self):

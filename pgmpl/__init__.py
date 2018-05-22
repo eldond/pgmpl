@@ -28,7 +28,7 @@ if os.environ.get('PGMPL_DEBUG', None) is None:
 pg.setConfigOption('background', color_translator(**{'color': rcParams['axes.facecolor']}))
 pg.setConfigOption('foreground', color_translator(**{'color': rcParams['axes.edgecolor']}))
 
-# Make a QApp so that windows can be opened
+# Check for an existing QApp and make one if none found so that windows can be opened
 app = QtGui.QApplication.instance()
 if app is None:
     printd('No pre-existing QApplication found. Creating one...')

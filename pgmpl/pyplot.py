@@ -7,8 +7,6 @@ Imitates matplotlib.pyplot but using PyQtGraph to make the plots
 
 # Basic imports
 from __future__ import print_function, division
-import sys
-import warnings
 import unittest
 
 # Calculation imports
