@@ -160,7 +160,7 @@ class Figure(pg.PlotWidget):
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
         if ax is None:
             if self.axes is None:
-                ax = add_subplot(1, 1, 1)
+                ax = self.add_subplot(1, 1, 1)
             else:
                 ax = np.atleast_1d(self.axes).flatten()[-1]
         if cax is None:
