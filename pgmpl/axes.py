@@ -248,7 +248,7 @@ class Axes(pg.PlotItem):
         if elinewidth is not None:
             ekwargs['linewidth'] = elinewidth
         epgkw = plotkw_translator(**ekwargs)
-        w = [True if i % int(round(errorevery)) == 0 else False for i in range(len(np.atleast_1d(x)))]
+        w = np.array([True if i % int(round(errorevery)) == 0 else False for i in range(len(np.atleast_1d(x)))])
 
         # Draw the line below the errorbars
         if linestyle not in [' '] and not barsabove:
