@@ -164,14 +164,18 @@ class Figure(pg.PlotWidget):
             else:
                 ax = np.atleast_1d(self.axes).flatten()[-1]
         if cax is None:
+            orientation = kwargs.get('orientation', 'vertical')
             row = int(np.floor((ax.index - 1) / ax.ncols))
             col = (ax.index - 1) % ax.ncols
 
             cax = Axes(nrows=ax.nrows, ncols=ax.ncols, index=ax.index)
             sub_layout = pg.GraphicsLayout()
             sub_layout.addItem(ax, row=0, col=0)
-            sub_layout.addItem(cax, row=0, col=1)
-            sub_layout.layout.setColumnFixedWidth(1, 50)  # https://stackoverflow.com/a/36897295/6605826
+            sub_layout.addItem(cax, row=int(orientation == 'horizontal'), col=int(orientation != 'horizontal'))
+            if orientation == 'horizontal':
+                sub_layout.layout.setRowFixedHeight(1, 50)  # https://stackoverflow.com/a/36897295/6605826
+            else:
+                sub_layout.layout.setColumnFixedWidth(1, 50)  # https://stackoverflow.com/a/36897295/6605826
 
             # noinspection PyBroadException
             try:

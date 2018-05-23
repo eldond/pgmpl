@@ -135,13 +135,14 @@ def twod_demo():
     fig, axs = plt.subplots(2, 2)
     img = axs[0, 0].imshow(a[:, :, 0], origin='lower')
     axs[0, 1].imshow(a[:, :, 0], origin='upper')
-    axs[1, 0].imshow(a[:, :, 0], extent=[10, 12, 20, 22], origin='lower')
+    img2 = axs[1, 0].imshow(a[:, :, 0], extent=[10, 12, 20, 22], origin='lower')
     axs[1, 1].imshow(a, extent=[10, 12, 20, 22], origin='lower')
     axs[0, 0].set_aspect('equal', adjustable='box')
     axs[0, 1].set_aspect('auto', adjustable='box')
     axs[1, 0].set_aspect('equal', adjustable='box')
     axs[1, 1].set_aspect('auto', adjustable='box')
     fig.colorbar(img, ax=axs[0, 0], label='colorbar label~~~')
+    fig.colorbar(img2, ax=axs[1, 0], label='horz cb label :)', orientation='horizontal')
 
     return fig, axs
 

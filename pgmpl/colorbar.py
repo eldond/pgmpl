@@ -32,27 +32,42 @@ class ColorbarBase(object):
             ticklocation='auto', extend='neither', spacing='uniform', ticks=None, format=None, drawedges=False,
             filled=True, extendfrac=None, extendrect=False, label='',
     ):
-        printd('ColorbarBase init')
-        print('self.mappable.vmin = {}, self.mappable.vmax = {}'.format(self.mappable.vmin, self.mappable.vmax))
+        printd('pgmpl.colorbar.ColorbarBase.__init__()...')
+        printd('  pgmpl.colorbar.ColorbarBase.__init__: self.mappable.vmin = {}, self.mappable.vmax = {}'.format(
+            self.mappable.vmin, self.mappable.vmax))
         a = np.linspace(0, 1, 256).reshape(256, 1)
+        if orientation == 'horizontal':
+            printd('  pgmpl colorbar initializing in horizontal orientation')
+            ylim = [0, 1]
+            xlim = [self.mappable.vmin, self.mappable.vmax]
+            a = a.T
+            show_ax = 'bottom'
+        else:
+            printd('  pgmpl colorbar initializing in vertical orientation')
+            xlim = [0, 1]
+            ylim = [self.mappable.vmin, self.mappable.vmax]
+            show_ax = 'right'
+        extent = tuple(xlim + ylim)
         ax.imshow(
             a,
             cmap=cmap, norm=norm, alpha=alpha,
-            origin='lower', extent=(0, 1, self.mappable.vmin, self.mappable.vmax),
+            origin='lower', extent=extent,
         )
-        ax.set_ylim([self.mappable.vmin, self.mappable.vmax])
-        ax.set_xlim([0, 1])
-        ax.hideAxis('bottom')
-        ax.showAxis('right')
-        ax.hideAxis('left')
-        ax.setLabel('right', text=label)
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        for ax_side in ['top', 'bottom', 'right', 'left']:
+            if ax_side == show_ax:
+                ax.showAxis(ax_side)
+            else:
+                ax.hideAxis(ax_side)
+        ax.setLabel(show_ax, text=label)
         ax.setMouseEnabled(x=False, y=False)
 
 
 class Colorbar(ColorbarBase):
 
     def __init__(self, ax, mappable, **kw):
-        printd('Colorbar init')
+        printd('pgmpl.colorbar.Colorbar.__init__()...')
         self.mappable = mappable
         kw['cmap'] = cmap = mappable.cmap
         kw['norm'] = norm = mappable.norm
