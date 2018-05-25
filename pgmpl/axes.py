@@ -78,6 +78,36 @@ class Axes(pg.PlotItem):
                 self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
+    def _prep_scatter_colors(
+            self, n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
+        """Helper function to prepare colors for scatter plot"""
+        # Translate face colors
+        if c is None:
+            # All same default color
+            brush_colors = [color_translator(color='b')] * n
+        elif is_numeric(tolist(c)[0]):
+            brush_colors = color_map_translator(
+                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=alpha,
+            )
+        else:
+            # Assume that c is a list/array of colors
+            brush_colors = [color_translator(color=cc) for cc in tolist(c)]
+
+        # Translate edge colors
+        if edgecolors is None:
+            brush_edges = [color_translator(color='k')] * n
+        else:
+            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+
+        # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
+        if (len(tolist(brush_colors)) == 1) and (n > 1):
+            brush_colors = tolist(brush_colors) * n
+        if (len(tolist(brush_edges)) == 1) and (n > 1):
+            brush_edges = tolist(brush_edges) * n
+
+        return brush_colors, brush_edges
+
     def scatter(
             self, x, y, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
             linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
@@ -112,30 +142,10 @@ class Axes(pg.PlotItem):
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        # Translate face colors
-        if c is None:
-            # All same default color
-            brush_colors = [color_translator(color='b')] * n
-        elif is_numeric(tolist(c)[0]):
-            brush_colors = color_map_translator(
-                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
-            )
-        else:
-            # Assume that c is a list/array of colors
-            brush_colors = [color_translator(color=cc) for cc in tolist(c)]
-
-        # Translate edge colors
-        if edgecolors is None:
-            brush_edges = [color_translator(color='k')] * n
-        else:
-            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+        brush_colors, brush_edges =  self._prep_scatter_colors(
+            n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
-        if (len(tolist(brush_colors)) == 1) and (n > 1):
-            brush_colors = tolist(brush_colors) * n
-        if (len(tolist(brush_edges)) == 1) and (n > 1):
-            brush_edges = tolist(brush_edges) * n
         if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
             linewidths = tolist(linewidths) * n
 
@@ -222,6 +232,7 @@ class Axes(pg.PlotItem):
     def _draw_errbar_caps(self, x, y, xerr, yerr,
                           capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None, **capkw):
         """
+        Helper function for errorbar.
         Draw caps on errorbars. pyqtgraph does the caps differently from matplotlib, so we'll put this together
         manually instead of using pyqtgraph ErrorBarItem's caps.
         :param x, y, xerr, yerr: Input data
@@ -271,6 +282,7 @@ class Axes(pg.PlotItem):
 
     def _sanitize_errbar_data(self, x, y=None, xerr=None, yerr=None, mask=None):
         """
+        Helper function for errorbar.
         Forces all data to be the same size and applies filters
         :param x: Independent variable
         :param y, xerr, yerr: Dependent variable and error bars (optional)

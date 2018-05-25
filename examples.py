@@ -57,7 +57,7 @@ def demo_plot():
     axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k', label='hline')
     axs[1, 0].legend()
 
-    beb = axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
+    beb = axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b', errorevery=10)
     axs[1, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r')
     y2line = axs[1, 1].plot(x, y2)
     axs[1, 1].plot(x, y3)
