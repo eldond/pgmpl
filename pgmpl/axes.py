@@ -219,6 +219,84 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
+    def _draw_errbar_caps(self, x, y, xerr, yerr,
+                          capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None, **capkw):
+        """
+        Draw caps on errorbars. pyqtgraph does the caps differently from matplotlib, so we'll put this together
+        manually instead of using pyqtgraph ErrorBarItem's caps.
+        :param x, y, xerr, yerr: Input data
+        :param capsize: Size of error bar caps (sets size of markers)
+        :param capkw: deepcopy of kwargs passed to errorbar. These are passed to plot when drawing the caps.
+        """
+        capkw.pop('pg_label', None)
+        capkw.pop('label', None)
+        capkw['linestyle'] = ' '
+        if capsize is not None:
+            capkw['markersize'] = capsize
+        if capthick is not None:
+            capkw['markeredgewidth'] = capthick
+        if yerr is not None and np.atleast_1d(yerr).max() > 0:
+            if uplims and lolims:
+                capkw['marker'] = '^'
+                self.plot(x, y + yerr, **capkw)
+                capkw['marker'] = 'v'
+                self.plot(x, y - yerr, **capkw)
+            elif uplims:
+                capkw['marker'] = 'v'
+                self.plot(x, y - yerr, **capkw)
+            elif lolims:
+                capkw['marker'] = '^'
+                self.plot(x, y + yerr, **capkw)
+            else:  # Neither lolims nor uplims
+                capkw['marker'] = '_'
+                self.plot(x, y + yerr, **capkw)
+                self.plot(x, y - yerr, **capkw)
+
+        if xerr is not None and np.atleast_1d(xerr).max() > 0:
+            if xuplims and xlolims:
+                capkw['marker'] = '>'
+                self.plot(x + xerr, y, **capkw)
+                capkw['marker'] = '<'
+                self.plot(x - xerr, y, **capkw)
+            elif xuplims:
+                capkw['marker'] = '<'
+                self.plot(x - xerr, y, **capkw)
+            elif xuplims:
+                capkw['marker'] = '>'
+                self.plot(x + xerr, y, **capkw)
+            else:  # Neither xuplims nor xlolims
+                capkw['marker'] = '|'
+                self.plot(x + xerr, y, **capkw)
+                self.plot(x - xerr, y, **capkw)
+
+    def _sanitize_errbar_data(self, x, y=None, xerr=None, yerr=None, mask=None):
+        """
+        Forces all data to be the same size and applies filters
+        :param x: Independent variable
+        :param y, xerr, yerr: Dependent variable and error bars (optional)
+        :param mask: bool array selecting which data to keep
+        :return: stuple of sanitized x, y, xerr, yerr
+
+        """
+
+        def prep(v):
+            """
+            Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
+            :param v: x, y, xerr, or yerr value or values
+            :return: properly dimensioned and filtered array corresponding to v
+            """
+            if v is None:
+                return None
+            v = np.atleast_1d(v)
+            xx = np.atleast_1d(x)
+            n = len(xx)
+            if len(v) == n:
+                return v[mask]
+            elif len(v) == 1:
+                return v[0] + xx[mask]*0
+
+        return (prep(x), prep(y), prep(xerr), prep(yerr))
+
     def errorbar(
             self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
             barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
@@ -255,25 +333,10 @@ class Axes(pg.PlotItem):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
-        def prep(v):
-            """
-            Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
-            :param v: x, y, xerr, or yerr value or values
-            :return: properly dimensioned and filtered array corresponding to v
-            """
-            v = np.atleast_1d(v)
-            xx = np.atleast_1d(x)
-            n = len(xx)
-            if len(v) == n:
-                return v[w]
-            elif len(v) == 1:
-                return v[0] + xx[w]*0
+        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, w)
 
         errb = pg.ErrorBarItem(
-            x=prep(x), y=prep(y),
-            height=0 if yerr is None else prep(yerr)*2,
-            width=0 if xerr is None else prep(xerr)*2,
-            **epgkw
+            x=xp, y=yp, height=0 if yerr is None else yerrp*2, width=0 if xerr is None else xerrp*2, **epgkw
         )
         self.addItem(errb)
 
@@ -282,55 +345,13 @@ class Axes(pg.PlotItem):
         if kwargs.get('markeredgewidth', None) is not None:
             capthick = kwargs.pop('markeredgewidth')
 
-        # Draw the caps. pyqtgraph does the caps differently from matplotlib, so we'll put this together manually
-        # instead of using pyqtgraph ErrorBarItem's caps.
-        def draw_errbar_caps():
-            capkw = copy.deepcopy(kwargs)
-            capkw.pop('pg_label', None)
-            capkw.pop('label', None)
-            capkw['linestyle'] = ' '
-            if capsize is not None:
-                capkw['markersize'] = capsize
-            if capthick is not None:
-                capkw['markeredgewidth'] = capthick
-            if yerr is not None and np.atleast_1d(yerr).max() > 0:
-                if uplims and lolims:
-                    capkw['marker'] = '^'
-                    self.plot(x, y + yerr, **capkw)
-                    capkw['marker'] = 'v'
-                    self.plot(x, y - yerr, **capkw)
-                elif uplims:
-                    capkw['marker'] = 'v'
-                    self.plot(x, y - yerr, **capkw)
-                elif lolims:
-                    capkw['marker'] = '^'
-                    self.plot(x, y + yerr, **capkw)
-                else:  # Neither lolims nor uplims
-                    capkw['marker'] = '_'
-                    self.plot(x, y + yerr, **capkw)
-                    self.plot(x, y - yerr, **capkw)
-
-            if xerr is not None and np.atleast_1d(xerr).max() > 0:
-                if xuplims and xlolims:
-                    capkw['marker'] = '>'
-                    self.plot(x + xerr, y, **capkw)
-                    capkw['marker'] = '<'
-                    self.plot(x - xerr, y, **capkw)
-                elif xuplims:
-                    capkw['marker'] = '<'
-                    self.plot(x - xerr, y, **capkw)
-                elif xuplims:
-                    capkw['marker'] = '>'
-                    self.plot(x + xerr, y, **capkw)
-                else:  # Neither xuplims nor xlolims
-                    capkw['marker'] = '|'
-                    self.plot(x + xerr, y, **capkw)
-                    self.plot(x - xerr, y, **capkw)
-
         if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
             printd('  Axes.errorbar no caps')
         else:
-            draw_errbar_caps()
+            self._draw_errbar_caps(
+                xp, yp, xerrp, yerrp, capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
+                **copy.deepcopy(kwargs)
+            )
 
         # OR draw the line above the errorbars
         if linestyle not in [' '] and barsabove:
@@ -674,7 +695,7 @@ class Legend:
         try:
             self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
         except AttributeError:
-            pass
+            printd('  Could not clear legend (maybe it is already invisible?')
 
 
 class TestPgmplAxes(unittest.TestCase):
