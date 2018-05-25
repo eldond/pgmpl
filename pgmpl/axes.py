@@ -50,6 +50,7 @@ class Axes(pg.PlotItem):
             self.setXLink(sharex)
         if sharey is not None:
             self.setYLink(sharey)
+        self._hold = kwargs.pop('hold', True)
 
     def clear(self):
         printd('  Clearing Axes instance {}...'.format(self))
@@ -474,6 +475,7 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
+    """Powers Axes.imshow"""
     def __init__(
             self, x, cmap=None, norm=None, interpolation=None, alpha=None, vmin=None, vmax=None,
             origin=None, extent=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, resample=None, url=None,
@@ -686,6 +688,13 @@ class TestPgmplAxes(unittest.TestCase):
     y = x**2 + 2.5
     z = x**3 - x**2 * 1.444
 
+    rgb2d = np.zeros((8, 8, 3))
+    rgb2d[0, 0, :] = 0.9
+    rgb2d[4, 4, :] = 1
+    rgb2d[3, 2, 0] = 0.5
+    rgb2d[2, 3, 1] = 0.7
+    rgb2d[3, 3, 2] = 0.6
+
     def test_axes_init(self):
         ax = Axes()
         if self.verbose:
@@ -707,12 +716,7 @@ class TestPgmplAxes(unittest.TestCase):
                    verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
 
     def test_axes_imshow(self):
-        a = np.zeros((8, 8, 3))
-        a[0, 0, :] = 0.9
-        a[4, 4, :] = 1
-        a[3, 2, 0] = 0.5
-        a[2, 3, 1] = 0.7
-        a[3, 3, 2] = 0.6
+        a = self.rgb2d
         ax = Axes()
         ax.imshow(a)
         ax1 = Axes()
