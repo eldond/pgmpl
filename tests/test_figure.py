@@ -11,7 +11,7 @@ import unittest
 import numpy as np
 
 # pgmpl
-import __init__  # __init__ does setup stuff like making sure a QApp exists
+from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.figure import Figure
 
 class TestPgmplFigure(unittest.TestCase):
