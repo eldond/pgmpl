@@ -284,9 +284,7 @@ class Axes(pg.PlotItem):
 
         # Draw the caps. pyqtgraph does the caps differently from matplotlib, so we'll put this together manually
         # instead of using pyqtgraph ErrorBarItem's caps.
-        if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
-            printd('  Axes.errorbar no caps')
-        else:
+        def draw_errbar_caps():
             capkw = copy.deepcopy(kwargs)
             capkw.pop('pg_label', None)
             capkw.pop('label', None)
@@ -328,6 +326,11 @@ class Axes(pg.PlotItem):
                     capkw['marker'] = '|'
                     self.plot(x + xerr, y, **capkw)
                     self.plot(x - xerr, y, **capkw)
+
+        if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
+            printd('  Axes.errorbar no caps')
+        else:
+            draw_errbar_caps()
 
         # OR draw the line above the errorbars
         if linestyle not in [' '] and barsabove:

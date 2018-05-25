@@ -164,11 +164,11 @@ class TestPgmplExamples(unittest.TestCase):
 if __name__ == '__main__':
     print('pgmpl examples...')
     pgmpl.util.set_debug(1)
-    # a = short_demo()
+    a = short_demo()
     b = demo_plot()
-    # c = log_demo()
+    c = log_demo()
     d = twod_demo()
-    # a[0].close()  # This is not needed, but it makes testing faster.
+    a[0].close()  # This is not needed, but it makes testing faster.
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):

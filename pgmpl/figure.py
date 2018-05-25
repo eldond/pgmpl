@@ -283,10 +283,10 @@ class TestPgmplFigure(unittest.TestCase):
     def test_fig_colorbar(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
-        x = np.linspace(0, 1, 10)
-        y = np.linspace(0, 1, 5)
-        a = x[:, np.newaxis] * y[np.newaxis, :]
-        img = ax.imshow(a)
+        x = np.linspace(0, 1, 21)
+        y = np.linspace(0, 1, 6)
+        aa = x[:, np.newaxis] * y[np.newaxis, :] * 2.5
+        img = ax.imshow(aa)
         fig.colorbar(img)
         if self.verbose:
             print('test_fig_colorbar: ax = ax')
