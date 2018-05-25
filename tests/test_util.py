@@ -17,6 +17,10 @@ from pgmpl.util import tolist, printd, is_iterable
 
 
 class TestPgmplUtil(unittest.TestCase):
+    """
+    Each test function tests one of the functions in translate.py.
+    The test function names are test_ + the name of the function they test.
+    """
 
     verbose = False
 

@@ -101,8 +101,6 @@ def suptitle(t, **kwargs):
 
 
 def gcf():
-    # Improvement may be possible. See:
-    # QWidget *QApplication::activeWindow()  http://doc.qt.io/qt-5/qapplication.html#activeWindow
     if len(tracker.open_windows):
         return tracker.open_windows[-1]
     else:

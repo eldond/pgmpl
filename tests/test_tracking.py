@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Test script for figure.py
+Test script for tracking.py
 """
 
 # Basic imports

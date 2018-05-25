@@ -16,6 +16,10 @@ from pgmpl.axes import Axes
 
 
 class TestPgmplAxes(unittest.TestCase):
+    """
+    Most test functions simply test one method of Axes. test_axes_plot tests Axes.plot(), for example.
+    More complicated behaviors will be mentioned in function docstrings.
+    """
 
     verbose = False
 
@@ -102,6 +106,7 @@ class TestPgmplAxes(unittest.TestCase):
             print('test_axes_clear: ax = {}'.format(ax))
 
     def test_Legend(self):
+        """Tests both the legend method of Axes and the Legend class implicitly"""
         ax = Axes()
         line = ax.plot(self.x, self.y, label='y(x) plot')
         leg = ax.legend()

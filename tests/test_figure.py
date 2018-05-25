@@ -15,6 +15,10 @@ from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp 
 from pgmpl.figure import Figure
 
 class TestPgmplFigure(unittest.TestCase):
+    """
+    Most test functions simply test one method of Figure. test_fig_colorbar tests Figure.colorbar(), for example.
+    More complicated behaviors will be mentioned in function docstrings.
+    """
 
     verbose = False
 
@@ -26,6 +30,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig1.close()
 
     def test_fig_methods(self):
+        """Test Figure methods gca, clear, and close"""
         from pgmpl.axes import Axes
         fig = Figure()
         ax = fig.gca()
@@ -39,12 +44,12 @@ class TestPgmplFigure(unittest.TestCase):
         if self.verbose:
             print('test_fig_methods: fig = {}, ax = {}'.format(fig, ax))
 
-    def test_fig_plot(self):
+    def test_fig_add_subplot(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
         if self.verbose:
-            print('test_fig_plot: fig = {}, ax = {}'.format(fig, ax))
+            print('test_fig_add_subplot: fig = {}, ax = {}'.format(fig, ax))
         fig.close()
 
     def test_figure_set_subplotpars(self):
