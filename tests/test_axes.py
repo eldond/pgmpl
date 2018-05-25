@@ -16,10 +16,6 @@ from pgmpl.axes import Axes
 
 
 class TestPgmplAxes(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest axes
-    """
 
     verbose = False
 

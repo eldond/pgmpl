@@ -15,10 +15,6 @@ from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp 
 from pgmpl.figure import Figure
 
 class TestPgmplFigure(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest figure
-    """
 
     verbose = False
 
@@ -51,7 +47,7 @@ class TestPgmplFigure(unittest.TestCase):
             print('test_fig_plot: fig = {}, ax = {}'.format(fig, ax))
         fig.close()
 
-    def test_set_subplotpars(self):
+    def test_figure_set_subplotpars(self):
         from matplotlib.figure import SubplotParams
         sp = SubplotParams(left=0.5, right=0.99, bottom=0.01, top=0.5, wspace=0.2, hspace=0.2)
         fig = Figure()
@@ -61,7 +57,7 @@ class TestPgmplFigure(unittest.TestCase):
         ax2.plot([1, 0, 1])
         fig.set_subplotpars(sp)
         if self.verbose:
-            print('test_set_subplotpars: fig = {}, ax = {}, ax2 = {}'.format(fig, ax, ax2))
+            print('test_figure_set_subplotpars: fig = {}, ax = {}, ax2 = {}'.format(fig, ax, ax2))
         fig.close()
 
     def test_fig_colorbar(self):

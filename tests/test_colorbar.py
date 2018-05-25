@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Test script for figure.py
+Test script for colorbar.py
 """
 
 # Basic imports
@@ -16,10 +16,6 @@ from pgmpl.colorbar import Colorbar
 
 
 class TestPgmplColorbar(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest colorbar
-    """
 
     verbose = False
 

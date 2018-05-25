@@ -10,7 +10,6 @@ more information.
 
 # Basic imports
 from __future__ import print_function, division
-import unittest
 import warnings
 
 # Plotting imports

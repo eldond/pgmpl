@@ -7,7 +7,6 @@ Imitates matplotlib.pyplot but using PyQtGraph to make the plots
 
 # Basic imports
 from __future__ import print_function, division
-import unittest
 
 # Calculation imports
 import numpy as np
@@ -134,79 +133,3 @@ def close(fig=None):
     except AttributeError:
         # pyqtgraph.PlotWidget.close() fails every other time it's called, so double tap for the win.
         fig.close()
-
-
-class TestPgmplPyplot(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest pyplot
-    """
-
-    verbose = False
-
-    x = np.linspace(0, 1.2, 20)
-    y = x**2 + 1
-
-    def test_figure(self):
-        fig = figure()
-        if self.verbose:
-            print('test_figure: fig = {}'.format(fig))
-        fig.close()
-
-    def test_subplots(self):
-        fig, axs = subplots(3, 2, sharex='all', sharey='all')
-        axs[1, 1].plot(self.x, self.y)
-        if self.verbose:
-            print('test_subplots: axs = {}'.format(axs))
-        fig.close()
-
-    def test_axes(self):
-        ax = axes()
-        ax.plot(self.x, self.y)
-        if self.verbose:
-            print('test_axes: ax = {}'.format(ax))
-        close()
-
-    def test_gcf(self):
-        fig = gcf()
-        assert isinstance(fig, Figure)
-        if self.verbose:
-            print('test_gcf: fig = {}'.format(fig))
-        fig.close()
-
-    def test_gca(self):
-        ax = gca()
-        assert isinstance(ax, Axes)
-        if self.verbose:
-            print('test_gca: ax = {}'.format(ax))
-        close()
-
-    def test_close(self):
-        fig = gcf()
-        close(fig)
-        if self.verbose:
-            print('test_close: fig = {}'.format(fig))
-        close()  # It should do its own gcf
-
-    def test_plot(self):
-        plot(self.x, self.y)
-        if self.verbose:
-            print('test_plot: done')
-        close()
-
-    def test_subplots_adjust(self):
-        plot(self.x, self.y**2+self.x**2+250)
-        subplots_adjust(left=0.5, right=0.99)
-        if self.verbose:
-            print('test_subplots_adjust: done')
-        close()
-
-    def test_text_functions(self):
-        suptitle('super title text')
-        if self.verbose:
-            print('test_text_functions: done')
-        close()
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -153,7 +153,7 @@ class TestPgmplExamples(unittest.TestCase):
     python -m unittest examples
     """
 
-    verbose = True
+    verbose = False
 
     def test_demo_plot(self):
         short_demo()
@@ -166,7 +166,7 @@ class TestPgmplExamples(unittest.TestCase):
 
 if __name__ == '__main__':
     print('pgmpl examples...')
-    pgmpl.util.set_debug(1)
+    pgmpl.util.set_debug(0)
     a = short_demo()
     b = demo_plot()
     c = log_demo()

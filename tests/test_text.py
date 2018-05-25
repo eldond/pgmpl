@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 
 """
-Test script for figure.py
+Test script for text.py
 """
 
 # Basic imports
@@ -15,27 +15,31 @@ from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp 
 from pgmpl.text import Text
 
 class TestPgmplText(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest text
-    """
 
     verbose = False
 
     def test_text_simple(self):
         t = Text(0.5, 0.5, 'text1')
         assert isinstance(t, Text)
+        if self.verbose:
+            print('test_text_simple: t = {}'.format(t))
 
     def test_text_on_plot(self):
         from pgmpl.pyplot import subplots
         fig, ax = subplots(1)
         ax.plot([0, 1], [1, 0])
         ax.plot([0, 1], [0, 1])
-        ax.text(0.5, 0.9, 'text1')
-        ax.text(0.5, 0.7, 'text2', color='r', va='bottom', ha='left')
-        ax.text(0.5, 0.5, 'text3', color='b', va='top', ha='right')
-        ax.text(0.5, 0.3, 'text4', color='g', va='center', ha='center')
-
+        t1 = ax.text(0.5, 0.9, 'text1')
+        t2 = ax.text(0.5, 0.7, 'text2', color='r', va='bottom', ha='left')
+        t3 = ax.text(0.5, 0.5, 'text3', color='b', va='top', ha='right')
+        t4 = ax.text(0.5, 0.3, 'text4', color='g', va='center', ha='center')
+        assert isinstance(t1, Text)
+        assert isinstance(t2, Text)
+        assert isinstance(t3, Text)
+        assert isinstance(t4, Text)
+        if self.verbose:
+            print('test_text_on_plot: t1, t2 ,t3, t4 = {}, {}, {}, {}'.format(t1, t2, t3, t4))
+        fig.close()
 
 if __name__ == '__main__':
     unittest.main()
