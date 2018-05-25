@@ -29,6 +29,9 @@ pg.setConfigOption('foreground', 'k')
 
 
 def demo_plot():
+    """
+    Big, multi-panel demo plot that uses many different methods
+    """
     x = np.linspace(0, 10, 151)
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
@@ -92,6 +95,9 @@ def demo_plot():
 
 
 def short_demo():
+    """
+    Minimal demo with just one panel
+    """
     x = np.linspace(0, 2*np.pi, 36)
     fig, axs = plt.subplots(1)
     axs.plot(x, np.cos(x))
@@ -106,6 +112,9 @@ def short_demo():
 
 
 def log_demo():
+    """
+    Test log scaling of axes
+    """
     x = np.linspace(0, 10, 101)
     y = np.exp(x)
     fig, ax = plt.subplots(1)
@@ -118,6 +127,9 @@ def log_demo():
 
 
 def twod_demo():
+    """
+    Test 2D plotting methods like imshow
+    """
     nx = 40
     ny = 20
     a = np.zeros((ny, nx, 3))
@@ -148,14 +160,13 @@ def twod_demo():
 
 
 class TestPgmplExamples(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest examples
-    """
 
     verbose = False
 
     def test_demo_plot(self):
+        """
+        Just call them all
+        """
         short_demo()
         demo_plot()
         log_demo()

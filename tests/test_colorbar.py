@@ -29,6 +29,7 @@ class TestPgmplColorbar(unittest.TestCase):
         fig, ax = subplots(1)
         img = ax.imshow(self.a)
         cb = fig.colorbar(img)
+        assert isinstance(cb, Colorbar)
         if self.verbose:
             print('test_colorbar: ax = {}, cb = {}'.format(ax, cb))
         fig.close()

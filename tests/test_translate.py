@@ -9,7 +9,7 @@ Test script for translate.py
 from __future__ import print_function, division
 import unittest
 import numpy as np
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 import copy
 from matplotlib import rcParams
 
@@ -60,6 +60,12 @@ class TestPgmplTranslate(unittest.TestCase):
         newc = [None] * self.nt
         for i in range(self.nt):
             newc[i] = color_translator(**self.plot_kw_tests[i])
+        assert all(color_translator(color='r') == np.array([255., 0., 0., 255.]))
+        assert all(color_translator(color='b') == np.array([0., 0., 255., 255.]))
+        assert all(color_translator(color='k', alpha=0.5) == np.array([0., 0., 0., 255./2.]))
+        assert all(color_translator(color=(1, 0.5, 1)) == np.array([255., 255/2., 255., 255.]))
+        assert all(color_translator(color=(1, 0.5, 1, 0.5)) == np.array([255., 255/2., 255., 255./2.]))
+        assert all(color_translator(color=(1, 0.5, 1), alpha=0.5) == np.array([255., 255/2., 255., 255./2.]))
         if self.verbose:
             print('New colors:', newc)
 
@@ -72,11 +78,21 @@ class TestPgmplTranslate(unittest.TestCase):
             print('QtCore.Qt.DashDotLine = {}'.format(QtCore.Qt.DashDotLine))
             print('style_translator(linestyle="-.") = {}'.format(style_translator(linestyle="-.")))
         assert style_translator(linestyle="-.") == QtCore.Qt.DashDotLine
+        assert style_translator(linestyle="--") == QtCore.Qt.DashLine
+        assert style_translator(linestyle=":") == QtCore.Qt.DotLine
+        assert style_translator(linestyle="-") == QtCore.Qt.SolidLine
 
     def test_symbol_translator(self):
         news = [None] * self.nt
         for i in range(self.nt):
             news[i] = symbol_translator(**self.plot_kw_tests[i])
+        assert symbol_translator(marker='o') == 'o'
+        assert symbol_translator(marker='+') == '+'
+        assert symbol_translator(marker='v') == 't'
+        assert symbol_translator(marker='^') == 't1'
+        custom_markers = '_x|,.'
+        for custom in custom_markers:
+            assert isinstance(symbol_translator(marker=custom), QtGui.QPainterPath)
         if self.verbose:
             print('New symbols:', news)
 
@@ -99,6 +115,8 @@ class TestPgmplTranslate(unittest.TestCase):
         correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
         test_answer = dealias(**test_dict)
         assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
+        assert dealias(lw=8) == {'linewidth': 8}
+        assert dealias(blah=58) == {'blah': 58}
         if self.verbose:
             print('test_dealias: test_answer = {}'.format(test_answer))
 
