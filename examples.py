@@ -153,12 +153,15 @@ class TestPgmplExamples(unittest.TestCase):
     python -m unittest examples
     """
 
-    verbose = False
+    verbose = True
 
     def test_demo_plot(self):
         short_demo()
         demo_plot()
         log_demo()
+        twod_demo()
+        if self.verbose:
+            print('  Tested examples.py')
 
 
 if __name__ == '__main__':
