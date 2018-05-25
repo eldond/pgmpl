@@ -168,6 +168,22 @@ class Axes(pg.PlotItem):
         self.addItem(img)
         return img
 
+    def contour(self, *args, **kwargs):
+        printd('  pgmpl.axes.Axes.contour()...')
+        if not self._hold:
+            self.clear()
+        kwargs['filled'] = False
+        contours = mcontour.QuadContourSet(self, *args, **kwargs)
+        return contours
+
+    def contourf(self, *args, **kwargs):
+        printd('  pgmpl.axes.Axes.contourf()...')
+        if not self._hold:
+            self.clear()
+        kwargs['filled'] = True
+        contours = mcontour.QuadContourSet(self, *args, **kwargs)
+        return contours
+
     def set_xlabel(self, label):
         """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
         self.setLabel('bottom', text=label)
@@ -723,6 +739,18 @@ class TestPgmplAxes(unittest.TestCase):
         ax1.imshow(a[:, :, 0:2])
         if self.verbose:
             print('test_axes_imshow: ax = {}, ax1 = {}'.format(ax, ax1))
+
+    def test_axes_contour(self):
+        a = sum(self.rgb2d, 2) * 10
+        levels = [0, 0.5, 1.2, 5, 9, 10, 20, 30]
+        print('shape(a) = {}'.format(np.shape(a)))
+        ax = Axes()
+        ax1 = Axes()
+        ax.contour(a)
+        ax1.contourf(a)
+        if self.verbose:
+            print('test_axes_contour: ax = {}, contours = {}, ax1 = {}, contourfs = {}'.format(
+                ax, contours, ax1, contourfs))
 
     def test_axes_err(self):
         ax = Axes()
