@@ -378,8 +378,8 @@ class Axes(pg.PlotItem):
             printd('  Axes.errorbar no caps')
         else:
             self._draw_errbar_caps(
-                xp, yp, xerrp, yerrp, capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
-                **copy.deepcopy(kwargs)
+                xp, yp, xerrp, yerrp, capsize=capsize, capthick=capthick,
+                lolims=lolims, uplims=uplims, xlolims=xlolims, xuplims=xuplims, **copy.deepcopy(kwargs)
             )
 
         # OR draw the line above the errorbars
