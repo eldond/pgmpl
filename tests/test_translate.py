@@ -34,6 +34,7 @@ class TestPgmplTranslate(unittest.TestCase):
         {'color': 'g', 'linestyle': ':', 'marker': 'o'},
         {'color': 'm', 'linestyle': ' ', 'marker': 'd', 'mew': 2},
         {'color': ' ', 'markeredgewidth': 1.5},
+        {'linestyle': '-.'},
     ]
 
     nt = len(plot_kw_tests)
@@ -61,6 +62,7 @@ class TestPgmplTranslate(unittest.TestCase):
         for i in range(self.nt):
             newc[i] = color_translator(**self.plot_kw_tests[i])
         assert all(color_translator(color='r') == np.array([255., 0., 0., 255.]))
+        assert all(color_translator(color='g') == np.array([0., 255./2., 0., 255.]))
         assert all(color_translator(color='b') == np.array([0., 0., 255., 255.]))
         assert all(color_translator(color='k', alpha=0.5) == np.array([0., 0., 0., 255./2.]))
         assert all(color_translator(color=(1, 0.5, 1)) == np.array([255., 255/2., 255., 255.]))
@@ -100,6 +102,7 @@ class TestPgmplTranslate(unittest.TestCase):
         newp = [None] * self.nt
         for i in range(self.nt):
             newp[i] = setup_pen_kw(**self.plot_kw_tests[i])
+            assert isinstance(newp[i], QtGui.QPen)
         if self.verbose:
             print('New pens:', newp)
 
@@ -115,8 +118,10 @@ class TestPgmplTranslate(unittest.TestCase):
         correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
         test_answer = dealias(**test_dict)
         assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
+
         assert dealias(lw=8) == {'linewidth': 8}
         assert dealias(blah=58) == {'blah': 58}
+        assert dealias(mec='r') == {'markeredgecolor': 'r'}
         if self.verbose:
             print('test_dealias: test_answer = {}'.format(test_answer))
 
