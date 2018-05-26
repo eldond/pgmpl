@@ -24,6 +24,20 @@ class TestPgmplUtil(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    def test_set_debug(self):
+        set_debug()
+        assert os.environ.get('PGMPL_DEBUG', None) == "1"
+        set_debug(False)
+        assert os.environ.get('PGMPL_DEBUG', None) == "0"
+        set_debug(True)
+        assert os.environ.get('PGMPL_DEBUG', None) == "1"
+        set_debug(0)
+        assert os.environ.get('PGMPL_DEBUG', None) == "0"
+        set_debug(1)
+        assert os.environ.get('PGMPL_DEBUG', None) == "1"
+        set_debug(None)
+        assert os.environ.get('PGMPL_DEBUG', None) == "0"
+
     def test_printd(self):
         test_string_1 = '\nthis string should print, but the other string should not'
         test_string_2 = '\nthis string should NOT print, but the other string SHOULD'
