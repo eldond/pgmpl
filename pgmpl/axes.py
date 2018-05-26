@@ -12,7 +12,6 @@ more information.
 from __future__ import print_function, division
 import warnings
 import copy
-import unittest
 
 # Calculation imports
 import numpy as np
@@ -79,6 +78,36 @@ class Axes(pg.PlotItem):
                 self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
+    def _prep_scatter_colors(
+            self, n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
+        """Helper function to prepare colors for scatter plot"""
+        # Translate face colors
+        if c is None:
+            # All same default color
+            brush_colors = [color_translator(color='b')] * n
+        elif is_numeric(tolist(c)[0]):
+            brush_colors = color_map_translator(
+                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=alpha,
+            )
+        else:
+            # Assume that c is a list/array of colors
+            brush_colors = [color_translator(color=cc) for cc in tolist(c)]
+
+        # Translate edge colors
+        if edgecolors is None:
+            brush_edges = [color_translator(color='k')] * n
+        else:
+            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+
+        # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
+        if (len(tolist(brush_colors)) == 1) and (n > 1):
+            brush_colors = tolist(brush_colors) * n
+        if (len(tolist(brush_edges)) == 1) and (n > 1):
+            brush_edges = tolist(brush_edges) * n
+
+        return brush_colors, brush_edges
+
     def scatter(
             self, x, y, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
             linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
@@ -113,30 +142,10 @@ class Axes(pg.PlotItem):
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        # Translate face colors
-        if c is None:
-            # All same default color
-            brush_colors = [color_translator(color='b')] * n
-        elif is_numeric(tolist(c)[0]):
-            brush_colors = color_map_translator(
-                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
-            )
-        else:
-            # Assume that c is a list/array of colors
-            brush_colors = [color_translator(color=cc) for cc in tolist(c)]
-
-        # Translate edge colors
-        if edgecolors is None:
-            brush_edges = [color_translator(color='k')] * n
-        else:
-            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+        brush_colors, brush_edges =  self._prep_scatter_colors(
+            n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
-        if (len(tolist(brush_colors)) == 1) and (n > 1):
-            brush_colors = tolist(brush_colors) * n
-        if (len(tolist(brush_edges)) == 1) and (n > 1):
-            brush_edges = tolist(brush_edges) * n
         if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
             linewidths = tolist(linewidths) * n
 
@@ -236,6 +245,87 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
+    def _draw_errbar_caps(self, x, y, xerr, yerr,
+                          capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None, **capkw):
+        """
+        Helper function for errorbar.
+        Draw caps on errorbars. pyqtgraph does the caps differently from matplotlib, so we'll put this together
+        manually instead of using pyqtgraph ErrorBarItem's caps.
+        :param x, y, xerr, yerr: Input data
+        :param capsize: Size of error bar caps (sets size of markers)
+        :param capkw: deepcopy of kwargs passed to errorbar. These are passed to plot when drawing the caps.
+        """
+        capkw.pop('pg_label', None)
+        capkw.pop('label', None)
+        capkw['linestyle'] = ' '
+        if capsize is not None:
+            capkw['markersize'] = capsize
+        if capthick is not None:
+            capkw['markeredgewidth'] = capthick
+        if yerr is not None and np.atleast_1d(yerr).max() > 0:
+            if uplims and lolims:
+                capkw['marker'] = '^'
+                self.plot(x, y + yerr, **capkw)
+                capkw['marker'] = 'v'
+                self.plot(x, y - yerr, **capkw)
+            elif uplims:
+                capkw['marker'] = 'v'
+                self.plot(x, y - yerr, **capkw)
+            elif lolims:
+                capkw['marker'] = '^'
+                self.plot(x, y + yerr, **capkw)
+            else:  # Neither lolims nor uplims
+                capkw['marker'] = '_'
+                self.plot(x, y + yerr, **capkw)
+                self.plot(x, y - yerr, **capkw)
+
+        if xerr is not None and np.atleast_1d(xerr).max() > 0:
+            if xuplims and xlolims:
+                capkw['marker'] = '>'
+                self.plot(x + xerr, y, **capkw)
+                capkw['marker'] = '<'
+                self.plot(x - xerr, y, **capkw)
+            elif xuplims:
+                capkw['marker'] = '<'
+                self.plot(x - xerr, y, **capkw)
+            elif xuplims:
+                capkw['marker'] = '>'
+                self.plot(x + xerr, y, **capkw)
+            else:  # Neither xuplims nor xlolims
+                capkw['marker'] = '|'
+                self.plot(x + xerr, y, **capkw)
+                self.plot(x - xerr, y, **capkw)
+
+    @staticmethod
+    def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
+        """
+        Helper function for errorbar.
+        Forces all data to be the same size and applies filters
+        :param x: Independent variable
+        :param y, xerr, yerr: Dependent variable and error bars (optional)
+        :param mask: bool array selecting which data to keep
+        :return: stuple of sanitized x, y, xerr, yerr
+
+        """
+
+        def prep(v):
+            """
+            Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
+            :param v: x, y, xerr, or yerr value or values
+            :return: properly dimensioned and filtered array corresponding to v
+            """
+            if v is None:
+                return None
+            v = np.atleast_1d(v)
+            xx = np.atleast_1d(x)
+            n = len(xx)
+            if len(v) == n:
+                return v[mask]
+            elif len(v) == 1:
+                return v[0] + xx[mask]*0
+
+        return prep(x), prep(y), prep(xerr), prep(yerr)
+
     def errorbar(
             self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
             barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
@@ -272,25 +362,10 @@ class Axes(pg.PlotItem):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
-        def prep(v):
-            """
-            Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
-            :param v: x, y, xerr, or yerr value or values
-            :return: properly dimensioned and filtered array corresponding to v
-            """
-            v = np.atleast_1d(v)
-            xx = np.atleast_1d(x)
-            n = len(xx)
-            if len(v) == n:
-                return v[w]
-            elif len(v) == 1:
-                return v[0] + xx[w]*0
+        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, w)
 
         errb = pg.ErrorBarItem(
-            x=prep(x), y=prep(y),
-            height=0 if yerr is None else prep(yerr)*2,
-            width=0 if xerr is None else prep(xerr)*2,
-            **epgkw
+            x=xp, y=yp, height=0 if yerr is None else yerrp*2, width=0 if xerr is None else xerrp*2, **epgkw
         )
         self.addItem(errb)
 
@@ -299,52 +374,13 @@ class Axes(pg.PlotItem):
         if kwargs.get('markeredgewidth', None) is not None:
             capthick = kwargs.pop('markeredgewidth')
 
-        # Draw the caps. pyqtgraph does the caps differently from matplotlib, so we'll put this together manually
-        # instead of using pyqtgraph ErrorBarItem's caps.
         if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
             printd('  Axes.errorbar no caps')
         else:
-            capkw = copy.deepcopy(kwargs)
-            capkw.pop('pg_label', None)
-            capkw.pop('label', None)
-            capkw['linestyle'] = ' '
-            if capsize is not None:
-                capkw['markersize'] = capsize
-            if capthick is not None:
-                capkw['markeredgewidth'] = capthick
-            if yerr is not None and np.atleast_1d(yerr).max() > 0:
-                if uplims and lolims:
-                    capkw['marker'] = '^'
-                    self.plot(x, y + yerr, **capkw)
-                    capkw['marker'] = 'v'
-                    self.plot(x, y - yerr, **capkw)
-                elif uplims:
-                    capkw['marker'] = 'v'
-                    self.plot(x, y - yerr, **capkw)
-                elif lolims:
-                    capkw['marker'] = '^'
-                    self.plot(x, y + yerr, **capkw)
-                else:  # Neither lolims nor uplims
-                    capkw['marker'] = '_'
-                    self.plot(x, y + yerr, **capkw)
-                    self.plot(x, y - yerr, **capkw)
-
-            if xerr is not None and np.atleast_1d(xerr).max() > 0:
-                if xuplims and xlolims:
-                    capkw['marker'] = '>'
-                    self.plot(x + xerr, y, **capkw)
-                    capkw['marker'] = '<'
-                    self.plot(x - xerr, y, **capkw)
-                elif xuplims:
-                    capkw['marker'] = '<'
-                    self.plot(x - xerr, y, **capkw)
-                elif xuplims:
-                    capkw['marker'] = '>'
-                    self.plot(x + xerr, y, **capkw)
-                else:  # Neither xuplims nor xlolims
-                    capkw['marker'] = '|'
-                    self.plot(x + xerr, y, **capkw)
-                    self.plot(x - xerr, y, **capkw)
+            self._draw_errbar_caps(
+                xp, yp, xerrp, yerrp, capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
+                **copy.deepcopy(kwargs)
+            )
 
         # OR draw the line above the errorbars
         if linestyle not in [' '] and barsabove:
@@ -689,123 +725,4 @@ class Legend:
         try:
             self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
         except AttributeError:
-            pass
-
-
-class TestPgmplAxes(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest axes
-    """
-
-    verbose = False
-
-    x = np.linspace(0, 1.8, 30)
-    y = x**2 + 2.5
-    z = x**3 - x**2 * 1.444
-
-    rgb2d = np.zeros((8, 8, 3))
-    rgb2d[0, 0, :] = 0.9
-    rgb2d[4, 4, :] = 1
-    rgb2d[3, 2, 0] = 0.5
-    rgb2d[2, 3, 1] = 0.7
-    rgb2d[3, 3, 2] = 0.6
-
-    def test_axes_init(self):
-        ax = Axes()
-        if self.verbose:
-            print('test_axes_init: ax = {}'.format(ax))
-
-    def test_axes_plot(self):
-        ax = Axes()
-        ax.plot(self.x, self.y, color='r')
-        if self.verbose:
-            print('test_axes_plot: ax = {}'.format(ax))
-
-    def test_axes_scatter(self):
-        ax = Axes()
-        ax.scatter(self.x, self.y, c=self.z)
-        ax.scatter(self.x, self.y, c='b')
-        ax.scatter(self.x, self.y, c=self.z, cmap='plasma', marker='s', linewidths=1, edgecolors='r')
-        # noinspection PyTypeChecker
-        ax.scatter(self.x, self.x*0, c=self.x, cmap='jet', marker=None,
-                   verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
-
-    def test_axes_imshow(self):
-        a = self.rgb2d
-        ax = Axes()
-        ax.imshow(a)
-        ax1 = Axes()
-        ax1.imshow(a[:, :, 0:2])
-        if self.verbose:
-            print('test_axes_imshow: ax = {}, ax1 = {}'.format(ax, ax1))
-
-    def test_axes_contour(self):
-        a = sum(self.rgb2d, 2) * 10
-        levels = [0, 0.5, 1.2, 5, 9, 10, 20, 30]
-        print('shape(a) = {}'.format(np.shape(a)))
-        ax = Axes()
-        ax1 = Axes()
-        ax.contour(a)
-        ax1.contourf(a)
-        if self.verbose:
-            print('test_axes_contour: ax = {}, contours = {}, ax1 = {}, contourfs = {}'.format(
-                ax, contours, ax1, contourfs))
-
-    def test_axes_err(self):
-        ax = Axes()
-        yerr = self.y*0.1
-        ax.errorbar(self.x, self.y, yerr, color='r')
-        ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
-        if self.verbose:
-            print('test_axes_err: ax = {}'.format(ax))
-
-    def test_axes_lines(self):
-        ax = Axes()
-        ax.axhline(0.5, linestyle='--', color='k')
-        ax.axvline(0.5)
-        ax.axvline(0.75, linestyle='-', color='b')
-        if self.verbose:
-            print('test_axes_lines: ax = {}'.format(ax))
-
-    def test_axes_xyaxes(self):
-        ax = Axes()
-        ax.plot([0, 1], [1, 2])
-        ax.set_ylabel('ylabel')
-        ax.set_xlabel('xlabel')
-        ax.set_title('title title title')
-        ax.set_xlim([-1, 2])
-        ax.set_ylim([-2, 4])
-        ax.set_xscale('linear')
-        ax.set_yscale('log')
-        if self.verbose:
-            print('test_axes_xyaxes: ax = {}'.format(ax))
-
-    def test_axes_aspect(self):
-        ax = Axes()
-        ax.plot([0, 10, 0, 1])
-        ax.set_aspect('equal')
-        if self.verbose:
-            print('test_axes_aspect: ax = {}'.format(ax))
-
-    def test_axes_clear(self):
-        ax = Axes()
-        ax.plot(self.y, self.x)  # Switch them so the test doesn't get bored.
-        ax.clear()
-        # Should add something to try to get the number of objects on the test and assert that there are none
-        if self.verbose:
-            print('test_axes_clear: ax = {}'.format(ax))
-
-    def test_Legend(self):
-        ax = Axes()
-        line = ax.plot(self.x, self.y, label='y(x) plot')
-        leg = ax.legend()
-        leg.addItem(line, name='yx plot')
-        leg.draggable()
-        leg.clear()
-        if self.verbose:
-            print('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
-
-
-if __name__ == '__main__':
-    unittest.main()
+            printd('  Could not clear legend (maybe it is already invisible?')

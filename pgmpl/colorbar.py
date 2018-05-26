@@ -12,7 +12,6 @@ more information.
 from __future__ import print_function, division
 import sys
 import warnings
-import unittest
 
 # Calculation imports
 import numpy as np
@@ -72,28 +71,3 @@ class Colorbar(ColorbarBase):
         kw['cmap'] = cmap = mappable.cmap
         kw['norm'] = norm = mappable.norm
         super(Colorbar, self).__init__(ax, **kw)
-
-
-class TestPgmplColorbar(unittest.TestCase):
-    """
-    Test from the command line with
-    python -m unittest colorbar
-    """
-
-    verbose = False
-
-    def test_colorbar(self):
-        from pyplot import subplots
-        fig, ax = subplots(1)
-        x = np.linspace(0, 1, 10)
-        y = np.linspace(0, 1, 5)
-        a = x[:, np.newaxis] * y[np.newaxis, :]
-        img = ax.imshow(a)
-        fig.colorbar(img)
-        if self.verbose:
-            print('test_colorbar: ax = ax')
-        fig.close()
-
-
-if __name__ == '__main__':
-    unittest.main()
