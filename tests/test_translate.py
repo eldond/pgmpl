@@ -7,6 +7,7 @@ Test script for translate.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 from PyQt4 import QtCore, QtGui
@@ -15,6 +16,7 @@ from matplotlib import rcParams
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
+from pgmpl.util import set_debug
 from pgmpl.translate import defaults_from_rcparams, color_translator, style_translator, symbol_translator, \
     setup_pen_kw, plotkw_translator, dealias, color_map_translator
 
@@ -25,7 +27,7 @@ class TestPgmplTranslate(unittest.TestCase):
     The test function names are test_ + the name of the function they test.
     """
 
-    verbose = False
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     plot_kw_tests = [
         {'color': 'r'},
@@ -35,15 +37,15 @@ class TestPgmplTranslate(unittest.TestCase):
         {'color': 'm', 'linestyle': ' ', 'marker': 'd', 'mew': 2},
         {'color': ' ', 'markeredgewidth': 1.5},
         {'linestyle': '-.'},
+        {'symbol': '+', 'alpha': 0.7},
     ]
 
     nt = len(plot_kw_tests)
 
     if verbose:
         print('-' * 79)
-        print('\nTestPgmpl has {} test sets of plot keywords ready to go!\n'.format(nt))
+        print('\nTestPgmplTranslate has {} test sets of plot keywords ready to go!\n'.format(nt))
         print('-' * 79)
-        set_debug(True)
 
     def test_defaults_from_rcparams(self):
         unique_linewidth = 5.1234958293

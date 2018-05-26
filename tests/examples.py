@@ -159,34 +159,43 @@ def twod_demo():
     return fig, axs
 
 
+def open_examples(close_after=False, start_event=True):
+    print('pgmpl examples...')
+    pgmpl.util.set_debug(0)
+
+    a = short_demo()
+    b = demo_plot()
+    c = log_demo()
+    d = twod_demo()
+    pgmpl.util.printd('  Example plots: a = {}, b = {}, c = {}, d = {}'.format(a, b, c, d))
+    tracker.status()
+
+    if close_after:
+        a[0].close()
+        b[0].close()
+        c[0].close()
+        d[0].close()
+        tracker.status()
+    elif start_event:
+        # Start Qt event loop unless running in interactive mode or using pyside.
+        if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+            print('Starting event loop for pgmpl examples...')
+            pgmpl.app.exec_()
+        else:
+            print('Done with pgmpl examples.')
+
+
 class TestPgmplExamples(unittest.TestCase):
 
-    verbose = False
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_demo_plot(self):
         """
         Just call them all
         """
-        short_demo()
-        demo_plot()
-        log_demo()
-        twod_demo()
+        open_examples(close_after=True)
         if self.verbose:
             print('  Tested examples.py')
 
-
 if __name__ == '__main__':
-    print('pgmpl examples...')
-    pgmpl.util.set_debug(0)
-    a = short_demo()
-    b = demo_plot()
-    c = log_demo()
-    d = twod_demo()
-    a[0].close()  # This is not needed, but it makes testing faster.
-    tracker.status()
-    # Start Qt event loop unless running in interactive mode or using pyside.
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        print('Starting event loop for pgmpl examples...')
-        pgmpl.app.exec_()
-    else:
-        print('Done with pgmpl examples.')
+    open_examples(start_event=True)

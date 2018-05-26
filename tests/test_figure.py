@@ -7,6 +7,7 @@ Test script for figure.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -14,13 +15,14 @@ import numpy as np
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.figure import Figure
 
+
 class TestPgmplFigure(unittest.TestCase):
     """
     Most test functions simply test one method of Figure. test_fig_colorbar tests Figure.colorbar(), for example.
     More complicated behaviors will be mentioned in function docstrings.
     """
 
-    verbose = False
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_figure(self):
         fig1 = Figure()
@@ -30,7 +32,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig1.close()
 
     def test_fig_methods(self):
-        """Test Figure methods gca, clear, and close"""
+        """Test Figure methods gca, show, clear, and close"""
         from pgmpl.axes import Axes
         fig = Figure()
         ax = fig.gca()
@@ -38,6 +40,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig.suptitle('suptitle text in unittest')
         ax2 = fig.gca()
         assert ax2 == ax
+        fig.show()
         fig.clear()
         fig.close()
         assert fig.clearfig == fig.clear  # Make sure this assignment didn't break.
