@@ -22,7 +22,7 @@ class TestPgmplUtil(unittest.TestCase):
     The test function names are test_ + the name of the function they test.
     """
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     def test_printd(self):
         test_string_1 = '\nthis string should print, but the other string should not'

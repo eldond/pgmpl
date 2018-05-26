@@ -7,6 +7,7 @@ Test script for tracking.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 import copy
@@ -18,7 +19,7 @@ from pgmpl.tracking import WTracker, tracker
 
 class TestPgmplTracking(unittest.TestCase):
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     def test_tracker(self):
         assert isinstance(tracker, WTracker)

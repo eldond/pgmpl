@@ -7,6 +7,7 @@ Test script for figure.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -14,13 +15,14 @@ import numpy as np
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.figure import Figure
 
+
 class TestPgmplFigure(unittest.TestCase):
     """
     Most test functions simply test one method of Figure. test_fig_colorbar tests Figure.colorbar(), for example.
     More complicated behaviors will be mentioned in function docstrings.
     """
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     def test_figure(self):
         fig1 = Figure()

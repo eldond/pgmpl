@@ -7,6 +7,7 @@ Test script for text.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -14,9 +15,10 @@ import numpy as np
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.text import Text
 
+
 class TestPgmplText(unittest.TestCase):
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     def test_text_simple(self):
         """Very basic test of just initializing the Text class"""

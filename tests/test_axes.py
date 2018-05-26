@@ -7,6 +7,7 @@ Test script for axes.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -21,7 +22,7 @@ class TestPgmplAxes(unittest.TestCase):
     More complicated behaviors will be mentioned in function docstrings.
     """
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     x = np.linspace(0, 1.8, 30)
     y = x**2 + 2.5

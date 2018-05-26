@@ -7,6 +7,7 @@ Test script for colorbar.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -17,7 +18,7 @@ from pgmpl.colorbar import Colorbar
 
 class TestPgmplColorbar(unittest.TestCase):
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     # Make some test data
     x = np.linspace(0, 1, 10)

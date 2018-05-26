@@ -7,6 +7,7 @@ Test script for pyplot.py
 
 # Basic imports
 from __future__ import print_function, division
+import os
 import unittest
 import numpy as np
 
@@ -17,7 +18,7 @@ from pgmpl.pyplot import *
 
 class TestPgmplPyplot(unittest.TestCase):
 
-    verbose = False
+    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
 
     x = np.linspace(0, 1.2, 20)
     y = x**2 + 1
