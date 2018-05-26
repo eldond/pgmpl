@@ -18,7 +18,7 @@ from pgmpl.text import Text
 
 class TestPgmplText(unittest.TestCase):
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_text_simple(self):
         """Very basic test of just initializing the Text class"""

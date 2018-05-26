@@ -22,7 +22,7 @@ class TestPgmplFigure(unittest.TestCase):
     More complicated behaviors will be mentioned in function docstrings.
     """
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_figure(self):
         fig1 = Figure()

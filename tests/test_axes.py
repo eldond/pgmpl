@@ -22,7 +22,7 @@ class TestPgmplAxes(unittest.TestCase):
     More complicated behaviors will be mentioned in function docstrings.
     """
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     x = np.linspace(0, 1.8, 30)
     y = x**2 + 2.5

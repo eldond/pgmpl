@@ -18,7 +18,7 @@ from pgmpl.pyplot import *
 
 class TestPgmplPyplot(unittest.TestCase):
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     x = np.linspace(0, 1.2, 20)
     y = x**2 + 1

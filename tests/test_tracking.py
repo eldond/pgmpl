@@ -19,7 +19,7 @@ from pgmpl.tracking import WTracker, tracker
 
 class TestPgmplTracking(unittest.TestCase):
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_tracker(self):
         assert isinstance(tracker, WTracker)

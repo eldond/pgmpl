@@ -27,7 +27,7 @@ class TestPgmplTranslate(unittest.TestCase):
     The test function names are test_ + the name of the function they test.
     """
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     plot_kw_tests = [
         {'color': 'r'},

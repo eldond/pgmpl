@@ -18,7 +18,7 @@ from pgmpl.colorbar import Colorbar
 
 class TestPgmplColorbar(unittest.TestCase):
 
-    verbose = os.environ.get('PGMPL_TEST_VERBOSE', False)
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     # Make some test data
     x = np.linspace(0, 1, 10)
