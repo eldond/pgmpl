@@ -38,6 +38,9 @@ class TestPgmplTracking(unittest.TestCase):
         assert dummy not in tracker.open_windows
         assert len(open_windows1) == len(open_windows2) + 1
 
+    def test_tracker_warnings(self):
+        tracker.window_closed('this is obviously not a tracked window, so there should be a warning')
+
 
 if __name__ == '__main__':
     unittest.main()
