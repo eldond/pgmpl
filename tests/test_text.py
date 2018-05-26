@@ -24,6 +24,7 @@ class TestPgmplText(unittest.TestCase):
         """Very basic test of just initializing the Text class"""
         t = Text(0.5, 0.5, 'text1')
         assert isinstance(t, Text)
+        assert t is t()
         if self.verbose:
             print('test_text_simple: t = {}'.format(t))
 
