@@ -32,7 +32,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig1.close()
 
     def test_fig_methods(self):
-        """Test Figure methods gca, clear, and close"""
+        """Test Figure methods gca, show, clear, and close"""
         from pgmpl.axes import Axes
         fig = Figure()
         ax = fig.gca()
@@ -40,6 +40,7 @@ class TestPgmplFigure(unittest.TestCase):
         fig.suptitle('suptitle text in unittest')
         ax2 = fig.gca()
         assert ax2 == ax
+        fig.show()
         fig.clear()
         fig.close()
         assert fig.clearfig == fig.clear  # Make sure this assignment didn't break.
