@@ -159,6 +159,32 @@ def twod_demo():
     return fig, axs
 
 
+def open_examples(close_after=False, start_event=True):
+    print('pgmpl examples...')
+    pgmpl.util.set_debug(0)
+
+    a = short_demo()
+    b = demo_plot()
+    c = log_demo()
+    d = twod_demo()
+    pgmpl.util.printd('  Example plots: a = {}, b = {}, c = {}, d = {}'.format(a, b, c, d))
+    tracker.status()
+
+    if close_after:
+        a[0].close()
+        b[0].close()
+        c[0].close()
+        d[0].close()
+        tracker.status()
+    elif start_event:
+        # Start Qt event loop unless running in interactive mode or using pyside.
+        if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+            print('Starting event loop for pgmpl examples...')
+            pgmpl.app.exec_()
+        else:
+            print('Done with pgmpl examples.')
+
+
 class TestPgmplExamples(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
@@ -167,33 +193,9 @@ class TestPgmplExamples(unittest.TestCase):
         """
         Just call them all
         """
-        p1 = short_demo()
-        p2 = demo_plot()
-        p3 = log_demo()
-        p4 = twod_demo()
-        p1[0].close()
-        p2[0].close()
-        p3[0].close()
-        p4[0].close()
+        open_examples(close_after=True)
         if self.verbose:
             print('  Tested examples.py')
 
-
-def open_examples():
-    print('pgmpl examples...')
-    pgmpl.util.set_debug(0)
-    a = short_demo()
-    b = demo_plot()
-    c = log_demo()
-    d = twod_demo()
-    pgmpl.util.printd('  Example plots: a = {}, b = {}, c = {}, d = {}'.format(a, b, c, d))
-    tracker.status()
-    # Start Qt event loop unless running in interactive mode or using pyside.
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        print('Starting event loop for pgmpl examples...')
-        pgmpl.app.exec_()
-    else:
-        print('Done with pgmpl examples.')
-
 if __name__ == '__main__':
-    open_examples()
+    open_examples(start_event=True)
