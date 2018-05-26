@@ -45,5 +45,13 @@ class TestPgmplText(unittest.TestCase):
             print('test_text_on_plot: t1, t2 ,t3, t4 = {}, {}, {}, {}'.format(t1, t2, t3, t4))
         fig.close()
 
+    def test_test_warnings(self):
+        """Use all the unsupported keywords to throw warnings"""
+        t = Text(0.51, 0.5, 'text', wrap=True, fontproperties={}, fake_keyword=True, linespacing=2, usetex=True,
+                 rotation_mode='default', multialignment='left')
+        assert isinstance(t, Text)  # It should still return the instance using the implemented keywords.
+        if self.verbose:
+            print('test_text_warnings: tried to make a Text instance using unimplemented keywords. t = {}'.format(t))
+
 if __name__ == '__main__':
     unittest.main()
