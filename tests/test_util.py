@@ -25,13 +25,15 @@ class TestPgmplUtil(unittest.TestCase):
     verbose = False
 
     def test_printd(self):
-        test_string_1 = 'this string should print, but the other string should not'
-        test_string_2 = 'this string should NOT print, but the other string SHOULD'
+        test_string_1 = '\nthis string should print, but the other string should not'
+        test_string_2 = '\nthis string should NOT print, but the other string SHOULD'
         debug = os.environ.get('PGMPL_DEBUG', "0")
         os.environ['PGMPL_DEBUG'] = "1"
         printd(test_string_1)
+        printd('this-should-print:', 'test-item-1a', 'test_item_2a_in-list-of-things', 5, 6, 'more-things-in-the-list')
         os.environ['PGMPL_DEBUG'] = "0"
         printd(test_string_2)
+        printd('SHOULD-NOT-PRINT:', 'test-item-1b', 'testitem2b-in-a-listofthings', 5, 6.1, 'morelistlol', 'blah')
         os.environ['PGMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
         if self.verbose:
             print('  test_printd completed')
@@ -58,6 +60,7 @@ class TestPgmplUtil(unittest.TestCase):
         assert is_iterable('blah')
         assert not is_iterable(1)
         assert not is_iterable(0.1)
+        assert not is_iterable(None)
         if self.verbose:
             print('  test_is_iterable completed')
 
