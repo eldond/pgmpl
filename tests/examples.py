@@ -161,28 +161,32 @@ def twod_demo():
 
 class TestPgmplExamples(unittest.TestCase):
 
-    verbose = False
+    verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
     def test_demo_plot(self):
         """
         Just call them all
         """
-        short_demo()
-        demo_plot()
-        log_demo()
-        twod_demo()
+        p1 = short_demo()
+        p2 = demo_plot()
+        p3 = log_demo()
+        p4 = twod_demo()
+        p1[0].close()
+        p2[0].close()
+        p3[0].close()
+        p4[0].close()
         if self.verbose:
             print('  Tested examples.py')
 
 
-if __name__ == '__main__':
+def open_examples():
     print('pgmpl examples...')
     pgmpl.util.set_debug(0)
     a = short_demo()
     b = demo_plot()
     c = log_demo()
     d = twod_demo()
-    a[0].close()  # This is not needed, but it makes testing faster.
+    pgmpl.util.printd('  Example plots: a = {}, b = {}, c = {}, d = {}'.format(a, b, c, d))
     tracker.status()
     # Start Qt event loop unless running in interactive mode or using pyside.
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
@@ -190,3 +194,6 @@ if __name__ == '__main__':
         pgmpl.app.exec_()
     else:
         print('Done with pgmpl examples.')
+
+if __name__ == '__main__':
+    open_examples()
