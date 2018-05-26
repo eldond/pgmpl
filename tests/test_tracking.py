@@ -11,6 +11,7 @@ import os
 import unittest
 import numpy as np
 import copy
+import warnings
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
@@ -39,8 +40,17 @@ class TestPgmplTracking(unittest.TestCase):
         assert len(open_windows1) == len(open_windows2) + 1
 
     def test_tracker_warnings(self):
-        tracker.window_closed('this is obviously not a tracked window, so there should be a warning')
-
+        warnings_expected = 1
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            tracker.window_closed('this is obviously not a tracked window, so there should be a warning')
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        if self.verbose:
+            print('test_tracker_warnings: called window_closed with a nonsense window to trigger a warning  '
+                  'and got {}/{} warnings.'.format(len(w), warnings_expected))
 
 if __name__ == '__main__':
     unittest.main()
