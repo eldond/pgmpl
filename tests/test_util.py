@@ -13,7 +13,7 @@ import os
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
-from pgmpl.util import tolist, printd, is_iterable
+from pgmpl.util import tolist, printd, is_iterable, set_debug
 
 
 class TestPgmplUtil(unittest.TestCase):
