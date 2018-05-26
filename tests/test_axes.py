@@ -27,6 +27,17 @@ class TestPgmplAxes(unittest.TestCase):
     y = x**2 + 2.5
     z = x**3 - x**2 * 1.444
 
+    imgdat1 = np.zeros((8, 8, 3))
+    imgdat1[0, 0, :] = 0.9
+    imgdat1[4, 4, :] = 1
+    imgdat1[3, 2, 0] = 0.5
+    imgdat1[2, 3, 1] = 0.7
+    imgdat1[3, 3, 2] = 0.6
+
+    x1 = x
+    x2 = np.linspace(0, 2.1, 25)
+    two_d_data = (x1[:, np.newaxis] - 0.94)**2 + (x2[np.newaxis, :] - 1.2)**2
+
     def test_axes_init(self):
         ax = Axes()
         if self.verbose:
@@ -48,18 +59,20 @@ class TestPgmplAxes(unittest.TestCase):
                    verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
 
     def test_axes_imshow(self):
-        a = np.zeros((8, 8, 3))
-        a[0, 0, :] = 0.9
-        a[4, 4, :] = 1
-        a[3, 2, 0] = 0.5
-        a[2, 3, 1] = 0.7
-        a[3, 3, 2] = 0.6
+        from pgmpl.axes import AxesImage
+        a = self.imgdat1
         ax = Axes()
-        ax.imshow(a)
+        img = ax.imshow(a)
         ax1 = Axes()
-        ax1.imshow(a[:, :, 0:2])
+        img1 = ax1.imshow(a[:, :, 0:2])
+        ax2 = Axes()
+        img2 = ax2.imshow(self.two_d_data)
+        assert isinstance(img, AxesImage)
+        assert isinstance(img1, AxesImage)
+        assert isinstance(img2, AxesImage)
         if self.verbose:
-            print('test_axes_imshow: ax = {}, ax1 = {}'.format(ax, ax1))
+            print('test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
+                ax, ax1, ax2, img, img1, img2))
 
     def test_axes_err(self):
         ax = Axes()

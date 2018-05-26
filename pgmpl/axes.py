@@ -279,7 +279,8 @@ class Axes(pg.PlotItem):
                 self.plot(x + xerr, y, **capkw)
                 self.plot(x - xerr, y, **capkw)
 
-    def _sanitize_errbar_data(self, x, y=None, xerr=None, yerr=None, mask=None):
+    @staticmethod
+    def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
         """
         Helper function for errorbar.
         Forces all data to be the same size and applies filters
@@ -306,7 +307,7 @@ class Axes(pg.PlotItem):
             elif len(v) == 1:
                 return v[0] + xx[mask]*0
 
-        return (prep(x), prep(y), prep(xerr), prep(yerr))
+        return prep(x), prep(y), prep(xerr), prep(yerr)
 
     def errorbar(
             self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
