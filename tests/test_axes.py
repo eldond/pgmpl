@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import os
 import unittest
 import numpy as np
+import warnings
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
@@ -74,6 +75,25 @@ class TestPgmplAxes(unittest.TestCase):
         if self.verbose:
             print('test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
                 ax, ax1, ax2, img, img1, img2))
+
+    def test_axes_imshow_warnings(self):
+        from pgmpl.axes import AxesImage
+        a = self.imgdat1
+        ax = Axes()
+
+        warnings_expected = 7
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            img = ax.imshow(a, shape=np.shape(a), imlim=55, interpolation='nearest', filternorm=2, filterrad=5.0,
+                            resample=True, url='google.com', blah=True)
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
+        if self.verbose:
+            print('test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
+                  'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))
 
     def test_axes_err(self):
         ax = Axes()
