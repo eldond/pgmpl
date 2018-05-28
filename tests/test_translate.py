@@ -37,7 +37,7 @@ class TestPgmplTranslate(unittest.TestCase):
         {'color': 'm', 'linestyle': ' ', 'marker': 'd', 'mew': 2},
         {'color': ' ', 'markeredgewidth': 1.5},
         {'linestyle': '-.'},
-        {'symbol': '+', 'alpha': 0.7},
+        {'marker': '+', 'alpha': 0.7},
     ]
 
     nt = len(plot_kw_tests)
