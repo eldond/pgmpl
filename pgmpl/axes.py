@@ -77,8 +77,9 @@ class Axes(pg.PlotItem):
                 self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
+    @staticmethod
     def _prep_scatter_colors(
-            self, n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
+            n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
         """Helper function to prepare colors for scatter plot"""
         # Translate face colors
         if c is None:
@@ -510,11 +511,16 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
-    def __init__(
-            self, x, cmap=None, norm=None, interpolation=None, alpha=None, vmin=None, vmax=None,
-            origin=None, extent=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, resample=None, url=None,
-            data=None, **kwargs
-    ):
+    def __init__(self, x, **kwargs):
+        data = kwargs.pop('data', None)
+        cmap = kwargs.pop('cmap', None)
+        norm = kwargs.pop('norm', None)
+        alpha = kwargs.pop('alpha', None)
+        vmin = kwargs.pop('vmin', None)
+        vmax = kwargs.pop('vmax', None)
+        extent = kwargs.pop('extent', None)
+        origin = kwargs.pop('origin', None)
+
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
@@ -522,19 +528,7 @@ class AxesImage(pg.ImageItem):
 
         xs = copy.copy(x)
 
-        if shape is not None:
-            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
-                          'so I had nothing to emulate.')
-        if imlim is not None:
-            warnings.warn('Axes.imshow ignored keyword: imlim.')
-        if interpolation is not None:
-            warnings.warn('Axes.imshow ignored keyword: interpolation.')
-        if filternorm != 1 or filterrad != 4.0:
-            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
-        if resample is not None:
-            warnings.warn('Axes.imshow ignored keyword: resample.')
-        if url is not None:
-            warnings.warn('Axes.imshow ignored keyword: url.')
+        self.check_inputs(**kwargs)
 
         if origin in ['upper', None]:
             xs = xs[::-1]
@@ -563,6 +557,24 @@ class AxesImage(pg.ImageItem):
         self.alpha = alpha
         self.vmin = x.min() if vmin is None else vmin
         self.vmax = x.max() if vmax is None else vmax
+
+    @staticmethod
+    def check_inputs(**kw):
+        if kw.pop('shape', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
+                          'so I had nothing to emulate.')
+        if kw.pop('imlim', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: imlim.')
+        if kw.pop('interpolation', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: interpolation.')
+        if kw.pop('filternorm', 1) != 1 or kw.pop('filterrad', 4.0) != 4.0:
+            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
+        if kw.pop('resample', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: resample.')
+        if kw.pop('url', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: url.')
+        if len(kw.keys()):
+            warnings.warn('Axes.imshow got unhandled keywords: {}'.format(kw.keys()))
 
 
 class Legend:
