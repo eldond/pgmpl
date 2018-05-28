@@ -211,6 +211,41 @@ def symbol_translator(**kw):
     return symbol
 
 
+def symbol_edge_setup(pgkw, plotkw):
+    """
+    Manage keywords related to symbol edges
+    :param pgkw: Dictionary of new keywords to pass to pyqtgraph functions
+    :param plotkw: Dictionary of matplotlib style keywords (translation in progress)
+    """
+    default_mec = plotkw.get('color', None) if plotkw.get('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
+    mec = plotkw.pop('markeredgecolor', default_mec)
+    mew = plotkw.pop('markeredgewidth', None)
+    symbol = symbol_translator(**plotkw)
+    if symbol is not None:
+        pgkw['symbol'] = symbol
+        penkw = {}
+
+        if mec is not None:
+            penkw['color'] = mec
+        if mew is not None:
+            penkw['width'] = mew
+        if 'alpha' in plotkw:
+            penkw['alpha'] = plotkw.pop('alpha')
+        if len(penkw.keys()):
+            pgkw['symbolPen'] = setup_pen_kw(**penkw)
+
+        # Handle fill
+        brushkw = {}
+        brush_color = color_translator(**plotkw)
+        if brush_color is not None:
+            brushkw['color'] = brush_color
+        if len(brushkw.keys()):
+            pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
+    else:
+        pgkw.pop('symbolSize', None)  # This isn't used when symbol is undefined, but it can cause problems, so remove.
+    printd('plotkw symbol = {}; symbol = {}'.format(plotkw.get('symbol', 'no symbol defined'), symbol), level=1)
+
+
 def setup_pen_kw(**kw):
     """
     Builds a pyqtgraph pen (object containing color, linestyle, etc. information) from Matplotlib keywords.
@@ -281,32 +316,7 @@ def plotkw_translator(**plotkw):
             pgkw[direct_translations[direct]] = plotkw.pop(direct)
 
     # Handle symbol edge
-    default_mec = plotkw.get('color', None) if plotkw.get('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
-    mec = plotkw.pop('markeredgecolor', default_mec)
-    mew = plotkw.pop('markeredgewidth', None)
-    symbol = symbol_translator(**plotkw)
-    if symbol is not None:
-        pgkw['symbol'] = symbol
-        penkw = {}
-
-        if mec is not None:
-            penkw['color'] = mec
-        if mew is not None:
-            penkw['width'] = mew
-        if 'alpha' in plotkw:
-            penkw['alpha'] = plotkw.pop('alpha')
-        if len(penkw.keys()):
-            pgkw['symbolPen'] = setup_pen_kw(**penkw)
-
-        # Handle fill
-        brushkw = {}
-        brush_color = color_translator(**plotkw)
-        if brush_color is not None:
-            brushkw['color'] = brush_color
-        if len(brushkw.keys()):
-            pgkw['symbolBrush'] = pg.mkBrush(**brushkw)
-    else:
-        pgkw.pop('symbolSize', None)  # This isn't used when symbol is undefined, but it can cause problems, so remove.
+    symbol_edge_setup(pgkw, plotkw)
 
     # Pass through other keywords
     late_pops = ['color', 'alpha', 'linewidth', 'marker', 'linestyle']
@@ -315,5 +325,4 @@ def plotkw_translator(**plotkw):
         plotkw.pop(late_pop, None)
     plotkw.update(pgkw)
 
-    printd('plotkw symbol = {}; symbol = {}'.format(plotkw.get('symbol', 'no symbol defined'), symbol), level=1)
     return plotkw

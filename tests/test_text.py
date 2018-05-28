@@ -47,7 +47,7 @@ class TestPgmplText(unittest.TestCase):
             print('test_text_on_plot: t1, t2 ,t3, t4 = {}, {}, {}, {}'.format(t1, t2, t3, t4))
         fig.close()
 
-    def test_test_warnings(self):
+    def test_text_warnings(self):
         """Use all the unsupported keywords to throw warnings"""
         warnings_expected = 7
         with warnings.catch_warnings(record=True) as w:

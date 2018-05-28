@@ -24,7 +24,7 @@ from collections import defaultdict
 # pgmpl
 # noinspection PyUnresolvedReferences
 import __init__  # __init__ does setup stuff like making sure a QApp exists
-from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator
+from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
 from util import printd, tolist, is_numeric
 from text import Text
 
@@ -77,8 +77,9 @@ class Axes(pg.PlotItem):
                 self.prop_cycle_index = 0
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
+    @staticmethod
     def _prep_scatter_colors(
-            self, n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
+            n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
         """Helper function to prepare colors for scatter plot"""
         # Translate face colors
         if c is None:
@@ -108,7 +109,7 @@ class Axes(pg.PlotItem):
         return brush_colors, brush_edges
 
     def scatter(
-            self, x, y, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
+            self, x=None, y=None, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
             linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
     ):
         """
@@ -141,7 +142,7 @@ class Axes(pg.PlotItem):
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        brush_colors, brush_edges =  self._prep_scatter_colors(
+        brush_colors, brush_edges = self._prep_scatter_colors(
             n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
@@ -188,7 +189,7 @@ class Axes(pg.PlotItem):
         """Imitates basic use of matplotlib.axes.Axes.set_title()"""
         self.setTitle(label)
 
-    def set_aspect(self, aspect, adjustable=None, anchor=None, share=False):
+    def set_aspect(self, aspect, adjustable=None, **kw):
         vb = self.getViewBox()
         if aspect == 'equal':
             vb.setAspectLocked(lock=True, ratio=1)
@@ -198,12 +199,12 @@ class Axes(pg.PlotItem):
             vb.setAspectLocked(lock=True, ratio=aspect)
         if adjustable not in ['box', None]:
             warnings.warn('Axes.set_aspect ignored keyword: adjustable')
-        if anchor is not None:
+        if kw.pop('anchor', None) is not None:
             warnings.warn('Axes.set_aspect ignored keyword: anchor')
-        if share:
+        if kw.pop('share', False):
             warnings.warn('Axes.set_aspect ignored keyword: share')
 
-    def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
+    def text(self, x, y, s, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
         :param x: scalar
@@ -214,9 +215,9 @@ class Axes(pg.PlotItem):
         :param kwargs:
         :return: Text instance
         """
-        if withdash:
+        if kwargs.pop('withdash', False):
             warnings.warn('  pgmpl.Axes.text withdash=True keyword is not not handled (yet?)')
-        text = Text(x, y, s, fontproperties=fontdict, **kwargs)
+        text = Text(x, y, s, fontproperties=kwargs.pop('fontdict', None), **kwargs)
         self.addItem(text)
         return text
 
@@ -228,8 +229,7 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
-    def _draw_errbar_caps(self, x, y, xerr, yerr,
-                          capsize=None, capthick=None, lolims=None, uplims=None, xlolims=None, xuplims=None, **capkw):
+    def _draw_errbar_caps(self, x, y, **capkw):
         """
         Helper function for errorbar.
         Draw caps on errorbars. pyqtgraph does the caps differently from matplotlib, so we'll put this together
@@ -238,46 +238,33 @@ class Axes(pg.PlotItem):
         :param capsize: Size of error bar caps (sets size of markers)
         :param capkw: deepcopy of kwargs passed to errorbar. These are passed to plot when drawing the caps.
         """
+        # Remove unused keywords so they don't make trouble later
         capkw.pop('pg_label', None)
         capkw.pop('label', None)
+        # Extract keywords
+        capsize = capkw.pop('capsize', None)
+        capthick = capkw.pop('capthick', None)
+        xerr = capkw.pop('xerr', None)
+        yerr = capkw.pop('yerr', None)
+
+        # Setup
         capkw['linestyle'] = ' '
         if capsize is not None:
             capkw['markersize'] = capsize
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
+
         if yerr is not None and np.atleast_1d(yerr).max() > 0:
-            if uplims and lolims:
-                capkw['marker'] = '^'
-                self.plot(x, y + yerr, **capkw)
-                capkw['marker'] = 'v'
-                self.plot(x, y - yerr, **capkw)
-            elif uplims:
-                capkw['marker'] = 'v'
-                self.plot(x, y - yerr, **capkw)
-            elif lolims:
-                capkw['marker'] = '^'
-                self.plot(x, y + yerr, **capkw)
-            else:  # Neither lolims nor uplims
-                capkw['marker'] = '_'
-                self.plot(x, y + yerr, **capkw)
-                self.plot(x, y - yerr, **capkw)
+            capkw['marker'] = 'v' if capkw.pop('lolims', None) else '_'
+            self.plot(x, y - yerr, **capkw)
+            capkw['marker'] = '^' if capkw.pop('uplims', None) else '_'
+            self.plot(x, y + yerr, **capkw)
 
         if xerr is not None and np.atleast_1d(xerr).max() > 0:
-            if xuplims and xlolims:
-                capkw['marker'] = '>'
-                self.plot(x + xerr, y, **capkw)
-                capkw['marker'] = '<'
-                self.plot(x - xerr, y, **capkw)
-            elif xuplims:
-                capkw['marker'] = '<'
-                self.plot(x - xerr, y, **capkw)
-            elif xuplims:
-                capkw['marker'] = '>'
-                self.plot(x + xerr, y, **capkw)
-            else:  # Neither xuplims nor xlolims
-                capkw['marker'] = '|'
-                self.plot(x + xerr, y, **capkw)
-                self.plot(x - xerr, y, **capkw)
+            capkw['marker'] = '<' if capkw.pop('xlolims', None) else '|'
+            self.plot(x - xerr, y, **capkw)
+            capkw['marker'] = '>' if capkw.pop('xuplims', None) else '|'
+            self.plot(x + xerr, y, **capkw)
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
@@ -309,18 +296,15 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
-    def errorbar(
-            self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
-            barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
-            errorevery=1, capthick=None, data=None, **kwargs
-    ):
+    def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
         :return: pyqtgraph.ErrorBarItem instance
             Does not include the line through nominal values as would be included in matplotlib's errorbar; this is
             drawn, but it is a separate object.
         """
-        linestyle = kwargs.get('linestyle', kwargs.get('ls', None))
+        kwargs = dealias(**kwargs)
+        data = kwargs.pop('data', None)
 
         if data is not None:
             x = data.get('x', None)
@@ -328,20 +312,18 @@ class Axes(pg.PlotItem):
             xerr = data.get('xerr', None)
             yerr = data.get('yerr', None)
 
-        if fmt != '':
-            kwargs['fmt'] = fmt
-
         # Separate keywords into those that affect a line through the data and those that affect the errorbars
         ekwargs = copy.deepcopy(kwargs)
-        if ecolor is not None:
-            ekwargs['color'] = ecolor
-        if elinewidth is not None:
-            ekwargs['linewidth'] = elinewidth
+        if kwargs.get('ecolor', None) is not None:
+            ekwargs['color'] = kwargs.pop('ecolor')
+        if kwargs.get('elinewidth', None) is not None:
+            ekwargs['linewidth'] = wargs.pop('elinewidth')
         epgkw = plotkw_translator(**ekwargs)
-        w = np.array([True if i % int(round(errorevery)) == 0 else False for i in range(len(np.atleast_1d(x)))])
+        w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
+                      for i in range(len(np.atleast_1d(x)))])
 
         # Draw the line below the errorbars
-        if linestyle not in [' '] and not barsabove:
+        if kwargs.get('linestyle', None) not in [' '] and not kwargs.get('barsabove', None):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
@@ -352,26 +334,22 @@ class Axes(pg.PlotItem):
         )
         self.addItem(errb)
 
-        if kwargs.get('mew', None) is not None:
-            capthick = kwargs.pop('mew')
         if kwargs.get('markeredgewidth', None) is not None:
-            capthick = kwargs.pop('markeredgewidth')
+            kwargs['capthick'] = kwargs.pop('markeredgewidth')
 
-        if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
+        if ((kwargs.get('capsize', None) is not None) and (kwargs.get('capsize', 0) <= 0)) or \
+                ((kwargs.get('capthick', None) is not None) and (kwargs.get('capthick', 0) <= 0)):
             printd('  Axes.errorbar no caps')
         else:
-            self._draw_errbar_caps(
-                xp, yp, xerrp, yerrp, capsize=capsize, capthick=capthick,
-                lolims=lolims, uplims=uplims, xlolims=xlolims, xuplims=xuplims, **copy.deepcopy(kwargs)
-            )
+            self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
 
         # OR draw the line above the errorbars
-        if linestyle not in [' '] and barsabove:
+        if kwargs.pop('linestyle', None) not in [' '] and kwargs.pop('barsabove', None):
             self.plot(x, y, **kwargs)
 
         return errb
 
-    def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
+    def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
         :return: list of pyqtgraph.FillBetweenItem instances
@@ -379,6 +357,7 @@ class Axes(pg.PlotItem):
             range into n segments, then the list will have n elements.
         """
         # Set up xy data
+        data = kwargs.pop('data', None)
         if data is not None:
             x = data['x']
             y1 = data['y1']
@@ -388,7 +367,7 @@ class Axes(pg.PlotItem):
         y1 = np.atleast_1d(y1)
         y2 = np.atleast_1d(y2)
         if len(y2) == 1:
-            y2 += x*0
+            y2 = x*0 + y2
 
         # Set up colors and display settings
         ekw = copy.deepcopy(kwargs)
@@ -404,10 +383,10 @@ class Axes(pg.PlotItem):
             brush, ekw, setup_pen_kw(**ekw)))
 
         # Handle special keywords
-        if where is not None:
-            if interpolate:
+        if kwargs.get('where', None) is not None:
+            if kwargs.pop('interpolate', False):
                 warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
-            d = np.diff(np.append(0, where))
+            d = np.diff(np.append(0, kwargs['where']))
             start_i = np.where(d == 1)[0]
             end_i = np.where(d == -1)[0]
             if len(end_i) < len(start_i):
@@ -418,7 +397,7 @@ class Axes(pg.PlotItem):
             start_i = [0]
             end_i = [len(x)]
 
-        if step is not None:
+        if kwargs.pop('step', None) is not None:
             warnings.warn('Warning: step keyword to fill_between is not handled yet.')
 
         # Do plot
@@ -436,7 +415,7 @@ class Axes(pg.PlotItem):
 
         return fb
 
-    def set_xlim(self, left=None, right=None, emit=True, auto=False, **kw):
+    def set_xlim(self, left=None, right=None, **kw):
         """Direct imitation of matplotlib set_xlim"""
         if right is None and len(np.atleast_1d(left)) == 2:
             new_xlims = tuple(left)  # X limits were passed in as first argument
@@ -446,9 +425,9 @@ class Axes(pg.PlotItem):
         else:
             new_xlims = None
 
-        if not emit:
+        if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_xlim is not handled yet')
-        if auto:
+        if kw.pop('auto', False):
             warnings.warn('auto keyword to set_xlim is not handled yet')
         if len(kw.keys()):
             warnings.warn('set_xlim ignores any extra keywords in **kw')
@@ -457,7 +436,7 @@ class Axes(pg.PlotItem):
             self.setXRange(new_xlims[0], new_xlims[1])
         return new_xlims
 
-    def set_ylim(self, bottom=None, top=None, emit=True, auto=False, **kw):
+    def set_ylim(self, bottom=None, top=None, **kw):
         """Direct imitation of matplotlib set_ylim"""
         if top is None and len(np.atleast_1d(bottom)) == 2:
             new_ylims = tuple(bottom)  # Y limits were passed in as first argument
@@ -467,9 +446,9 @@ class Axes(pg.PlotItem):
         else:
             new_ylims = None
 
-        if not emit:
+        if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_ylim is not handled yet')
-        if auto:
+        if kw.pop('auto', False):
             warnings.warn('auto keyword to set_ylim is not handled yet')
         if len(kw.keys()):
             warnings.warn('set_ylim ignores any extra keywords in **kw')
@@ -510,11 +489,16 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
-    def __init__(
-            self, x, cmap=None, norm=None, interpolation=None, alpha=None, vmin=None, vmax=None,
-            origin=None, extent=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, resample=None, url=None,
-            data=None, **kwargs
-    ):
+    def __init__(self, x, **kwargs):
+        data = kwargs.pop('data', None)
+        cmap = kwargs.pop('cmap', None)
+        norm = kwargs.pop('norm', None)
+        alpha = kwargs.pop('alpha', None)
+        vmin = kwargs.pop('vmin', None)
+        vmax = kwargs.pop('vmax', None)
+        extent = kwargs.pop('extent', None)
+        origin = kwargs.pop('origin', None)
+
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
@@ -522,19 +506,7 @@ class AxesImage(pg.ImageItem):
 
         xs = copy.copy(x)
 
-        if shape is not None:
-            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
-                          'so I had nothing to emulate.')
-        if imlim is not None:
-            warnings.warn('Axes.imshow ignored keyword: imlim.')
-        if interpolation is not None:
-            warnings.warn('Axes.imshow ignored keyword: interpolation.')
-        if filternorm != 1 or filterrad != 4.0:
-            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
-        if resample is not None:
-            warnings.warn('Axes.imshow ignored keyword: resample.')
-        if url is not None:
-            warnings.warn('Axes.imshow ignored keyword: url.')
+        self.check_inputs(**kwargs)
 
         if origin in ['upper', None]:
             xs = xs[::-1]
@@ -563,6 +535,24 @@ class AxesImage(pg.ImageItem):
         self.alpha = alpha
         self.vmin = x.min() if vmin is None else vmin
         self.vmax = x.max() if vmax is None else vmax
+
+    @staticmethod
+    def check_inputs(**kw):
+        if kw.pop('shape', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
+                          'so I had nothing to emulate.')
+        if kw.pop('imlim', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: imlim.')
+        if kw.pop('interpolation', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: interpolation.')
+        if kw.pop('filternorm', 1) != 1 or kw.pop('filterrad', 4.0) != 4.0:
+            warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
+        if kw.pop('resample', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: resample.')
+        if kw.pop('url', None) is not None:
+            warnings.warn('Axes.imshow ignored keyword: url.')
+        if len(kw.keys()):
+            warnings.warn('Axes.imshow got unhandled keywords: {}'.format(kw.keys()))
 
 
 class Legend:
