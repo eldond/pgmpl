@@ -114,7 +114,8 @@ class TestPgmplAxes(unittest.TestCase):
     def test_axes_err(self):
         ax = Axes()
         yerr = self.y*0.1
-        ax.errorbar(self.x, self.y, yerr, color='r')
+        ax.errorbar(-self.x, self.y, yerr, color='r')
+        ax.errorbar(self.x, self.y, yerr, color='r', capsize=6, capthick=1.25, marker='s', ecolor='m')
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         if self.verbose:
             print('test_axes_err: ax = {}'.format(ax))

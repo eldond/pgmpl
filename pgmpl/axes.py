@@ -24,7 +24,7 @@ from collections import defaultdict
 # pgmpl
 # noinspection PyUnresolvedReferences
 import __init__  # __init__ does setup stuff like making sure a QApp exists
-from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator
+from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
 from util import printd, tolist, is_numeric
 from text import Text
 
@@ -307,7 +307,9 @@ class Axes(pg.PlotItem):
             Does not include the line through nominal values as would be included in matplotlib's errorbar; this is
             drawn, but it is a separate object.
         """
-        linestyle = kwargs.get('linestyle', kwargs.get('ls', None))
+        kwargs = dealias(**kwargs)
+
+        linestyle = kwargs.get('linestyle', None)
 
         if data is not None:
             x = data.get('x', None)
@@ -339,8 +341,6 @@ class Axes(pg.PlotItem):
         )
         self.addItem(errb)
 
-        if kwargs.get('mew', None) is not None:
-            capthick = kwargs.pop('mew')
         if kwargs.get('markeredgewidth', None) is not None:
             capthick = kwargs.pop('markeredgewidth')
 

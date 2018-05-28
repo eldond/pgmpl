@@ -52,7 +52,6 @@ def demo_plot():
 
     axs[0, 1].fill_between(x, y1, y2, facecolor=(0, 0, 1, 0.5), edgecolor='k')
     axs[0, 1].fill_between(x, y1+20, y2+25, color='r', alpha=0.4, edgecolor='k', linewidth=3, where=(x > 7) | (x < 4))
-    axs[0, 1].set_aspect(10)
 
     axs[1, 0].plot(x, y1, color='r', label='y1', lw=3)
     axs[1, 0].plot(x, y2, color='k', label='y2')
@@ -67,9 +66,9 @@ def demo_plot():
     y2line = axs[1, 1].plot(x, y2)
     axs[1, 1].plot(x, y3)
     axs[1, 1].legend([beb, y2line], ['manual label for blue errorbar', 'manual label for y2line'])
-    axs[1, 1].errorbar(-x[0:3], y1[0:3], y1[0:3] * 0.25, color='m', uplims=True)
-    axs[1, 1].errorbar(-x[3:6], y1[3:6], y1[3:6] * 0.25, color='k', lolims=True)
-    axs[1, 1].errorbar(-x[6:9], y1[6:9], y1[6:9] * 0.25, color='y', lolims=True, uplims=True)
+    axs[1, 1].errorbar(-x[0:3], y1[0:3], y1[0:3] * 0.25, color='m', uplims=True, marker='o', ecolor='r')
+    axs[1, 1].errorbar(-x[3:6], y1[3:6], y1[3:6] * 0.25, color='k', lolims=True, capsize=5)
+    axs[1, 1].errorbar(-x[6:9], y1[6:9], y1[6:9] * 0.25, color='y', lolims=True, uplims=True, capsize=10, capthick=2)
     axs[1, 1].errorbar(-x[20:25], y1[20:25], y1[20:25] * 0.1, x[20:25] * 0.05, color='r', xlolims=True)
     axs[1, 1].errorbar(-x[30:35], y1[30:35], y1[30:35] * 0.1, x[30:35] * 0.05, color='b', xuplims=True)
     axs[1, 1].errorbar(-x[40:45], y1[40:45], y1[40:45] * 0.1, x[40:45] * 0.05, color='g', xuplims=True, xlolims=True)
@@ -95,6 +94,7 @@ def demo_plot():
     axs[2, 1].text(0, 0, 'these axes were cleared', color='k')
     axs[2, 1].plot([0, 1], [1, 0], label='re-added after clear')
     axs[2, 1].legend()
+    axs[2, 1].set_aspect(10)
 
     fig.suptitle('super title of the figure')
     fig.suptitle('suptitle 2: the replacement suptitle (the old one should be gone)')
