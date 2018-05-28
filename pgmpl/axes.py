@@ -337,8 +337,8 @@ class Axes(pg.PlotItem):
         if kwargs.get('markeredgewidth', None) is not None:
             kwargs['capthick'] = kwargs.pop('markeredgewidth')
 
-        if ((kwargs['capsize'] is not None) and (kwargs['capsize'] <= 0)) or \
-                ((kwargs['capthick'] <= 0) and (kwargs['capthick'] is not None)):
+        if ((kwargs.get('capsize', None) is not None) and (kwargs.get('capsize', 0) <= 0)) or \
+                ((kwargs.get('capthick', None) is not None) and (kwargs.get('capthick', 0) <= 0)):
             printd('  Axes.errorbar no caps')
         else:
             self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
