@@ -122,7 +122,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
-        ax.fill_between(self.x, -self.y-yerr-20, -20)
+        # ax.fill_between(self.x, -self.y-yerr-20, -20)
         if self.verbose:
             print('test_axes_err: ax = {}'.format(ax))
 
