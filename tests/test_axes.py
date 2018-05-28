@@ -53,12 +53,14 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_scatter(self):
         ax = Axes()
+        ax.scatter(self.x, -self.y)
         ax.scatter(self.x, self.y, c=self.z)
-        ax.scatter(self.x, self.y, c='b')
+        ax.scatter(self.x, self.y, c='b', aspect='equal')
         ax.scatter(self.x, self.y, c=self.z, cmap='plasma', marker='s', linewidths=1, edgecolors='r')
         # noinspection PyTypeChecker
         ax.scatter(self.x, self.x*0, c=self.x, cmap='jet', marker=None,
                    verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])
+        ax.scatter(data={'x': self.x, 'y': self.y, 'c': self.z, 's': 10})
 
     def test_axes_imshow(self):
         from pgmpl.axes import AxesImage
@@ -128,8 +130,19 @@ class TestPgmplAxes(unittest.TestCase):
         ax = Axes()
         ax.plot([0, 10, 0, 1])
         ax.set_aspect('equal')
+
+        # Test warnings
+        warnings_expected = 3
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            ax.set_aspect('equal', adjustable='datalim', anchor='C', share=True)
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
         if self.verbose:
-            print('test_axes_aspect: ax = {}'.format(ax))
+            print('test_axes_aspect: tried to call Axes set_aspect() using unimplemented keywords '
+                  'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
 
     def test_axes_clear(self):
         ax = Axes()

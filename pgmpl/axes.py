@@ -109,7 +109,7 @@ class Axes(pg.PlotItem):
         return brush_colors, brush_edges
 
     def scatter(
-            self, x, y, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
+            self, x=None, y=None, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
             linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
     ):
         """
@@ -142,7 +142,7 @@ class Axes(pg.PlotItem):
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        brush_colors, brush_edges =  self._prep_scatter_colors(
+        brush_colors, brush_edges = self._prep_scatter_colors(
             n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
