@@ -99,12 +99,15 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_warnings(self):
         ax = Axes()
-        warnings_expected = 1
+        warnings_expected = 8
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger warnings.
-            ax.text(0.5, 0.91, 'text1', withdash=True)
+            ax.text(0.5, 0.91, 'text1', withdash=True)  # 1 warning
+            ax.fill_between(self.x, self.y*0.1, self.y*1.1, step='pre')  # 1 warning
+            ax.set_xlim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
+            ax.set_ylim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         if self.verbose:
@@ -116,7 +119,10 @@ class TestPgmplAxes(unittest.TestCase):
         yerr = self.y*0.1
         ax.errorbar(-self.x, self.y, yerr, color='r')
         ax.errorbar(self.x, self.y, yerr, color='r', capsize=6, capthick=1.25, marker='s', ecolor='m')
+        ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
+        ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
+        ax.fill_between(self.x, -self.y-yerr-20, -20)
         if self.verbose:
             print('test_axes_err: ax = {}'.format(ax))
 
@@ -135,7 +141,9 @@ class TestPgmplAxes(unittest.TestCase):
         ax.set_xlabel('xlabel')
         ax.set_title('title title title')
         ax.set_xlim([-1, 2])
+        ax.set_xlim(-1, 2)
         ax.set_ylim([-2, 4])
+        ax.set_ylim(-2, 4)
         ax.set_xscale('linear')
         ax.set_yscale('log')
         if self.verbose:

@@ -297,7 +297,7 @@ class Axes(pg.PlotItem):
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
     def errorbar(
-            self, x, y, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
+            self, x=None, y=None, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
             barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
             errorevery=1, capthick=None, data=None, **kwargs
     ):
@@ -358,7 +358,7 @@ class Axes(pg.PlotItem):
 
         return errb
 
-    def fill_between(self, x, y1, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
+    def fill_between(self, x=None, y1=None, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
         :return: list of pyqtgraph.FillBetweenItem instances
@@ -375,7 +375,7 @@ class Axes(pg.PlotItem):
         y1 = np.atleast_1d(y1)
         y2 = np.atleast_1d(y2)
         if len(y2) == 1:
-            y2 += x*0
+            y2 = x*0 + y2
 
         # Set up colors and display settings
         ekw = copy.deepcopy(kwargs)
