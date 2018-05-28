@@ -65,6 +65,12 @@ def demo_plot():
     y2line = axs[1, 1].plot(x, y2)
     axs[1, 1].plot(x, y3)
     axs[1, 1].legend([beb, y2line], ['manual label for blue errorbar', 'manual label for y2line'])
+    axs[1, 1].errorbar(-x[0:3], y1[0:3], y1[0:3] * 0.25, color='m', uplims=True)
+    axs[1, 1].errorbar(-x[3:6], y1[3:6], y1[3:6] * 0.25, color='k', lolims=True)
+    axs[1, 1].errorbar(-x[6:9], y1[6:9], y1[6:9] * 0.25, color='y', lolims=True, uplims=True)
+    axs[1, 1].errorbar(-x[20:25], y1[20:25], y1[20:25] * 0.1, x[20:25] * 0.05, color='r', xlolims=True)
+    axs[1, 1].errorbar(-x[30:35], y1[30:35], y1[30:35] * 0.1, x[30:35] * 0.05, color='b', xuplims=True)
+    axs[1, 1].errorbar(-x[40:45], y1[40:45], y1[40:45] * 0.1, x[40:45] * 0.05, color='g', xuplims=True, xlolims=True)
 
     axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
     axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 05], c=['r', 'b', 'g', 'k', 'm', 'y'], linewidths=1)
