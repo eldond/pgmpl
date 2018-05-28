@@ -189,7 +189,7 @@ class Axes(pg.PlotItem):
         """Imitates basic use of matplotlib.axes.Axes.set_title()"""
         self.setTitle(label)
 
-    def set_aspect(self, aspect, adjustable=None, anchor=None, share=False):
+    def set_aspect(self, aspect, adjustable=None, **kw):
         vb = self.getViewBox()
         if aspect == 'equal':
             vb.setAspectLocked(lock=True, ratio=1)
@@ -199,12 +199,12 @@ class Axes(pg.PlotItem):
             vb.setAspectLocked(lock=True, ratio=aspect)
         if adjustable not in ['box', None]:
             warnings.warn('Axes.set_aspect ignored keyword: adjustable')
-        if anchor is not None:
+        if kw.pop('anchor', None) is not None:
             warnings.warn('Axes.set_aspect ignored keyword: anchor')
-        if share:
+        if kw.pop('share', False):
             warnings.warn('Axes.set_aspect ignored keyword: share')
 
-    def text(self, x, y, s, fontdict=None, withdash=False, **kwargs):
+    def text(self, x, y, s, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
         :param x: scalar
@@ -215,9 +215,9 @@ class Axes(pg.PlotItem):
         :param kwargs:
         :return: Text instance
         """
-        if withdash:
+        if kwargs.pop('withdash', False):
             warnings.warn('  pgmpl.Axes.text withdash=True keyword is not not handled (yet?)')
-        text = Text(x, y, s, fontproperties=fontdict, **kwargs)
+        text = Text(x, y, s, fontproperties=kwargs.pop('fontdict', None), **kwargs)
         self.addItem(text)
         return text
 
@@ -349,7 +349,7 @@ class Axes(pg.PlotItem):
 
         return errb
 
-    def fill_between(self, x=None, y1=None, y2=0, where=None, interpolate=False, step=None, data=None, **kwargs):
+    def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
         :return: list of pyqtgraph.FillBetweenItem instances
@@ -357,6 +357,7 @@ class Axes(pg.PlotItem):
             range into n segments, then the list will have n elements.
         """
         # Set up xy data
+        data = kwargs.pop('data', None)
         if data is not None:
             x = data['x']
             y1 = data['y1']
@@ -382,10 +383,10 @@ class Axes(pg.PlotItem):
             brush, ekw, setup_pen_kw(**ekw)))
 
         # Handle special keywords
-        if where is not None:
-            if interpolate:
+        if kwargs.get('where', None) is not None:
+            if kwargs.pop('interpolate', False):
                 warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
-            d = np.diff(np.append(0, where))
+            d = np.diff(np.append(0, kwargs['where']))
             start_i = np.where(d == 1)[0]
             end_i = np.where(d == -1)[0]
             if len(end_i) < len(start_i):
@@ -396,7 +397,7 @@ class Axes(pg.PlotItem):
             start_i = [0]
             end_i = [len(x)]
 
-        if step is not None:
+        if kwargs.pop('step', None) is not None:
             warnings.warn('Warning: step keyword to fill_between is not handled yet.')
 
         # Do plot
@@ -414,7 +415,7 @@ class Axes(pg.PlotItem):
 
         return fb
 
-    def set_xlim(self, left=None, right=None, emit=True, auto=False, **kw):
+    def set_xlim(self, left=None, right=None, **kw):
         """Direct imitation of matplotlib set_xlim"""
         if right is None and len(np.atleast_1d(left)) == 2:
             new_xlims = tuple(left)  # X limits were passed in as first argument
@@ -424,9 +425,9 @@ class Axes(pg.PlotItem):
         else:
             new_xlims = None
 
-        if not emit:
+        if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_xlim is not handled yet')
-        if auto:
+        if kw.pop('auto', False):
             warnings.warn('auto keyword to set_xlim is not handled yet')
         if len(kw.keys()):
             warnings.warn('set_xlim ignores any extra keywords in **kw')
@@ -435,7 +436,7 @@ class Axes(pg.PlotItem):
             self.setXRange(new_xlims[0], new_xlims[1])
         return new_xlims
 
-    def set_ylim(self, bottom=None, top=None, emit=True, auto=False, **kw):
+    def set_ylim(self, bottom=None, top=None, **kw):
         """Direct imitation of matplotlib set_ylim"""
         if top is None and len(np.atleast_1d(bottom)) == 2:
             new_ylims = tuple(bottom)  # Y limits were passed in as first argument
@@ -445,9 +446,9 @@ class Axes(pg.PlotItem):
         else:
             new_ylims = None
 
-        if not emit:
+        if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_ylim is not handled yet')
-        if auto:
+        if kw.pop('auto', False):
             warnings.warn('auto keyword to set_ylim is not handled yet')
         if len(kw.keys()):
             warnings.warn('set_ylim ignores any extra keywords in **kw')
