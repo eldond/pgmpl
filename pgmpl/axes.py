@@ -296,11 +296,7 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
-    def errorbar(
-            self, x=None, y=None, yerr=None, xerr=None, fmt='', ecolor=None, elinewidth=None, capsize=None,
-            barsabove=None, lolims=None, uplims=None, xlolims=None, xuplims=None,
-            errorevery=1, capthick=None, data=None, **kwargs
-    ):
+    def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
         :return: pyqtgraph.ErrorBarItem instance
@@ -308,8 +304,7 @@ class Axes(pg.PlotItem):
             drawn, but it is a separate object.
         """
         kwargs = dealias(**kwargs)
-
-        linestyle = kwargs.get('linestyle', None)
+        data = kwargs.pop('data')
 
         if data is not None:
             x = data.get('x', None)
@@ -317,20 +312,18 @@ class Axes(pg.PlotItem):
             xerr = data.get('xerr', None)
             yerr = data.get('yerr', None)
 
-        if fmt != '':
-            kwargs['fmt'] = fmt
-
         # Separate keywords into those that affect a line through the data and those that affect the errorbars
         ekwargs = copy.deepcopy(kwargs)
-        if ecolor is not None:
-            ekwargs['color'] = ecolor
-        if elinewidth is not None:
-            ekwargs['linewidth'] = elinewidth
+        if kwargs.get('ecolor', None) is not None:
+            ekwargs['color'] = kwargs.pop('ecolor')
+        if kwargs.get('elinewidth', None) is not None:
+            ekwargs['linewidth'] = wargs.pop('elinewidth')
         epgkw = plotkw_translator(**ekwargs)
-        w = np.array([True if i % int(round(errorevery)) == 0 else False for i in range(len(np.atleast_1d(x)))])
+        w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
+                      for i in range(len(np.atleast_1d(x)))])
 
         # Draw the line below the errorbars
-        if linestyle not in [' '] and not barsabove:
+        if kwargs.get('linestyle', None) not in [' '] and not kwargs.get('barsabove', None):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
@@ -342,18 +335,16 @@ class Axes(pg.PlotItem):
         self.addItem(errb)
 
         if kwargs.get('markeredgewidth', None) is not None:
-            capthick = kwargs.pop('markeredgewidth')
+            kwargs['capthick'] = kwargs.pop('markeredgewidth')
 
-        if ((capsize is not None) and (capsize <= 0)) or ((capthick <= 0) and (capthick is not None)):
+        if ((kwargs['capsize'] is not None) and (kwargs['capsize'] <= 0)) or \
+                ((kwargs['capthick'] <= 0) and (kwargs['capthick'] is not None)):
             printd('  Axes.errorbar no caps')
         else:
-            self._draw_errbar_caps(
-                xp, yp, xerr=xerrp, yerr=yerrp, capsize=capsize, capthick=capthick,
-                lolims=lolims, uplims=uplims, xlolims=xlolims, xuplims=xuplims, **copy.deepcopy(kwargs)
-            )
+            self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
 
         # OR draw the line above the errorbars
-        if linestyle not in [' '] and barsabove:
+        if kwargs.pop('linestyle', None) not in [' '] and kwargs.pop('barsabove', None):
             self.plot(x, y, **kwargs)
 
         return errb
