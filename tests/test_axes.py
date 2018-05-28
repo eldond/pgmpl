@@ -122,7 +122,6 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
-        # ax.fill_between(self.x, -self.y-yerr-20, -20)
         if self.verbose:
             print('test_axes_err: ax = {}'.format(ax))
 
@@ -183,6 +182,20 @@ class TestPgmplAxes(unittest.TestCase):
         leg = ax.legend()
         leg.addItem(line, name='yx plot')
         leg.draggable()
+
+        # Test warnings
+        warnings_expected = 1
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            leg.draggable(False)
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        if self.verbose:
+            print('test_axes_Legend: trigger a warning from Legend '
+                  'and got {}/{} warnings. leg = {}'.format(len(w), warnings_expected, leg))
+
         leg.clear()
         if self.verbose:
             print('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
