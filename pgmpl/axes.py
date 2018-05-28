@@ -304,7 +304,7 @@ class Axes(pg.PlotItem):
             drawn, but it is a separate object.
         """
         kwargs = dealias(**kwargs)
-        data = kwargs.pop('data')
+        data = kwargs.pop('data', None)
 
         if data is not None:
             x = data.get('x', None)
