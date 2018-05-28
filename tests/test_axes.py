@@ -68,7 +68,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax = Axes()
         img = ax.imshow(a)
         ax1 = Axes()
-        img1 = ax1.imshow(a[:, :, 0:2])
+        img1 = ax1.imshow(a[:, :, 0:2], aspect='equal')
         ax2 = Axes()
         img2 = ax2.imshow(self.two_d_data)
         assert isinstance(img, AxesImage)
@@ -96,6 +96,20 @@ class TestPgmplAxes(unittest.TestCase):
         if self.verbose:
             print('test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
                   'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))
+
+    def test_axes_warnings(self):
+        ax = Axes()
+        warnings_expected = 1
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger warnings.
+            ax.text(0.5, 0.91, 'text1', withdash=True)
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        if self.verbose:
+            print('test_axes_warnings: tried to make probelmatic calls to Axes methods '
+                  'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
 
     def test_axes_err(self):
         ax = Axes()
@@ -130,6 +144,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax = Axes()
         ax.plot([0, 10, 0, 1])
         ax.set_aspect('equal')
+        ax.set_aspect(16.0/9.0)
 
         # Test warnings
         warnings_expected = 3

@@ -229,7 +229,7 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
-    def _draw_errbar_caps(self, x, y, xerr, yerr, **capkw):
+    def _draw_errbar_caps(self, x, y, **capkw):
         """
         Helper function for errorbar.
         Draw caps on errorbars. pyqtgraph does the caps differently from matplotlib, so we'll put this together
@@ -244,6 +244,8 @@ class Axes(pg.PlotItem):
         # Extract keywords
         capsize = capkw.pop('capsize', None)
         capthick = capkw.pop('capthick', None)
+        xerr = capkw.pop('xerr', None)
+        yerr = capkw.pop('yerr', None)
 
         # Setup
         capkw['linestyle'] = ' '
@@ -346,7 +348,7 @@ class Axes(pg.PlotItem):
             printd('  Axes.errorbar no caps')
         else:
             self._draw_errbar_caps(
-                xp, yp, xerrp, yerrp, capsize=capsize, capthick=capthick,
+                xp, yp, xerr=xerrp, yerr=yerrp, capsize=capsize, capthick=capthick,
                 lolims=lolims, uplims=uplims, xlolims=xlolims, xuplims=xuplims, **copy.deepcopy(kwargs)
             )
 
