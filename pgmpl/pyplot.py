@@ -47,11 +47,6 @@ def subplots(nrows=1, ncols=1, **fig_kw):
     :return: Figure object
     :return: Axes object or array of Axes objects
     """
-
-    sharex = fig_kw.pop('sharex', 'none')
-    sharey = fig_kw.pop('sharey', 'none')
-    squeeze = fig_kw.pop('squeeze', True)
-    subplot_kw = fig_kw.pop('subplot_kw', {})
     gridspec_kw = fig_kw.pop('gridspec_kw', None)
 
     def pick_share(share, ii, jj, axs_):
@@ -84,10 +79,11 @@ def subplots(nrows=1, ncols=1, **fig_kw):
             index = i*ncols + j + 1
             axs[i, j] = fig.add_subplot(
                 nrows, ncols, index,
-                sharex=pick_share(sharex, i, j, axs), sharey=pick_share(sharey, i, j, axs),
-                **subplot_kw)
+                sharex=pick_share(fig_kw.pop('sharex', 'none'), i, j, axs),
+                sharey=pick_share(fig_kw.pop('sharey', 'none'), i, j, axs),
+                **fig_kw.pop('subplot_kw', {}))
             printd('index {}, row {}, col {}'.format(index, i, j))
-    if squeeze:
+    if fig_kw.pop('squeeze', True):
         axs = np.squeeze(axs)
         if len(np.shape(axs)) == 0:
             axs = axs[()]  # https://stackoverflow.com/a/35160426/6605826
