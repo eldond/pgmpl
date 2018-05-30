@@ -539,16 +539,12 @@ class AxesImage(pg.ImageItem):
         if kw.pop('shape', None) is not None:
             warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
                           'so I had nothing to emulate.')
-        if kw.pop('imlim', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: imlim.')
-        if kw.pop('interpolation', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: interpolation.')
+        ignoreds = ['imlim', 'resample', 'url', 'interpolation']
+        for ignored in ignoreds:
+            if kw.pop(ignored, None) is not None:
+                warnings.warn('Axes.imshow ignored keyword: {}.'.format(ignored))
         if kw.pop('filternorm', 1) != 1 or kw.pop('filterrad', 4.0) != 4.0:
             warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
-        if kw.pop('resample', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: resample.')
-        if kw.pop('url', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: url.')
         if len(kw.keys()):
             warnings.warn('Axes.imshow got unhandled keywords: {}'.format(kw.keys()))
 
