@@ -184,12 +184,14 @@ class TestPgmplAxes(unittest.TestCase):
         leg.draggable()
 
         # Test warnings
-        warnings_expected = 1
+        warnings_expected = 3
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger a warning.
             leg.draggable(False)
+            # Trigger more warnings:
+            leg2 = ax.legend(blah='unrecognized keyword should make warning', borderaxespad=5)
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         if self.verbose:
