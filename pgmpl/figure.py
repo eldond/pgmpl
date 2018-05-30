@@ -53,14 +53,10 @@ class Figure(pg.PlotWidget):
             dpi = rcParams['figure.dpi']
         if figsize is None:
             figsize = rcParams['figure.figsize']
-        printd('dpi = {}, figsize = {}'.format(dpi, figsize))
-        figsize = np.array(figsize)*dpi
-        self.width = figsize[0]
-        self.height = figsize[1]
+        self.width, self.height = np.array(figsize)*dpi
         self.resize(self.width, self.height)
-        self.axes = None
-        self.layout = None
-        self.suptitle_label = None
+        for init_to_none in ['axes', 'layout', 'suptitle_label']:
+            setattr(self, init_to_none, None)
         self.suptitle_text = ''
         self.fig_colspan = 1
         self.mklay()
@@ -104,13 +100,10 @@ class Figure(pg.PlotWidget):
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
-        if pars is None:
+        if pars is None or self.layout is None:
+            # Either no pars were provided or the layout has already been set to None because the figure is closing.
+            # Don't do any margin adjustments.
             return
-        if self.layout is None:
-            # The layout has already been set to None because the figure is closing. Don't do any margin adjustments.
-            return
-        fx = self.width
-        fy = self.height
         if pars is not None:
             self.margins = {
                 'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
@@ -125,14 +118,14 @@ class Figure(pg.PlotWidget):
             else:
                 nrows = 3  # This isn't actually known, so we have to just guess
                 ncols = 3
-                spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * fx
-                spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * fy
+                spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * self.width
+                spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * self.height
                 self.layout.setSpacing((spx + spy)/2.0)
                 self.layout.setContentsMargins(
-                    self.margins['left']*fx,
-                    (1-self.margins['top'])*fy,
-                    (1-self.margins['right'])*fx,
-                    self.margins['bottom']*fy,
+                    self.margins['left']*self.width,
+                    (1-self.margins['top'])*self.height,
+                    (1-self.margins['right'])*self.width,
+                    self.margins['bottom']*self.height,
                 )
         return
 
