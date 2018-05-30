@@ -294,7 +294,7 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
-    def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
+    def errorbar(self, x=None, y=None, yerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
         :return: pyqtgraph.ErrorBarItem instance
@@ -303,6 +303,7 @@ class Axes(pg.PlotItem):
         """
         kwargs = dealias(**kwargs)
         data = kwargs.pop('data', None)
+        xerr = kwargs.pop('xerr', None)
 
         if data is not None:
             x = data.get('x', None)
