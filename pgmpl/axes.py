@@ -34,8 +34,6 @@ class Axes(pg.PlotItem):
     Imitates matplotlib.axes.Axes using PyQtGraph
     """
     def __init__(self, **kwargs):
-        sharex = kwargs.pop('sharex', None)
-        sharey = kwargs.pop('sharey', None)
         self.nrows = kwargs.pop('nrows', 1)
         self.ncols = kwargs.pop('ncols', 1)
         self.index = kwargs.pop('index', 1)
@@ -45,10 +43,10 @@ class Axes(pg.PlotItem):
         tmp = self.prop_cycle()
         self.cyc = defaultdict(lambda: next(tmp))
         self.prop_cycle_index = 0
-        if sharex is not None:
-            self.setXLink(sharex)
-        if sharey is not None:
-            self.setYLink(sharey)
+        if kwargs.get('sharex', None) is not None:
+            self.setXLink(kwargs['sharex'])
+        if kwargs.get('sharey', None) is not None:
+            self.setYLink(kwargs['sharey'])
 
     def clear(self):
         printd('  Clearing Axes instance {}...'.format(self))
