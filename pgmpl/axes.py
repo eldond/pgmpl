@@ -412,6 +412,14 @@ class Axes(pg.PlotItem):
 
         return fb
 
+    def _check_set_lim_kw(self, **kw):
+        if not kw.pop('emit', True):
+            warnings.warn('emit keyword to set_xlim/set_ylim is not handled yet')
+        if kw.pop('auto', False):
+            warnings.warn('auto keyword to set_xlim/set_ylim is not handled yet')
+        if len(kw.keys()):
+            warnings.warn('set_xlim/set_ylim ignores any extra keywords in **kw: {}'.format(kw.keys()))
+
     def set_xlim(self, left=None, right=None, **kw):
         """Direct imitation of matplotlib set_xlim"""
         if right is None and len(np.atleast_1d(left)) == 2:
@@ -422,12 +430,7 @@ class Axes(pg.PlotItem):
         else:
             new_xlims = None
 
-        if not kw.pop('emit', True):
-            warnings.warn('emit keyword to set_xlim is not handled yet')
-        if kw.pop('auto', False):
-            warnings.warn('auto keyword to set_xlim is not handled yet')
-        if len(kw.keys()):
-            warnings.warn('set_xlim ignores any extra keywords in **kw')
+        self._check_set_lim_kw(**kw)
 
         if new_xlims is not None:
             self.setXRange(new_xlims[0], new_xlims[1])
@@ -443,12 +446,7 @@ class Axes(pg.PlotItem):
         else:
             new_ylims = None
 
-        if not kw.pop('emit', True):
-            warnings.warn('emit keyword to set_ylim is not handled yet')
-        if kw.pop('auto', False):
-            warnings.warn('auto keyword to set_ylim is not handled yet')
-        if len(kw.keys()):
-            warnings.warn('set_ylim ignores any extra keywords in **kw')
+        self._check_set_lim_kw(**kw)
 
         if new_ylims is not None:
             self.setYRange(new_ylims[0], new_ylims[1])
