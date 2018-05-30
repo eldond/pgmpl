@@ -33,17 +33,16 @@ class Figure(pg.PlotWidget):
     """
     Imitates matplotlib.figure.Figure using PyQtGraph
     """
-    def __init__(
-            self, figsize=None, dpi=None,
-            facecolor=None, edgecolor=None, linewidth=0.0,
-            frameon=True, subplotpars=None, tight_layout=None, constrained_layout=None,
-    ):
+    def __init__(self, **kw):
+        figsize = kw.pop('figsize', None)
+        dpi = kw.pop('dpi', None)
+
         super(Figure, self).__init__()
         self.patch_resize = True  # Controls whether resize events mess with margins or not (this works well now)
-        pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
+        pg.setConfigOption('background', kw.pop('facecolor', 'w'))
         pg.setConfigOption('foreground', 'k')
         tracker.window_opened(self)
-        self.tight = tight_layout or constrained_layout
+        self.tight = kw.pop('tight_layout', None) or kw.pop('constrained_layout', None)
         if self.tight:
             self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
         else:
@@ -67,10 +66,9 @@ class Figure(pg.PlotWidget):
         self.mklay()
         self.clear = self.clearfig  # Just defining the thing as clear doesn't work; needs to be done this way.
 
-        if subplotpars is not None:
-            self.set_subplotpars(subplotpars)
+        self.set_subplotpars(kw.pop('subplotpars', None))
 
-        if frameon is not False and linewidth > 0 and edgecolor:
+        if kw.pop('frameon', True) is not False and kw.pop('linewidth', 0.0) > 0 and kw.pop('edgecolor', None):
             warnings.warn('WARNING: frame around figure edge is not implemented yet')
 
     def clearfig(self):
@@ -106,6 +104,8 @@ class Figure(pg.PlotWidget):
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
+        if pars is None:
+            return
         if self.layout is None:
             # The layout has already been set to None because the figure is closing. Don't do any margin adjustments.
             return
@@ -136,12 +136,11 @@ class Figure(pg.PlotWidget):
                 )
         return
 
-    def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
+    def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        if projection is not None and projection != 'rectilinear':
-            raise NotImplementedError('projection keyword in add_subplot is not ready')
-        if polar is not None and polar is not False:
-            raise NotImplementedError('polar projection is not ready')
+        for unhandled in ['projection', 'polar']:
+            if kwargs.pop(unhandled, None) is not None:
+                raise NotImplementedError('{} keyword in add_subplot is not ready'.format(unhandled))
         row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))

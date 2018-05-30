@@ -33,7 +33,7 @@ def axes(fig=None, **kwargs):
     return ax
 
 
-def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
+def subplots(nrows=1, ncols=1, **fig_kw):
     """
     Imitates matplotlib.pyplot.subplots() using PyQtGraph
     :param nrows: int, optional, default: 1
@@ -43,10 +43,16 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
     :param squeeze: bool, optional, default: True
     :param subplot_kw: dict, optional
     :param gridspec_kw: dict, optional
-    :param fig_kw:
+    :param fig_kw: Remaining keywords are passed to pyplot.figure() call to create figure.Figure instance.
     :return: Figure object
     :return: Axes object or array of Axes objects
     """
+
+    sharex = fig_kw.pop('sharex', 'none')
+    sharey = fig_kw.pop('sharey', 'none')
+    squeeze = fig_kw.pop('squeeze', True)
+    subplot_kw = fig_kw.pop('subplot_kw', {})
+    gridspec_kw = fig_kw.pop('gridspec_kw', None)
 
     def pick_share(share, ii, jj, axs_):
         if ii == 0 and jj == 0:
@@ -73,7 +79,6 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
             fig.set_subplotpars(sp)
 
     axs = np.zeros((nrows, ncols), object)
-    subplot_kw = subplot_kw if subplot_kw is not None else {}
     for i in range(nrows):
         for j in range(ncols):
             index = i*ncols + j + 1
