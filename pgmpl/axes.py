@@ -91,11 +91,8 @@ class Axes(pg.PlotItem):
             brush_colors = [color_translator(color=cc) for cc in tolist(c)]
 
         # Translate edge colors
-        if edgecolors is None:
-            brush_edges = [color_translator(color='k')] * n
-        else:
-            brush_edges = [color_translator(color=edgecolor, alpha=kwargs.get('alpha', None))
-                           for edgecolor in tolist(edgecolors)]
+        brush_edges = [color_translator(color='k')] * n if edgecolors is None \
+            else [color_translator(color=ec, alpha=kwargs.get('alpha', None)) for ec in tolist(edgecolors)]
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
         if (len(tolist(brush_colors)) == 1) and (n > 1):
