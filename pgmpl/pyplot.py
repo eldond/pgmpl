@@ -33,6 +33,30 @@ def axes(fig=None, **kwargs):
     return ax
 
 
+def pick_share(share, ii, jj, axs_):
+    """
+    Helper function for selecting which axes to link. Should be called separately for sharex and sharey.
+    :param share: string
+        What type of sharing is going on?
+    :param ii, jj: ints
+        Coordinates of current plot in plot grid
+    :param axs_: 2D array of Axes instances
+        The plot Axes
+    :return: Axes instance or None
+        The Axes instance to be linked.
+    """
+    if ii == 0 and jj == 0:
+        return None
+    if share in ['all', True]:
+        return axs_[0, 0]
+    elif share in ['col']:
+        return axs_[0, jj] if ii > 0 else None
+    elif share in ['row']:
+        return axs_[ii, 0] if jj > 0 else None
+    else:
+        return None
+
+
 def subplots(nrows=1, ncols=1, **fig_kw):
     """
     Imitates matplotlib.pyplot.subplots() using PyQtGraph
@@ -48,18 +72,6 @@ def subplots(nrows=1, ncols=1, **fig_kw):
     :return: Axes object or array of Axes objects
     """
     gridspec_kw = fig_kw.pop('gridspec_kw', None)
-
-    def pick_share(share, ii, jj, axs_):
-        if ii == 0 and jj == 0:
-            return None
-        if share in ['all', True]:
-            return axs_[0, 0]
-        elif share in ['col']:
-            return axs_[0, jj] if ii > 0 else None
-        elif share in ['row']:
-            return axs_[ii, 0] if jj > 0 else None
-        else:
-            return None
 
     fig = figure(**fig_kw)
 
