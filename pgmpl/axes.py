@@ -164,7 +164,7 @@ class Axes(pg.PlotItem):
 
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
-    def imshow(self, x, aspect=None, **kwargs):
+    def imshow(self, x=None, aspect=None, **kwargs):
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
         img = AxesImage(x, **kwargs)
