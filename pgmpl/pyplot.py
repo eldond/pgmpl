@@ -79,8 +79,8 @@ def subplots(nrows=1, ncols=1, **fig_kw):
             index = i*ncols + j + 1
             axs[i, j] = fig.add_subplot(
                 nrows, ncols, index,
-                sharex=pick_share(fig_kw.pop('sharex', 'none'), i, j, axs),
-                sharey=pick_share(fig_kw.pop('sharey', 'none'), i, j, axs),
+                sharex=pick_share(fig_kw.get('sharex', 'none'), i, j, axs),
+                sharey=pick_share(fig_kw.get('sharey', 'none'), i, j, axs),
                 **fig_kw.pop('subplot_kw', {}))
             printd('index {}, row {}, col {}'.format(index, i, j))
     if fig_kw.pop('squeeze', True):
