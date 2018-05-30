@@ -279,10 +279,7 @@ def setup_pen_kw(**kw):
     if news is not None:
         penkw['style'] = news
 
-    if len(penkw.keys()):
-        pen = pg.mkPen(**penkw)
-    else:
-        pen = None
+    pen = pg.mkPen(**penkw) if len(penkw.keys()) else None
 
     return pen
 

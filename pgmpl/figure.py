@@ -147,20 +147,14 @@ class Figure(pg.PlotWidget):
         col = (index-1) % ncols
         ax = Axes(nrows=nrows, ncols=ncols, index=index, **kwargs)
         self.layout.addItem(ax, row+1, col)
-        if self.axes is None:
-            self.axes = ax
-        else:
-            self.axes = tolist(self.axes) + [ax]
+        self.axes = ax if self.axes is None else tolist(self.axes) + [ax]
         self.fig_colspan = max([ncols, self.fig_colspan])
         self.refresh_suptitle()
         return ax
 
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
         if ax is None:
-            if self.axes is None:
-                ax = self.add_subplot(1, 1, 1)
-            else:
-                ax = np.atleast_1d(self.axes).flatten()[-1]
+            ax = self.add_subplot(1, 1, 1) if self.axes is None else np.atleast_1d(self.axes).flatten()[-1]
         if cax is None:
             orientation = kwargs.get('orientation', 'vertical')
             row = int(np.floor((ax.index - 1) / ax.ncols))
