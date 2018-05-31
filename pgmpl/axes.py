@@ -103,6 +103,17 @@ class Axes(pg.PlotItem):
 
         return brush_colors, brush_edges
 
+    @staticmethod
+    def _make_custom_verts(verts):
+        """
+        Makes a custom symbol from the verts keyword accepted by scatter
+        :param verts: sequence of (x, y), optional
+        :return: a pyqt path suitable for use with Axes.plot()'s symbol keyword.
+        """
+        verts_x = np.array([vert[0] for vert in verts])
+        verts_y = np.array([vert[1] for vert in verts])
+        return pg.arrayToQPath(verts_x, verts_y, connect='all')
+
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
@@ -125,7 +136,6 @@ class Axes(pg.PlotItem):
         """
         data = kwargs.pop('data', None)
         linewidths = kwargs.pop('linewidths', None)
-        verts = kwargs.pop('verts', None)
         if data is not None:
             x = data.get('x')
             y = data.get('y')
@@ -160,9 +170,7 @@ class Axes(pg.PlotItem):
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
         if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
-            verts_x = np.array([vert[0] for vert in verts])
-            verts_y = np.array([vert[1] for vert in verts])
-            plotkw['symbol'] = pg.arrayToQPath(verts_x, verts_y, connect='all')
+            plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
 
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
