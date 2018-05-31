@@ -77,9 +77,10 @@ class Axes(pg.PlotItem):
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     @staticmethod
-    def _prep_scatter_colors(n, c=None, **kwargs):
+    def _prep_scatter_colors(n, **kwargs):
         """Helper function to prepare colors for scatter plot"""
         edgecolors = kwargs.pop('edgecolors', None)
+        c = kwargs.pop('c', None)
         # Translate face colors
         if c is None:
             # All same default color
@@ -102,10 +103,7 @@ class Axes(pg.PlotItem):
 
         return brush_colors, brush_edges
 
-    def scatter(
-            self, x=None, y=None, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
-            linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
-    ):
+    def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
         :param x: array like with length n
@@ -125,28 +123,32 @@ class Axes(pg.PlotItem):
         :param kwargs:
         :return: plotItem instance
         """
+        data = kwargs.pop('data', None)
+        linewidths = kwargs.pop('linewidths', None)
+        verts = kwargs.pop('verts', None)
         if data is not None:
             x = data.get('x')
             y = data.get('y')
-            s = data.get('s', None)
-            c = data.get('c', None)
-            edgecolors = data.get('edgecolors', None)
+            kwargs['s'] = data.get('s', None)
+            kwargs['c'] = data.get('c', None)
+            kwargs['edgecolors'] = data.get('edgecolors', None)
             linewidths = data.get('linewidths', None)
             # The following keywords are apparently valid within `data`,
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        brush_colors, brush_edges = self._prep_scatter_colors(
-            n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
+        brush_colors, brush_edges = self._prep_scatter_colors(n, **kwargs)
+
+        for popit in ['cmap', 'norm', 'vmin', 'vmax', 'alpha', 'edgecolors', 'c']:
+            kwargs.pop(popit, None)  # Make sure all the color keywords are gone now that they've been used.
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
         if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
             linewidths = tolist(linewidths) * n
 
         # Catch & translate other keywords
-        kwargs['markersize'] = s
-        if marker is not None:
-            kwargs['marker'] = marker
+        kwargs['markersize'] = kwargs.pop('s', 10)
+        kwargs.setdefault('marker', 'o')
         plotkw = plotkw_translator(**kwargs)
 
         # Fill in keywords we already prepared
@@ -157,7 +159,7 @@ class Axes(pg.PlotItem):
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
-        if marker is None:
+        if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
             verts_x = np.array([vert[0] for vert in verts])
             verts_y = np.array([vert[1] for vert in verts])
             plotkw['symbol'] = pg.arrayToQPath(verts_x, verts_y, connect='all')
