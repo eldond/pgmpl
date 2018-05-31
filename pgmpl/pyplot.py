@@ -33,7 +33,31 @@ def axes(fig=None, **kwargs):
     return ax
 
 
-def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subplot_kw=None, gridspec_kw=None, **fig_kw):
+def pick_share(share, ii, jj, axs_):
+    """
+    Helper function for selecting which axes to link. Should be called separately for sharex and sharey.
+    :param share: string
+        What type of sharing is going on?
+    :param ii, jj: ints
+        Coordinates of current plot in plot grid
+    :param axs_: 2D array of Axes instances
+        The plot Axes
+    :return: Axes instance or None
+        The Axes instance to be linked.
+    """
+    if ii == 0 and jj == 0:
+        return None
+    if share in ['all', True]:
+        return axs_[0, 0]
+    elif share in ['col']:
+        return axs_[0, jj] if ii > 0 else None
+    elif share in ['row']:
+        return axs_[ii, 0] if jj > 0 else None
+    else:
+        return None
+
+
+def subplots(nrows=1, ncols=1, **fig_kw):
     """
     Imitates matplotlib.pyplot.subplots() using PyQtGraph
     :param nrows: int, optional, default: 1
@@ -43,22 +67,11 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
     :param squeeze: bool, optional, default: True
     :param subplot_kw: dict, optional
     :param gridspec_kw: dict, optional
-    :param fig_kw:
+    :param fig_kw: Remaining keywords are passed to pyplot.figure() call to create figure.Figure instance.
     :return: Figure object
     :return: Axes object or array of Axes objects
     """
-
-    def pick_share(share, ii, jj, axs_):
-        if ii == 0 and jj == 0:
-            return None
-        if share in ['all', True]:
-            return axs_[0, 0]
-        elif share in ['col']:
-            return axs_[0, jj] if ii > 0 else None
-        elif share in ['row']:
-            return axs_[ii, 0] if jj > 0 else None
-        else:
-            return None
+    gridspec_kw = fig_kw.pop('gridspec_kw', None)
 
     fig = figure(**fig_kw)
 
@@ -73,16 +86,16 @@ def subplots(nrows=1, ncols=1, sharex='none', sharey='none', squeeze=True, subpl
             fig.set_subplotpars(sp)
 
     axs = np.zeros((nrows, ncols), object)
-    subplot_kw = subplot_kw if subplot_kw is not None else {}
     for i in range(nrows):
         for j in range(ncols):
             index = i*ncols + j + 1
             axs[i, j] = fig.add_subplot(
                 nrows, ncols, index,
-                sharex=pick_share(sharex, i, j, axs), sharey=pick_share(sharey, i, j, axs),
-                **subplot_kw)
+                sharex=pick_share(fig_kw.get('sharex', 'none'), i, j, axs),
+                sharey=pick_share(fig_kw.get('sharey', 'none'), i, j, axs),
+                **fig_kw.pop('subplot_kw', {}))
             printd('index {}, row {}, col {}'.format(index, i, j))
-    if squeeze:
+    if fig_kw.pop('squeeze', True):
         axs = np.squeeze(axs)
         if len(np.shape(axs)) == 0:
             axs = axs[()]  # https://stackoverflow.com/a/35160426/6605826
