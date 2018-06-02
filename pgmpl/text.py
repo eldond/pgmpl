@@ -14,20 +14,14 @@ import warnings
 
 # Plotting imports
 import pyqtgraph as pg
-from translate import color_translator
+from translate import color_translator, dealias
 
 
 class Text(pg.TextItem):
     """
     Imitates matplotlib.text.Text using PyQtGraph
     """
-    def __init__(
-            self, x=0.0, y=0.0, text='',
-            color=None,
-            verticalalignment='baseline', horizontalalignment='left', multialignment=None,
-            fontproperties=None, rotation=None, linespacing=None, rotation_mode=None, usetex=None, wrap=False,
-            **kwargs
-    ):
+    def __init__(self, x=0.0, y=0.0, text='', **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
         :param x: scalar
@@ -48,22 +42,22 @@ class Text(pg.TextItem):
         :param rotation_mode: (not implemented in pgmpl wrapper)
         :param usetex: (not implemented in pgmpl wrapper)
         :param wrap: (not yet implemented in pgmpl wrapper)
-        :param kwargs: dict
-            Other keywords
         """
+
+        kwargs = dealias(**kwargs)
+
+        verticalalignment = kwargs.pop('verticalalignment', 'baseline')
+        horizontalalignment = kwargs.pop('horizontalalignment', 'left')
+        rotation = kwargs.pop('rotation', None)
 
         superkw = {
             'text': text,
         }
-        t_color = color_translator(**{'color': color})
+        t_color = color_translator(**{'color': kwargs.pop('color', None)})
         if t_color is not None:
             superkw['color'] = t_color
         if rotation is not None:
             superkw['angle'] = rotation
-        ha = kwargs.pop('ha', None)
-        va = kwargs.pop('va', None)
-        horizontalalignment = ha if horizontalalignment is None else horizontalalignment
-        verticalalignment = va if verticalalignment is None else verticalalignment
         if horizontalalignment is not None or verticalalignment is not None:
             superkw['anchor'] = (
                 {'left': 0, 'center': 0.5, 'right': 1}.get(horizontalalignment, 0),
@@ -72,18 +66,14 @@ class Text(pg.TextItem):
         super(Text, self).__init__(**superkw)
         self.setPos(x, y)
 
-        if multialignment is not None:
-            warnings.warn('  pgmpl.text.Text does not support multialignment keyword')
-        if rotation_mode is not None:
-            warnings.warn('  pgmpl.text.Text does not support rotation_mode keyword')
-        if usetex is not None:
-            warnings.warn('  pgmpl.text.Text does not support usetex keyword')
-        if linespacing is not None:
-            warnings.warn('  pgmpl.text.Text does not support linespacing keyword')
+        for not_supported in ['multialignment', 'rotation_mode', 'usetex', 'linespacing']:
+            if kwargs.pop(not_supported, None) is not None:
+                warnings.warn('  pgmpl.text.Text does not support {} keyword and it will be ignored.'.format(
+                    not_supported))
 
-        if wrap:
+        if kwargs.pop('wrap', None):
             warnings.warn('  pgmpl.text.Text does not support wrap keyword yet (may be possible later)')
-        if fontproperties is not None:
+        if kwargs.pop('fontproperties', None) is not None:
             warnings.warn('  pgmpl.text.Text does not handle font changes yet (to be implemented later)')
 
         if len(kwargs.keys()):

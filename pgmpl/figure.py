@@ -33,17 +33,16 @@ class Figure(pg.PlotWidget):
     """
     Imitates matplotlib.figure.Figure using PyQtGraph
     """
-    def __init__(
-            self, figsize=None, dpi=None,
-            facecolor=None, edgecolor=None, linewidth=0.0,
-            frameon=True, subplotpars=None, tight_layout=None, constrained_layout=None,
-    ):
+    def __init__(self, **kw):
+        figsize = kw.pop('figsize', None)
+        dpi = kw.pop('dpi', None)
+
         super(Figure, self).__init__()
         self.patch_resize = True  # Controls whether resize events mess with margins or not (this works well now)
-        pg.setConfigOption('background', 'w' if facecolor is None else facecolor)
+        pg.setConfigOption('background', kw.pop('facecolor', 'w'))
         pg.setConfigOption('foreground', 'k')
         tracker.window_opened(self)
-        self.tight = tight_layout or constrained_layout
+        self.tight = kw.pop('tight_layout', None) or kw.pop('constrained_layout', None)
         if self.tight:
             self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
         else:
@@ -54,23 +53,18 @@ class Figure(pg.PlotWidget):
             dpi = rcParams['figure.dpi']
         if figsize is None:
             figsize = rcParams['figure.figsize']
-        printd('dpi = {}, figsize = {}'.format(dpi, figsize))
-        figsize = np.array(figsize)*dpi
-        self.width = figsize[0]
-        self.height = figsize[1]
+        self.width, self.height = np.array(figsize)*dpi
         self.resize(self.width, self.height)
-        self.axes = None
-        self.layout = None
-        self.suptitle_label = None
+        for init_to_none in ['axes', 'layout', 'suptitle_label']:
+            setattr(self, init_to_none, None)
         self.suptitle_text = ''
         self.fig_colspan = 1
         self.mklay()
         self.clear = self.clearfig  # Just defining the thing as clear doesn't work; needs to be done this way.
 
-        if subplotpars is not None:
-            self.set_subplotpars(subplotpars)
+        self.set_subplotpars(kw.pop('subplotpars', None))
 
-        if frameon is not False and linewidth > 0 and edgecolor:
+        if kw.pop('frameon', True) is not False and kw.pop('linewidth', 0.0) > 0 and kw.pop('edgecolor', None):
             warnings.warn('WARNING: frame around figure edge is not implemented yet')
 
     def clearfig(self):
@@ -106,11 +100,10 @@ class Figure(pg.PlotWidget):
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
-        if self.layout is None:
-            # The layout has already been set to None because the figure is closing. Don't do any margin adjustments.
+        if pars is None or self.layout is None:
+            # Either no pars were provided or the layout has already been set to None because the figure is closing.
+            # Don't do any margin adjustments.
             return
-        fx = self.width
-        fy = self.height
         if pars is not None:
             self.margins = {
                 'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
@@ -125,43 +118,36 @@ class Figure(pg.PlotWidget):
             else:
                 nrows = 3  # This isn't actually known, so we have to just guess
                 ncols = 3
-                spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * fx
-                spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * fy
+                spx = (self.margins['right'] - self.margins['left'])/nrows * self.margins['wspace'] * self.width
+                spy = (self.margins['top'] - self.margins['bottom'])/ncols * self.margins['hspace'] * self.height
                 self.layout.setSpacing((spx + spy)/2.0)
                 self.layout.setContentsMargins(
-                    self.margins['left']*fx,
-                    (1-self.margins['top'])*fy,
-                    (1-self.margins['right'])*fx,
-                    self.margins['bottom']*fy,
+                    self.margins['left']*self.width,
+                    (1-self.margins['top'])*self.height,
+                    (1-self.margins['right'])*self.width,
+                    self.margins['bottom']*self.height,
                 )
         return
 
-    def add_subplot(self, nrows, ncols, index, projection=None, polar=None, **kwargs):
+    def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        if projection is not None and projection != 'rectilinear':
-            raise NotImplementedError('projection keyword in add_subplot is not ready')
-        if polar is not None and polar is not False:
-            raise NotImplementedError('polar projection is not ready')
+        for unhandled in ['projection', 'polar']:
+            if kwargs.pop(unhandled, None) is not None:
+                raise NotImplementedError('{} keyword in add_subplot is not ready'.format(unhandled))
         row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = (index-1) % ncols
         ax = Axes(nrows=nrows, ncols=ncols, index=index, **kwargs)
         self.layout.addItem(ax, row+1, col)
-        if self.axes is None:
-            self.axes = ax
-        else:
-            self.axes = tolist(self.axes) + [ax]
+        self.axes = ax if self.axes is None else tolist(self.axes) + [ax]
         self.fig_colspan = max([ncols, self.fig_colspan])
         self.refresh_suptitle()
         return ax
 
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
         if ax is None:
-            if self.axes is None:
-                ax = self.add_subplot(1, 1, 1)
-            else:
-                ax = np.atleast_1d(self.axes).flatten()[-1]
+            ax = self.add_subplot(1, 1, 1) if self.axes is None else np.atleast_1d(self.axes).flatten()[-1]
         if cax is None:
             orientation = kwargs.get('orientation', 'vertical')
             row = int(np.floor((ax.index - 1) / ax.ncols))

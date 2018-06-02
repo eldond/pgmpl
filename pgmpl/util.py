@@ -8,8 +8,9 @@ import numpy as np
 
 
 def set_debug(enable=True):
-    os.environ['PGMPL_DEBUG'] = str(int(enable))
-    printd('pgmpl debugging set to {}'.format(str(int(enable))))
+    flag = str(int(bool(enable)))
+    os.environ['PGMPL_DEBUG'] = flag
+    printd('pgmpl debugging set to {}'.format(flag))
 
 
 def printd(*args, **kw):
