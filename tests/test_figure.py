@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import os
 import unittest
 import numpy as np
+import warnings
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
