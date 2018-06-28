@@ -24,6 +24,10 @@ class TestPgmplUtil(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     def test_set_debug(self):
         set_debug()
         assert os.environ.get('PGMPL_DEBUG', None) == "1"
@@ -49,8 +53,6 @@ class TestPgmplUtil(unittest.TestCase):
         printd(test_string_2)
         printd('SHOULD-NOT-PRINT:', 'test-item-1b', 'testitem2b-in-a-listofthings', 5, 6.1, 'morelistlol', 'blah')
         os.environ['PGMPL_DEBUG'] = debug  # Put it back how it was (polite~~)
-        if self.verbose:
-            print('  test_printd completed')
 
     def test_tolist(self):
         ar = np.array([1, 2, 3])
@@ -64,8 +66,6 @@ class TestPgmplUtil(unittest.TestCase):
         for thing in [ar, a2, bo, li, no, sc, st, tu]:
             assert isinstance(tolist(thing), list)
             assert isinstance(tolist(thing) + [1, 2, 3], list)
-        if self.verbose:
-            print('  test_tolist completed')
 
     def test_is_iterable(self):
         assert is_iterable([1, 2, 3])
@@ -75,8 +75,15 @@ class TestPgmplUtil(unittest.TestCase):
         assert not is_iterable(1)
         assert not is_iterable(0.1)
         assert not is_iterable(None)
-        if self.verbose:
-            print('  test_is_iterable completed')
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
 
 
 if __name__ == '__main__':

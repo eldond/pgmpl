@@ -21,13 +21,15 @@ class TestPgmplText(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     def test_text_simple(self):
         """Very basic test of just initializing the Text class"""
         t = Text(0.5, 0.5, 'text1')
         assert isinstance(t, Text)
         assert t is t()
-        if self.verbose:
-            print('test_text_simple: t = {}'.format(t))
 
     def test_text_on_plot(self):
         """Test setting up a plot and putting text on it with Axes.text, which of course uses the Text class."""
@@ -43,8 +45,7 @@ class TestPgmplText(unittest.TestCase):
         assert isinstance(t2, Text)
         assert isinstance(t3, Text)
         assert isinstance(t4, Text)
-        if self.verbose:
-            print('test_text_on_plot: t1, t2 ,t3, t4 = {}, {}, {}, {}'.format(t1, t2, t3, t4))
+        self.printv('      test_text_on_plot: t1, t2 ,t3, t4 = {}, {}, {}, {}'.format(t1, t2, t3, t4))
         fig.close()
 
     def test_text_warnings(self):
@@ -59,9 +60,18 @@ class TestPgmplText(unittest.TestCase):
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         assert isinstance(t, Text)  # It should still return the instance using the implemented keywords.
-        if self.verbose:
-            print('test_text_warnings: tried to make a Text instance using unimplemented keywords '
-                  'and got {}/{} warnings. t = {}'.format(len(w), warnings_expected, t))
+        self.printv('      test_text_warnings: tried to make a Text instance using unimplemented keywords '
+                    'and got {}/{} warnings. t = {}'.format(len(w), warnings_expected, t))
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
+
 
 if __name__ == '__main__':
     unittest.main()

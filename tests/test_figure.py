@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import os
 import unittest
 import numpy as np
+import warnings
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
@@ -24,12 +25,29 @@ class TestPgmplFigure(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     def test_figure(self):
         fig1 = Figure()
         assert isinstance(fig1, Figure)
-        if self.verbose:
-            print('test_figure: fig1 = {}'.format(fig1))
+        Figure(tight_layout=True)
         fig1.close()
+
+    def test_figure_warnings(self):
+        warnings_expected = 2
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger warnings.
+            fig = Figure(frameon=True, linewidth=1, edgecolor='k')  # 1 warning
+            fig.suptitle('suptitle', unrecognized='keyword')  # 1 warning
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        assert isinstance(fig, Figure)  # It should still return the instance using the implemented keywords.
+        self.printv('      test_figure_warnings: tried to initialize Figure with problematic settings '
+                    'and got {}/{} warnings.'.format(len(w), warnings_expected))
 
     def test_fig_methods(self):
         """Test Figure methods gca, show, clear, and close"""
@@ -44,15 +62,11 @@ class TestPgmplFigure(unittest.TestCase):
         fig.clear()
         fig.close()
         assert fig.clearfig == fig.clear  # Make sure this assignment didn't break.
-        if self.verbose:
-            print('test_fig_methods: fig = {}, ax = {}'.format(fig, ax))
 
     def test_fig_add_subplot(self):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
-        if self.verbose:
-            print('test_fig_add_subplot: fig = {}, ax = {}'.format(fig, ax))
         fig.close()
 
     def test_figure_set_subplotpars(self):
@@ -64,8 +78,6 @@ class TestPgmplFigure(unittest.TestCase):
         ax2 = fig.add_subplot(2, 2, 4)
         ax2.plot([1, 0, 1])
         fig.set_subplotpars(sp)
-        if self.verbose:
-            print('test_figure_set_subplotpars: fig = {}, ax = {}, ax2 = {}'.format(fig, ax, ax2))
         fig.close()
 
     def test_fig_colorbar(self):
@@ -76,9 +88,16 @@ class TestPgmplFigure(unittest.TestCase):
         aa = x[:, np.newaxis] * y[np.newaxis, :] * 2.5
         img = ax.imshow(aa)
         fig.colorbar(img)
-        if self.verbose:
-            print('test_fig_colorbar: ax = ax')
         fig.close()
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
 
 
 if __name__ == '__main__':

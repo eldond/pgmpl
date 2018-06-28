@@ -321,7 +321,7 @@ class Axes(pg.PlotItem):
         if kwargs.get('ecolor', None) is not None:
             ekwargs['color'] = kwargs.pop('ecolor')
         if kwargs.get('elinewidth', None) is not None:
-            ekwargs['linewidth'] = wargs.pop('elinewidth')
+            ekwargs['linewidth'] = kwargs.pop('elinewidth')
         epgkw = plotkw_translator(**ekwargs)
         w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
                       for i in range(len(np.atleast_1d(x)))])
@@ -491,7 +491,7 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
-    def __init__(self, x, **kwargs):
+    def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
         cmap = kwargs.pop('cmap', None)
         norm = kwargs.pop('norm', None)
