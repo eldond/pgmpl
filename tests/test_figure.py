@@ -32,7 +32,7 @@ class TestPgmplFigure(unittest.TestCase):
     def test_figure(self):
         fig1 = Figure()
         assert isinstance(fig1, Figure)
-        Figure(tight=True)
+        Figure(tight_layout=True)
         fig1.close()
 
     def test_figure_warnings(self):

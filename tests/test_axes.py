@@ -47,6 +47,8 @@ class TestPgmplAxes(unittest.TestCase):
     def test_axes_plot(self):
         ax = Axes()
         ax.plot(self.x, self.y, color='r')
+        for i in range(len(ax.prop_cycle)+1):  # Use up all the colors in the prop cycle so it has to loop
+            ax.plot(self.x, self.y+i)
 
     def test_axes_scatter(self):
         ax = Axes()
@@ -119,9 +121,11 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(self.x, self.y, yerr, color='r', capsize=6, capthick=1.25, marker='s', ecolor='m')
         ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
         ax.errorbar(self.x, self.y, yerr, elinewidth=2.5, markeredgewidth=1.2, barsabove=True)
+        ax.errorbar(self.x, self.y-20, yerr, capsize=0, capthick=0)
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
         ax.fill_between(self.x, -self.y - yerr - 1, -self.y + yerr - 1, where=(self.x >= np.mean(self.x)))
+        ax.fill_between(self.x, self.y+20, 0)
 
     def test_axes_lines(self):
         ax = Axes()
