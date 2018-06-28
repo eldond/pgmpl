@@ -27,6 +27,7 @@ import __init__  # __init__ does setup stuff like making sure a QApp exists
 from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
 from util import printd, tolist, is_numeric
 from text import Text
+from contour import QuadContourSet
 
 
 class Axes(pg.PlotItem):
@@ -186,7 +187,7 @@ class Axes(pg.PlotItem):
         if not self._hold:
             self.clear()
         kwargs['filled'] = False
-        contours = mcontour.QuadContourSet(self, *args, **kwargs)
+        contours = QuadContourSet(self, *args, **kwargs)
         return contours
 
     def contourf(self, *args, **kwargs):
@@ -194,7 +195,7 @@ class Axes(pg.PlotItem):
         if not self._hold:
             self.clear()
         kwargs['filled'] = True
-        contours = mcontour.QuadContourSet(self, *args, **kwargs)
+        contours = QuadContourSet(self, *args, **kwargs)
         return contours
 
     def set_xlabel(self, label):
