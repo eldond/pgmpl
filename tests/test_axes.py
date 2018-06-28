@@ -40,16 +40,13 @@ class TestPgmplAxes(unittest.TestCase):
     x2 = np.linspace(0, 2.1, 25)
     two_d_data = (x1[:, np.newaxis] - 0.94)**2 + (x2[np.newaxis, :] - 1.2)**2
 
-    def test_axes_init(self):
-        ax = Axes()
+    def printv(self, *args):
         if self.verbose:
-            print('test_axes_init: ax = {}'.format(ax))
+            print(*args)
 
     def test_axes_plot(self):
         ax = Axes()
         ax.plot(self.x, self.y, color='r')
-        if self.verbose:
-            print('test_axes_plot: ax = {}'.format(ax))
 
     def test_axes_scatter(self):
         ax = Axes()
@@ -74,9 +71,8 @@ class TestPgmplAxes(unittest.TestCase):
         assert isinstance(img, AxesImage)
         assert isinstance(img1, AxesImage)
         assert isinstance(img2, AxesImage)
-        if self.verbose:
-            print('test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
-                ax, ax1, ax2, img, img1, img2))
+        self.printv('      test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
+               ax, ax1, ax2, img, img1, img2))
 
     def test_axes_imshow_warnings(self):
         from pgmpl.axes import AxesImage
@@ -93,9 +89,8 @@ class TestPgmplAxes(unittest.TestCase):
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
-        if self.verbose:
-            print('test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
-                  'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))
+        self.printv('      test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
+                    'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))
 
     def test_axes_warnings(self):
         ax = Axes()
@@ -110,9 +105,8 @@ class TestPgmplAxes(unittest.TestCase):
             ax.set_ylim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             # Verify that warnings were made.
             assert len(w) == warnings_expected
-        if self.verbose:
-            print('test_axes_warnings: tried to make probelmatic calls to Axes methods '
-                  'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
+        self.printv('      test_axes_warnings: tried to make probelmatic calls to Axes methods '
+                    'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
 
     def test_axes_err(self):
         ax = Axes()
@@ -122,16 +116,12 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
-        if self.verbose:
-            print('test_axes_err: ax = {}'.format(ax))
 
     def test_axes_lines(self):
         ax = Axes()
         ax.axhline(0.5, linestyle='--', color='k')
         ax.axvline(0.5)
         ax.axvline(0.75, linestyle='-', color='b')
-        if self.verbose:
-            print('test_axes_lines: ax = {}'.format(ax))
 
     def test_axes_xyaxes(self):
         ax = Axes()
@@ -145,8 +135,6 @@ class TestPgmplAxes(unittest.TestCase):
         ax.set_ylim(-2, 4)
         ax.set_xscale('linear')
         ax.set_yscale('log')
-        if self.verbose:
-            print('test_axes_xyaxes: ax = {}'.format(ax))
 
     def test_axes_aspect(self):
         ax = Axes()
@@ -163,17 +151,14 @@ class TestPgmplAxes(unittest.TestCase):
             ax.set_aspect('equal', adjustable='datalim', anchor='C', share=True)
             # Verify that warnings were made.
             assert len(w) == warnings_expected
-        if self.verbose:
-            print('test_axes_aspect: tried to call Axes set_aspect() using unimplemented keywords '
-                  'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
+        self.printv('      test_axes_aspect: tried to call Axes set_aspect() using unimplemented keywords '
+                    'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
 
     def test_axes_clear(self):
         ax = Axes()
         ax.plot(self.y, self.x)  # Switch them so the test doesn't get bored.
         ax.clear()
         # Should add something to try to get the number of objects on the test and assert that there are none
-        if self.verbose:
-            print('test_axes_clear: ax = {}'.format(ax))
 
     def test_Legend(self):
         """Tests both the legend method of Axes and the Legend class implicitly"""
@@ -192,13 +177,20 @@ class TestPgmplAxes(unittest.TestCase):
             leg.draggable(False)
             # Verify that warnings were made.
             assert len(w) == warnings_expected
-        if self.verbose:
-            print('test_axes_Legend: trigger a warning from Legend '
-                  'and got {}/{} warnings. leg = {}'.format(len(w), warnings_expected, leg))
+        self.printv('      test_axes_Legend: triggered a warning from Legend and got {}/{} warnings. leg = {}'.format(
+            len(w), warnings_expected, leg))
 
         leg.clear()
-        if self.verbose:
-            print('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
 
 
 if __name__ == '__main__':

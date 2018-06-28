@@ -25,15 +25,26 @@ class TestPgmplColorbar(unittest.TestCase):
     y = np.linspace(0, 1, 5)
     a = x[:, np.newaxis] * y[np.newaxis, :]
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     def test_colorbar(self):
         from pgmpl.pyplot import subplots
         fig, ax = subplots(1)
         img = ax.imshow(self.a)
         cb = fig.colorbar(img)
         assert isinstance(cb, Colorbar)
-        if self.verbose:
-            print('test_colorbar: ax = {}, cb = {}'.format(ax, cb))
         fig.close()
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
 
 
 if __name__ == '__main__':

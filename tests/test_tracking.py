@@ -22,10 +22,12 @@ class TestPgmplTracking(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     def test_tracker(self):
         assert isinstance(tracker, WTracker)
-        if self.verbose:
-            print('test_tracker: tracker = {}'.format(tracker))
         dummy = 'dummy_window'
         open_windows0 = copy.deepcopy(tracker.open_windows)
         tracker.window_opened(dummy)
@@ -48,9 +50,18 @@ class TestPgmplTracking(unittest.TestCase):
             tracker.window_closed('this is obviously not a tracked window, so there should be a warning')
             # Verify that warnings were made.
             assert len(w) == warnings_expected
-        if self.verbose:
-            print('test_tracker_warnings: called window_closed with a nonsense window to trigger a warning  '
-                  'and got {}/{} warnings.'.format(len(w), warnings_expected))
+        self.printv('      test_tracker_warnings: called window_closed with a nonsense window to trigger a warning  '
+                    'and got {}/{} warnings.'.format(len(w), warnings_expected))
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
+
 
 if __name__ == '__main__':
     unittest.main()
