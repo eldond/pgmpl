@@ -65,7 +65,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax = Axes()
         img = ax.imshow(a)
         ax1 = Axes()
-        img1 = ax1.imshow(a[:, :, 0:2], aspect='equal')
+        img1 = ax1.imshow(data={'x': a[:, :, 0:2]}, aspect='equal')
         ax2 = Axes()
         img2 = ax2.imshow(self.two_d_data)
         assert isinstance(img, AxesImage)
@@ -85,8 +85,9 @@ class TestPgmplAxes(unittest.TestCase):
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger warnings.
-            img = ax.imshow(data={'x': a, 'unrecognized': 55}, shape=np.shape(a), imlim=55, interpolation='nearest',
-                            filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)
+            img = ax.imshow(
+                data={'x': a, 'unrecognized': 'thingy'}, shape=np.shape(a), imlim=55, interpolation='nearest',
+                filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)  # 8 warnings
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
@@ -102,7 +103,8 @@ class TestPgmplAxes(unittest.TestCase):
             # Trigger warnings.
             ax.text(0.5, 0.91, 'text1', withdash=True)  # 1 warning
             ax.fill_between(self.x, self.y*0.1, self.y*1.1, step='pre')  # 1 warning
-            ax.fill_between(self.x, self.y * 0.1, self.y * 1.1, where=(self.x > -10), interpolate=True)  # 1 warning
+            ax.fill_between(self.x, -self.y - 10, self.y - 10,
+                            where=(self.x >= np.mean(self.x)), interpolate=True)  # 1 warning
             ax.set_xlim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             ax.set_ylim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             # Verify that warnings were made.
@@ -119,6 +121,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(self.x, self.y, yerr, elinewidth=2.5, markeredgewidth=1.2, barsabove=True)
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
+        ax.fill_between(self.x, -self.y - yerr - 1, -self.y + yerr - 1, where=(self.x >= np.mean(self.x)))
 
     def test_axes_lines(self):
         ax = Axes()
@@ -196,12 +199,14 @@ class TestPgmplAxes(unittest.TestCase):
         leg.draggable()
 
         # Test warnings
-        warnings_expected = 1
+        warnings_expected = 3
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger a warning.
             leg.draggable(False)
+            # Trigger more warnings:
+            ax.legend(blah='unrecognized keyword should make warning', borderaxespad=5)
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         self.printv('      test_axes_Legend: triggered a warning from Legend and got {}/{} warnings. leg = {}'.format(

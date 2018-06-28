@@ -126,7 +126,7 @@ def color_translator(**kw):
     return new_color
 
 
-def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=False, ncol=256, alpha=None):
+def color_map_translator(x, **kw):
     """
     Translates colors for a matplotlib colormap and a dataset, such as would be used for scatter, imshow, contour, etc.
     :param x: numeric scalar or iterable
@@ -141,12 +141,13 @@ def color_map_translator(x, cmap=None, norm=None, vmin=None, vmax=None, clip=Fal
     :return: List of pyqtgraph-compatible color specifications with length matching x
     """
     printd('color_map_translator...')
+    norm = kw.pop('norm', None)
     if norm is None:
         printd('  norm was None, normalizing...')
-        norm = Normalize(vmin=vmin, vmax=vmax, clip=clip)
-    comap = matplotlib.cm.get_cmap(cmap, lut=ncol)
+        norm = Normalize(vmin=kw.pop('vmin', None), vmax=kw.pop('vmax', None), clip=kw.pop('clip', False))
+    comap = matplotlib.cm.get_cmap(kw.pop('cmap', None), lut=kw.pop('ncol', 256))
     colors = comap(norm(np.atleast_1d(x)))
-    return [color_translator(color=color, alpha=alpha) for color in tolist(colors)]
+    return [color_translator(color=color, alpha=kw.get('alpha', None)) for color in tolist(colors)]
 
 
 def style_translator(**kw):
@@ -278,10 +279,7 @@ def setup_pen_kw(**kw):
     if news is not None:
         penkw['style'] = news
 
-    if len(penkw.keys()):
-        pen = pg.mkPen(**penkw)
-    else:
-        pen = None
+    pen = pg.mkPen(**penkw) if len(penkw.keys()) else None
 
     return pen
 

@@ -34,21 +34,20 @@ class Axes(pg.PlotItem):
     Imitates matplotlib.axes.Axes using PyQtGraph
     """
     def __init__(self, **kwargs):
-        sharex = kwargs.pop('sharex', None)
-        sharey = kwargs.pop('sharey', None)
-        self.nrows = kwargs.pop('nrows', 1)
-        self.ncols = kwargs.pop('ncols', 1)
-        self.index = kwargs.pop('index', 1)
+        for item in ['sharex', 'sharey']:
+            setattr(self, item, kwargs.pop(item, None))
+        for item in ['nrows', 'ncols', 'index']:
+            setattr(self, item, kwargs.pop(item, 1))
         super(Axes, self).__init__(**kwargs)
         self.legend = Legend(ax=self)
         self.prop_cycle = rcParams['axes.prop_cycle']
         tmp = self.prop_cycle()
         self.cyc = defaultdict(lambda: next(tmp))
         self.prop_cycle_index = 0
-        if sharex is not None:
-            self.setXLink(sharex)
-        if sharey is not None:
-            self.setYLink(sharey)
+        if self.sharex is not None:
+            self.setXLink(self.sharex)
+        if self.sharey is not None:
+            self.setYLink(self.sharey)
 
     def clear(self):
         printd('  Clearing Axes instance {}...'.format(self))
@@ -78,27 +77,23 @@ class Axes(pg.PlotItem):
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     @staticmethod
-    def _prep_scatter_colors(
-            n, c=None, cmap=None, norm=None, vmin=None, vmax=None, edgecolors=None, alpha=None, **kwargs):
+    def _prep_scatter_colors(n, **kwargs):
         """Helper function to prepare colors for scatter plot"""
+        edgecolors = kwargs.pop('edgecolors', None)
+        c = kwargs.pop('c', None)
         # Translate face colors
         if c is None:
             # All same default color
             brush_colors = [color_translator(color='b')] * n
         elif is_numeric(tolist(c)[0]):
-            brush_colors = color_map_translator(
-                c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
-            )
+            brush_colors = color_map_translator(c, **kwargs)
         else:
             # Assume that c is a list/array of colors
             brush_colors = [color_translator(color=cc) for cc in tolist(c)]
 
         # Translate edge colors
-        if edgecolors is None:
-            brush_edges = [color_translator(color='k')] * n
-        else:
-            brush_edges = [color_translator(color=edgecolor, alpha=alpha) for edgecolor in tolist(edgecolors)]
+        brush_edges = [color_translator(color='k')] * n if edgecolors is None \
+            else [color_translator(color=ec, alpha=kwargs.get('alpha', None)) for ec in tolist(edgecolors)]
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
         if (len(tolist(brush_colors)) == 1) and (n > 1):
@@ -108,10 +103,18 @@ class Axes(pg.PlotItem):
 
         return brush_colors, brush_edges
 
-    def scatter(
-            self, x=None, y=None, s=10, c=None, marker='o', cmap=None, norm=None, vmin=None, vmax=None, alpha=None,
-            linewidths=None, verts=None, edgecolors=None, data=None, **kwargs
-    ):
+    @staticmethod
+    def _make_custom_verts(verts):
+        """
+        Makes a custom symbol from the verts keyword accepted by scatter
+        :param verts: sequence of (x, y), optional
+        :return: a pyqt path suitable for use with Axes.plot()'s symbol keyword.
+        """
+        verts_x = np.array([vert[0] for vert in verts])
+        verts_y = np.array([vert[1] for vert in verts])
+        return pg.arrayToQPath(verts_x, verts_y, connect='all')
+
+    def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
         :param x: array like with length n
@@ -131,28 +134,31 @@ class Axes(pg.PlotItem):
         :param kwargs:
         :return: plotItem instance
         """
+        data = kwargs.pop('data', None)
+        linewidths = kwargs.pop('linewidths', None)
         if data is not None:
             x = data.get('x')
             y = data.get('y')
-            s = data.get('s', None)
-            c = data.get('c', None)
-            edgecolors = data.get('edgecolors', None)
+            kwargs['s'] = data.get('s', None)
+            kwargs['c'] = data.get('c', None)
+            kwargs['edgecolors'] = data.get('edgecolors', None)
             linewidths = data.get('linewidths', None)
             # The following keywords are apparently valid within `data`,
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
-        brush_colors, brush_edges = self._prep_scatter_colors(
-            n, c=c, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, edgecolors=edgecolors, alpha=alpha, **kwargs)
+        brush_colors, brush_edges = self._prep_scatter_colors(n, **kwargs)
+
+        for popit in ['cmap', 'norm', 'vmin', 'vmax', 'alpha', 'edgecolors', 'c']:
+            kwargs.pop(popit, None)  # Make sure all the color keywords are gone now that they've been used.
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
         if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
             linewidths = tolist(linewidths) * n
 
         # Catch & translate other keywords
-        kwargs['markersize'] = s
-        if marker is not None:
-            kwargs['marker'] = marker
+        kwargs['markersize'] = kwargs.pop('s', 10)
+        kwargs.setdefault('marker', 'o')
         plotkw = plotkw_translator(**kwargs)
 
         # Fill in keywords we already prepared
@@ -163,10 +169,8 @@ class Axes(pg.PlotItem):
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
-        if marker is None:
-            verts_x = np.array([vert[0] for vert in verts])
-            verts_y = np.array([vert[1] for vert in verts])
-            plotkw['symbol'] = pg.arrayToQPath(verts_x, verts_y, connect='all')
+        if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
+            plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
 
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
@@ -415,6 +419,14 @@ class Axes(pg.PlotItem):
 
         return fb
 
+    def _check_set_lim_kw(self, **kw):
+        if not kw.pop('emit', True):
+            warnings.warn('emit keyword to set_xlim/set_ylim is not handled yet')
+        if kw.pop('auto', False):
+            warnings.warn('auto keyword to set_xlim/set_ylim is not handled yet')
+        if len(kw.keys()):
+            warnings.warn('set_xlim/set_ylim ignores any extra keywords in **kw: {}'.format(kw.keys()))
+
     def set_xlim(self, left=None, right=None, **kw):
         """Direct imitation of matplotlib set_xlim"""
         if right is None and len(np.atleast_1d(left)) == 2:
@@ -425,12 +437,7 @@ class Axes(pg.PlotItem):
         else:
             new_xlims = None
 
-        if not kw.pop('emit', True):
-            warnings.warn('emit keyword to set_xlim is not handled yet')
-        if kw.pop('auto', False):
-            warnings.warn('auto keyword to set_xlim is not handled yet')
-        if len(kw.keys()):
-            warnings.warn('set_xlim ignores any extra keywords in **kw')
+        self._check_set_lim_kw(**kw)
 
         if new_xlims is not None:
             self.setXRange(new_xlims[0], new_xlims[1])
@@ -446,12 +453,7 @@ class Axes(pg.PlotItem):
         else:
             new_ylims = None
 
-        if not kw.pop('emit', True):
-            warnings.warn('emit keyword to set_ylim is not handled yet')
-        if kw.pop('auto', False):
-            warnings.warn('auto keyword to set_ylim is not handled yet')
-        if len(kw.keys()):
-            warnings.warn('set_ylim ignores any extra keywords in **kw')
+        self._check_set_lim_kw(**kw)
 
         if new_ylims is not None:
             self.setYRange(new_ylims[0], new_ylims[1])
@@ -541,16 +543,12 @@ class AxesImage(pg.ImageItem):
         if kw.pop('shape', None) is not None:
             warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
                           'so I had nothing to emulate.')
-        if kw.pop('imlim', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: imlim.')
-        if kw.pop('interpolation', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: interpolation.')
+        ignoreds = ['imlim', 'resample', 'url', 'interpolation']
+        for ignored in ignoreds:
+            if kw.pop(ignored, None) is not None:
+                warnings.warn('Axes.imshow ignored keyword: {}.'.format(ignored))
         if kw.pop('filternorm', 1) != 1 or kw.pop('filterrad', 4.0) != 4.0:
             warnings.warn('Axes.imshow ignores changes to keywords filternorm and filterrad.')
-        if kw.pop('resample', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: resample.')
-        if kw.pop('url', None) is not None:
-            warnings.warn('Axes.imshow ignored keyword: url.')
         if len(kw.keys()):
             warnings.warn('Axes.imshow got unhandled keywords: {}'.format(kw.keys()))
 
@@ -603,39 +601,7 @@ class Legend:
                 isvis=handle.isVisible() if hasattr(handle, 'isVisible') else None,
             ))
 
-    def __call__(
-            self,
-            handles=None,
-            labels=None,
-            loc=None,
-            numpoints=None,    # the number of points in the legend line
-            markerscale=None,  # the relative size of legend markers vs. original
-            markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
-            scatterpoints=None,    # number of scatter points
-            scatteryoffsets=None,
-            prop=None,          # properties for the legend texts
-            fontsize=None,        # keyword to set font size directly
-            # spacing & pad defined as a fraction of the font-size
-            borderpad=None,      # the whitespace inside the legend border
-            labelspacing=None,   # the vertical space between the legend entries
-            handlelength=None,   # the length of the legend handles
-            handleheight=None,   # the height of the legend handles
-            handletextpad=None,  # the pad between the legend handle and text
-            borderaxespad=None,  # the pad between the axes and legend border
-            columnspacing=None,  # spacing between columns
-            ncol=1,     # number of columns
-            mode=None,  # mode for horizontal distribution of columns. None, "expand"
-            fancybox=None,  # True use a fancy box, false use a rounded box, none use rc
-            shadow=None,
-            title=None,  # set a title for the legend
-            framealpha=None,  # set frame alpha
-            edgecolor=None,  # frame patch edgecolor
-            facecolor=None,  # frame patch facecolor
-            bbox_to_anchor=None,  # bbox that the legend will be anchored.
-            bbox_transform=None,  # transform for the bbox
-            frameon=None,  # draw frame
-            handler_map=None,
-    ):
+    def __call__(self, handles=None, labels=None, **kw):
         """
         Adds a legend to the plot axes. This class should be added to axes as they are created so that calling it acts
         like a method of the class and adds a legend, imitating matplotlib legend calling.
@@ -665,7 +631,49 @@ class Legend:
         for handle, label in zip(handles, labels):
             if self.supported(handle):
                 self.leg.addItem(handle, label)
+
+        self.check_call_kw(**kw)
+
         return self
+
+    def check_call_kw(self, **kw):
+        """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
+        unhandled_kws = dict(loc=None,
+            numpoints=None,    # the number of points in the legend line
+            markerscale=None,  # the relative size of legend markers vs. original
+            markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
+            scatterpoints=None,    # number of scatter points
+            scatteryoffsets=None,
+            prop=None,          # properties for the legend texts
+            fontsize=None,        # keyword to set font size directly
+            # spacing & pad defined as a fraction of the font-size
+            borderpad=None,      # the whitespace inside the legend border
+            labelspacing=None,   # the vertical space between the legend entries
+            handlelength=None,   # the length of the legend handles
+            handleheight=None,   # the height of the legend handles
+            handletextpad=None,  # the pad between the legend handle and text
+            borderaxespad=None,  # the pad between the axes and legend border
+            columnspacing=None,  # spacing between columns
+            ncol=1,     # number of columns
+            mode=None,  # mode for horizontal distribution of columns. None, "expand"
+            fancybox=None,  # True use a fancy box, false use a rounded box, none use rc
+            shadow=None,
+            title=None,  # set a title for the legend
+            framealpha=None,  # set frame alpha
+            edgecolor=None,  # frame patch edgecolor
+            facecolor=None,  # frame patch facecolor
+            bbox_to_anchor=None,  # bbox that the legend will be anchored.
+            bbox_transform=None,  # transform for the bbox
+            frameon=None,  # draw frame
+            handler_map=None,
+        )
+        for unhandled in unhandled_kws.keys():
+            if unhandled in kw.keys():
+                kw.pop(unhandled)
+                warnings.warn(
+                    'pgmpl.axes.Legend.__call__ got unhandled keyword: {}. This keyword might be implemented later.')
+        if len(kw.keys()):
+            warnings.warn('pgmpl.axes.Legend.__call__ got unrecognized keywords: {}'.format(kw.keys()))
 
     def addItem(self, item, name=None):
         """
