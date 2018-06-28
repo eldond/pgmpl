@@ -31,7 +31,22 @@ class TestPgmplFigure(unittest.TestCase):
     def test_figure(self):
         fig1 = Figure()
         assert isinstance(fig1, Figure)
+        Figure(tight=True)
         fig1.close()
+
+    def test_figure_warnings(self):
+        warnings_expected = 2
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger warnings.
+            fig = Figure(frameon=True, linewidth=1, edgecolor='k')  # 1 warning
+            fig.suptitle('suptitle', unrecognized='keyword')  # 1 warning
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        assert isinstance(fig, Figure)  # It should still return the instance using the implemented keywords.
+        self.printv('      test_figure_warnings: tried to initialize Figure with problematic settings '
+                    'and got {}/{} warnings.'.format(len(w), warnings_expected))
 
     def test_fig_methods(self):
         """Test Figure methods gca, show, clear, and close"""

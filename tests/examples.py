@@ -205,5 +205,6 @@ class TestPgmplExamples(unittest.TestCase):
         if self.verbose:
             print('  Tested examples.py')
 
+
 if __name__ == '__main__':
     open_examples(start_event=True)

@@ -71,6 +71,7 @@ class TestPgmplAxes(unittest.TestCase):
         assert isinstance(img, AxesImage)
         assert isinstance(img1, AxesImage)
         assert isinstance(img2, AxesImage)
+        ax.imshow(data={'x': a})
         self.printv('      test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
                ax, ax1, ax2, img, img1, img2))
 
@@ -79,13 +80,13 @@ class TestPgmplAxes(unittest.TestCase):
         a = self.imgdat1
         ax = Axes()
 
-        warnings_expected = 7
+        warnings_expected = 8
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            # Trigger a warning.
-            img = ax.imshow(a, shape=np.shape(a), imlim=55, interpolation='nearest', filternorm=2, filterrad=5.0,
-                            resample=True, url='google.com', blah=True)
+            # Trigger warnings.
+            img = ax.imshow(data={'x': a, 'unrecognized': 55}, shape=np.shape(a), imlim=55, interpolation='nearest',
+                            filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)
             # Verify that warnings were made.
             assert len(w) == warnings_expected
         assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
@@ -94,13 +95,14 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_warnings(self):
         ax = Axes()
-        warnings_expected = 8
+        warnings_expected = 9
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger warnings.
             ax.text(0.5, 0.91, 'text1', withdash=True)  # 1 warning
             ax.fill_between(self.x, self.y*0.1, self.y*1.1, step='pre')  # 1 warning
+            ax.fill_between(self.x, self.y * 0.1, self.y * 1.1, where=(self.x > -10), interpolate=True)  # 1 warning
             ax.set_xlim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             ax.set_ylim([-1, 2], emit=False, auto=True, blah=True)  # 3 warnings
             # Verify that warnings were made.
@@ -114,6 +116,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax.errorbar(-self.x, self.y, yerr, color='r')
         ax.errorbar(self.x, self.y, yerr, color='r', capsize=6, capthick=1.25, marker='s', ecolor='m')
         ax.errorbar(data={'x': -self.x, 'y': -self.y, 'yerr': yerr})
+        ax.errorbar(self.x, self.y, yerr, elinewidth=2.5, markeredgewidth=1.2, barsabove=True)
         ax.fill_between(self.x, -self.y-yerr-1, -self.y+yerr-1)
         ax.fill_between(data={'x': -self.x, 'y1': 10-self.y-yerr-1, 'y2': -self.y+yerr-1})
 
@@ -125,16 +128,40 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_xyaxes(self):
         ax = Axes()
-        ax.plot([0, 1], [1, 2])
+        ax.plot([1, 5], [1, 2])
         ax.set_ylabel('ylabel')
         ax.set_xlabel('xlabel')
         ax.set_title('title title title')
+        ax.set_xlim()
+        ax.set_ylim()
         ax.set_xlim([-1, 2])
-        ax.set_xlim(-1, 2)
         ax.set_ylim([-2, 4])
-        ax.set_ylim(-2, 4)
+        ax.set_xlim(1, 2)
+        ax.set_ylim(1, 4)
         ax.set_xscale('linear')
+        ax.set_yscale('linear')
+        ax.set_xscale('log')
         ax.set_yscale('log')
+
+    def test_axes_xyaxes_warnings(self):
+        ax = Axes()
+        ax.set_xlim(1, 10)
+        ax.set_ylim(1, 10)
+        warnings_expected = 8
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger warnings.
+            ax.set_xscale('symlog', keyword='unrecognized')  # 2 warnings
+            ax.set_xscale('logit')  # 1 warning
+            ax.set_xscale('unrecognized')  # 1 warning
+            ax.set_yscale('symlog', keyword='unrecognized')  # 2 warnings
+            ax.set_yscale('logit')  # 1 warning
+            ax.set_yscale('unrecognized')  # 1 warning
+            # Verify that warnings were made.
+            assert len(w) == warnings_expected
+        self.printv('      test_axes_xyaxes_warnings: tried to make probelmatic calls to Axes lim & scale methods '
+                    'and got {}/{} warnings. ax = {}'.format(len(w), warnings_expected, ax))
 
     def test_axes_aspect(self):
         ax = Axes()
