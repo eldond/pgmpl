@@ -201,6 +201,20 @@ class TestPgmplAxes(unittest.TestCase):
         leg = ax.legend()
         leg.addItem(line, name='yx plot')
         leg.draggable()
+        leg.clear()
+        ax2 = Axes()
+        ax2.plot(self.x, self.y, color='r', label='y(x) plot red')
+        ax2.plot(self.x, -self.y, color='b', label='y(x) plot blue')
+        ax2.legend(labels='blah')
+
+        ax.legend(loc=0)
+        ax.legend(loc=4)
+        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+
+    def test_Legend_warnings(self):
+        ax = Axes()
+        ax.plot(self.x, self.y, label='y(x) plot')
+        leg = ax.legend()
 
         # Test warnings
         warnings_expected = 3
@@ -215,9 +229,6 @@ class TestPgmplAxes(unittest.TestCase):
             assert len(w) == warnings_expected
         self.printv('      test_axes_Legend: triggered a warning from Legend and got {}/{} warnings. leg = {}'.format(
             len(w), warnings_expected, leg))
-
-        leg.clear()
-        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
 
     def setUp(self):
         test_id = self.id()
