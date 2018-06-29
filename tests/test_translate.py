@@ -42,22 +42,23 @@ class TestPgmplTranslate(unittest.TestCase):
 
     nt = len(plot_kw_tests)
 
+    def printv(self, *args):
+        if self.verbose:
+            print(*args)
+
     if verbose:
         print('-' * 79)
         print('\nTestPgmplTranslate has {} test sets of plot keywords ready to go!\n'.format(nt))
         print('-' * 79)
 
     def test_defaults_from_rcparams(self):
-        unique_linewidth = 5.1234958293
+        unique_linewidth = 5.1234958293 + rcParams['lines.linewidth']
         ans0 = defaults_from_rcparams({})
         ans1 = defaults_from_rcparams({'linewidth': unique_linewidth})
         ans0b = copy.deepcopy(ans0)
         ans0b['linewidth'] = unique_linewidth
         assert ans1 == ans0b
-        if rcParams['lines.linewidth'] == unique_linewidth:
-            assert ans1 == ans0
-        else:
-            assert ans1 != ans0
+        assert ans1 != ans0
 
     def test_color_translator(self):
         newc = [None] * self.nt
@@ -70,8 +71,6 @@ class TestPgmplTranslate(unittest.TestCase):
         assert all(color_translator(color=(1, 0.5, 1)) == np.array([255., 255/2., 255., 255.]))
         assert all(color_translator(color=(1, 0.5, 1, 0.5)) == np.array([255., 255/2., 255., 255./2.]))
         assert all(color_translator(color=(1, 0.5, 1), alpha=0.5) == np.array([255., 255/2., 255., 255./2.]))
-        if self.verbose:
-            print('New colors:', newc)
 
     def test_style_translator(self):
         news = [None] * self.nt
@@ -97,23 +96,17 @@ class TestPgmplTranslate(unittest.TestCase):
         custom_markers = '_x|,.'
         for custom in custom_markers:
             assert isinstance(symbol_translator(marker=custom), QtGui.QPainterPath)
-        if self.verbose:
-            print('New symbols:', news)
 
     def test_setup_pen_kw(self):
         newp = [None] * self.nt
         for i in range(self.nt):
             newp[i] = setup_pen_kw(**self.plot_kw_tests[i])
             assert isinstance(newp[i], QtGui.QPen)
-        if self.verbose:
-            print('New pens:', newp)
 
     def test_plotkw_translator(self):
         newk = [{}] * self.nt
         for i in range(self.nt):
             newk[i] = plotkw_translator(**self.plot_kw_tests[i])
-        if self.verbose:
-            print('New keyword dictionaries:', newk)
 
     def test_dealias(self):
         test_dict = {'lw': 5, 'ls': '--', 'mec': 'r', 'markeredgewidth': 1, 'blah': 0}
@@ -124,8 +117,6 @@ class TestPgmplTranslate(unittest.TestCase):
         assert dealias(lw=8) == {'linewidth': 8}
         assert dealias(blah=58) == {'blah': 58}
         assert dealias(mec='r') == {'markeredgecolor': 'r'}
-        if self.verbose:
-            print('test_dealias: test_answer = {}'.format(test_answer))
 
     def test_color_map_translator(self):
         x = [0, 1, 2, 3, 5, 9, 10, 22]
@@ -137,8 +128,15 @@ class TestPgmplTranslate(unittest.TestCase):
         assert len(m2) == 3
         assert len(m3) == len(x)
         assert any((np.atleast_1d(m3) != np.atleast_1d(m4)).flatten())
-        if self.verbose:
-            print('test_color_map_translator: m4 = {}'.format(m4))
+
+    def setUp(self):
+        test_id = self.id()
+        test_name = '.'.join(test_id.split('.')[-2:])
+        self.printv('{}...'.format(test_name))
+
+    def tearDown(self):
+        test_name = '.'.join(self.id().split('.')[-2:])
+        self.printv('    {} done.'.format(test_name))
 
 
 if __name__ == '__main__':

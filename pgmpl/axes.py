@@ -338,7 +338,7 @@ class Axes(pg.PlotItem):
         if kwargs.get('ecolor', None) is not None:
             ekwargs['color'] = kwargs.pop('ecolor')
         if kwargs.get('elinewidth', None) is not None:
-            ekwargs['linewidth'] = wargs.pop('elinewidth')
+            ekwargs['linewidth'] = kwargs.pop('elinewidth')
         epgkw = plotkw_translator(**ekwargs)
         w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
                       for i in range(len(np.atleast_1d(x)))])
@@ -509,7 +509,7 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
-    def __init__(self, x, **kwargs):
+    def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
         cmap = kwargs.pop('cmap', None)
         norm = kwargs.pop('norm', None)
@@ -656,7 +656,8 @@ class Legend:
 
     def check_call_kw(self, **kw):
         """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
-        unhandled_kws = dict(loc=None,
+        unhandled_kws = dict(
+            loc=None,
             numpoints=None,    # the number of points in the legend line
             markerscale=None,  # the relative size of legend markers vs. original
             markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
@@ -688,8 +689,8 @@ class Legend:
         for unhandled in unhandled_kws.keys():
             if unhandled in kw.keys():
                 kw.pop(unhandled)
-                warnings.warn(
-                    'pgmpl.axes.Legend.__call__ got unhandled keyword: {}. This keyword might be implemented later.')
+                warnings.warn('pgmpl.axes.Legend.__call__ got unhandled keyword: {}. '
+                              'This keyword might be implemented later.'.format(unhandled))
         if len(kw.keys()):
             warnings.warn('pgmpl.axes.Legend.__call__ got unrecognized keywords: {}'.format(kw.keys()))
 
