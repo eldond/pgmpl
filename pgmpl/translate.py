@@ -72,14 +72,9 @@ def defaults_from_rcparams(plotkw):
         Input dictionary with missing keywords filled in using defaults
     """
     params = {  # If you have a parameter that can't be assigned simply by just splitting after ., then set it up here.
-        'lines.linestyle': 'linestyle',  # This could've gone in simples, but then there'd be no example.
+        # 'lines.linestyle': 'linestyle',  # This can go in simples instead, but here's how it would go for example.
     }
-    simples = [
-        'lines.linewidth',
-        'lines.marker',
-        'lines.markeredgewidth',
-        'lines.markersize',
-    ]
+    simples = ['lines.linewidth', 'lines.marker', 'lines.markeredgewidth', 'lines.markersize', 'lines.linestyle']
     for simple in simples:
         params[simple] = '.'.join(simple.split('.')[1:])
 
