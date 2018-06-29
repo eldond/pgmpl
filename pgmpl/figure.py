@@ -126,7 +126,6 @@ class Figure(pg.PlotWidget):
 
     def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        print('self.layout', self.layout)
         for unhandled in ['projection', 'polar']:
             if kwargs.pop(unhandled, None) is not None:
                 raise NotImplementedError('{} keyword in add_subplot is not ready'.format(unhandled))
@@ -135,7 +134,6 @@ class Figure(pg.PlotWidget):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = (index-1) % ncols
         ax = Axes(nrows=nrows, ncols=ncols, index=index, **kwargs)
-        print('self.layout', self.layout)
         self.layout.addItem(ax, row+1, col)
         self.axes = ax if self.axes is None else tolist(self.axes) + [ax]
         self.fig_colspan = max([ncols, self.fig_colspan])
