@@ -664,34 +664,11 @@ class Legend:
     def check_call_kw(**kw):
         """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
         unhandled_kws = dict(
-            loc=None,
-            numpoints=None,    # the number of points in the legend line
-            markerscale=None,  # the relative size of legend markers vs. original
-            markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
-            scatterpoints=None,    # number of scatter points
-            scatteryoffsets=None,
-            prop=None,          # properties for the legend texts
-            fontsize=None,        # keyword to set font size directly
-            # spacing & pad defined as a fraction of the font-size
-            borderpad=None,      # the whitespace inside the legend border
-            labelspacing=None,   # the vertical space between the legend entries
-            handlelength=None,   # the length of the legend handles
-            handleheight=None,   # the height of the legend handles
-            handletextpad=None,  # the pad between the legend handle and text
-            borderaxespad=None,  # the pad between the axes and legend border
-            columnspacing=None,  # spacing between columns
-            ncol=1,     # number of columns
-            mode=None,  # mode for horizontal distribution of columns. None, "expand"
-            fancybox=None,  # True use a fancy box, false use a rounded box, none use rc
-            shadow=None,
-            title=None,  # set a title for the legend
-            framealpha=None,  # set frame alpha
-            edgecolor=None,  # frame patch edgecolor
-            facecolor=None,  # frame patch facecolor
-            bbox_to_anchor=None,  # bbox that the legend will be anchored.
-            bbox_transform=None,  # transform for the bbox
-            frameon=None,  # draw frame
-            handler_map=None,
+            loc=None, numpoints=None, markerscale=None, markerfirst=True, scatterpoints=None, scatteryoffsets=None,
+            prop=None, fontsize=None, borderpad=None, labelspacing=None, handlelength=None, handleheight=None,
+            handletextpad=None, borderaxespad=None, columnspacing=None, ncol=1, mode=None, fancybox=None, shadow=None,
+            title=None, framealpha=None, edgecolor=None, facecolor=None, bbox_to_anchor=None, bbox_transform=None,
+            frameon=None, handler_map=None,
         )
         for unhandled in unhandled_kws.keys():
             if unhandled in kw.keys():
