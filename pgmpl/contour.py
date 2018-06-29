@@ -9,6 +9,26 @@ more information.
 """
 
 
+# Basic imports
+from __future__ import print_function, division
+import warnings
+import copy
+
+# Calculation imports
+import numpy as np
+
+# Plotting imports
+import pyqtgraph as pg
+from matplotlib import rcParams
+from collections import defaultdict
+
+# pgmpl
+# noinspection PyUnresolvedReferences
+import __init__  # __init__ does setup stuff like making sure a QApp exists
+from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
+from util import printd, tolist, is_numeric
+
+
 class ContourSet(object):
 
     def __init__(self, ax, *args, **kwargs):
@@ -25,9 +45,49 @@ class ContourSet(object):
         if self.antialiased is None and self.filled:
             self.antialiased = False
         self.nchunk = kwargs.pop('nchunk', 0)
-        kwargs = self._process_args(*args, **kwargs)
+        self.x, self.y, self.z, self.levels = self.choose_xyz_levels(*args)
 
         return
+
+    def auto_pick_levels(self, z, nlvl=None):
+        """
+        Pick contour levels automatically
+        :param z: 2D array
+        :param nlvl: int or None
+            Number of levels; set to some arbitrary default if None
+        :return: array
+        """
+        nlvl = 5 if nlvl is None else nlvl
+        self.vmin = z.min() if self.vmin is None else self.vmin
+        self.vmax = z.max() if self.vmax is None else self.vmax
+        return np.linspace(self.vmin, self.vmax, nlvl)
+
+    def choose_xyz_levels(self, *args):
+        """
+        Interprets args to pick the contour value Z, the X,Y coordinates, and the contour levels.
+        :param args: list of arguments received by __init__
+            Could be [z] or [x, y, z] or [z, L] or [x, y, z, L], and L could be an array of levels or a number of levels
+        :return: tuple of arrays for x, y, z, and levels
+        """
+        x = y = lvlinfo = None
+
+        if len(args) == 1:
+            z = args[0]
+        elif len(args) == 2:
+            z, lvlinfo = args
+        elif len(args) == 3:
+            x, y, z = args
+        elif len(args) == 4:
+            x, y, z, lvlinfo = args
+        else:
+            raise TypeError('choose_xyz_levels takes 1, 2, 3, or 4 arguments. Got {} arguments.'.format(len(args)))
+
+        levels = lvlinfo if ((lvlinfo is not None) and np.iterable(lvlinfo)) else self.auto_pick_levels(z, lvlinfo)
+
+        if x is None:
+            x, y = np.arange(np.shape(z)[0]), np.arange(np.shape(z)[1])
+
+        return x, y, z, levels
 
     def _process_args(self, *args, **kwargs):
         """
@@ -66,6 +126,6 @@ class ContourSet(object):
 
 
 class QuadContourSet(ContourSet):
-    """blah"""
-#    def __init__(self, **kwargs):
-#        super(QuadContourSet, self).__init__(**kwargs)
+    """Provided to make this thing follow the same sort of structure as matplotlib"""
+    def __init__(self, *args, **kwargs):
+        super(QuadContourSet, self).__init__(*args, **kwargs)

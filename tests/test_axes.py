@@ -80,18 +80,18 @@ class TestPgmplAxes(unittest.TestCase):
     def test_axes_contour(self):
         a = sum(self.rgb2d, 2) * 10
         levels = [0, 0.5, 1.2, 5, 9, 10, 20, 30]
-        print('shape(a) = {}'.format(np.shape(a)))
         ax = Axes()
-        ax1 = Axes()
         ax.contour(a)
+        ax1 = Axes()
         ax1.contourf(a)
-        if self.verbose:
-            print('test_axes_contour: ax = {}, contours = {}, ax1 = {}, contourfs = {}'.format(
-                ax, contours, ax1, contourfs))
+        ax2 = Axes()
+        ax2.contour(a, levels)
+        ax3 = Axes()
+        ax3.contour(a, 3)
 
     def test_axes_imshow_warnings(self):
         from pgmpl.axes import AxesImage
-        a = self.imgdat1
+        a = self.rgb2d
         ax = Axes()
 
         warnings_expected = 8
