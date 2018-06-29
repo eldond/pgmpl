@@ -72,14 +72,9 @@ def defaults_from_rcparams(plotkw):
         Input dictionary with missing keywords filled in using defaults
     """
     params = {  # If you have a parameter that can't be assigned simply by just splitting after ., then set it up here.
-        'lines.linestyle': 'linestyle',  # This could've gone in simples, but then there'd be no example.
+        # 'lines.linestyle': 'linestyle',  # This can go in simples instead, but here's how it would go for example.
     }
-    simples = [
-        'lines.linewidth',
-        'lines.marker',
-        'lines.markeredgewidth',
-        'lines.markersize',
-    ]
+    simples = ['lines.linewidth', 'lines.marker', 'lines.markeredgewidth', 'lines.markersize', 'lines.linestyle']
     for simple in simples:
         params[simple] = '.'.join(simple.split('.')[1:])
 
@@ -112,18 +107,13 @@ def color_translator(**kw):
         except ValueError:
             printd('    color_translator input: kw["color"] = {}'.format(kw.get('color', None)), level=3)
         if kw['color'] in ['', ' ']:
-            new_color = (0, 0, 0, 0)  # Empty strings and spaces are code for invisible (alpha = 0)
+            return 0, 0, 0, 0  # Empty strings and spaces are code for invisible (alpha = 0)
         elif 'alpha' in kw and kw['alpha'] is not None:
-            new_color = np.array(to_rgba(kw['color'])) * 255
-            new_color[3] = kw['alpha'] * 255
+            return np.append(np.array(to_rgba(kw['color']))[0:3], kw['alpha']) * 255
         else:
-            new_color = np.array(to_rgba(kw['color'])) * 255
+            return np.array(to_rgba(kw['color'])) * 255
     else:
-        if 'alpha' in kw and kw['alpha'] is not None:
-            new_color = (0, 0, 0, int(round(kw['alpha'] * 255)))
-        else:
-            new_color = None
-    return new_color
+        return (0, 0, 0, int(round(kw['alpha'] * 255))) if 'alpha' in kw and kw['alpha'] is not None else None
 
 
 def color_map_translator(x, **kw):
@@ -181,35 +171,19 @@ def symbol_translator(**kw):
     :return: string
         Code for the relevant pyqtgraph symbol.
     """
-    if 'marker' in kw:
-        theta = np.linspace(0, 2 * np.pi, 36)
-        symbol = {  # mpl symbol : pyqt4 symbol
-            '.': pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
-            ',': pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]),
-                                 np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
-            'x': pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]),
-                                 np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'),
-            '+': '+',
-            '*': 'star',
-            'o': 'o',
-            'v': 't',
-            '^': 't1',
-            '>': 't2',
-            '<': 't3',
-            'd': 'd',
-            's': 's',
-            'p': 'p',
-            'h': 'h',
-            '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
-            '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
-            'None': None,
-            'none': None,
-            None: None,
-        }.get(kw['marker'], 'o')
-    else:
-        symbol = None
-
-    return symbol
+    theta = np.linspace(0, 2 * np.pi, 36)
+    return {  # mpl symbol : pyqt4 symbol
+        '.': pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
+        ',': pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]),
+                             np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
+        'x': pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]),
+                             np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'),
+        '+': '+', '*': 'star', 'o': 'o', 'v': 't', '^': 't1', '>': 't2', '<': 't3',
+        'd': 'd', 's': 's', 'p': 'p', 'h': 'h',
+        '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
+        '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
+        'None': None, 'none': None, None: None,
+    }.get(kw['marker'], 'o') if 'marker' in kw else None
 
 
 def symbol_edge_setup(pgkw, plotkw):
@@ -279,9 +253,7 @@ def setup_pen_kw(**kw):
     if news is not None:
         penkw['style'] = news
 
-    pen = pg.mkPen(**penkw) if len(penkw.keys()) else None
-
-    return pen
+    return pg.mkPen(**penkw) if len(penkw.keys()) else None
 
 
 def plotkw_translator(**plotkw):
