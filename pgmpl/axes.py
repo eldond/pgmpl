@@ -258,17 +258,17 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        if yerr is not None and np.atleast_1d(yerr).max() > 0:
-            capkw['marker'] = 'v' if capkw.pop('lolims', None) else '_'
-            self.plot(x, y - yerr, **capkw)
-            capkw['marker'] = '^' if capkw.pop('uplims', None) else '_'
-            self.plot(x, y + yerr, **capkw)
+        def errbar_cap_mark(err, xy):
+            if err is not None and np.atleast_1d(err).max() > 0:
+                errx = err if xy == 'x' else 0
+                erry = err if xy != 'x' else 0
+                capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
+                self.plot(x - errx, y - erry, **capkw)
+                capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
+                self.plot(x + errx, y + erry, **capkw)
 
-        if xerr is not None and np.atleast_1d(xerr).max() > 0:
-            capkw['marker'] = '<' if capkw.pop('xlolims', None) else '|'
-            self.plot(x - xerr, y, **capkw)
-            capkw['marker'] = '>' if capkw.pop('xuplims', None) else '|'
-            self.plot(x + xerr, y, **capkw)
+        errbar_cap_mark(xerr, 'x')
+        errbar_cap_mark(yerr, '')
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
@@ -419,7 +419,8 @@ class Axes(pg.PlotItem):
 
         return fb
 
-    def _check_set_lim_kw(self, **kw):
+    @staticmethod
+    def _check_set_lim_kw(**kw):
         if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_xlim/set_ylim is not handled yet')
         if kw.pop('auto', False):
@@ -636,7 +637,8 @@ class Legend:
 
         return self
 
-    def check_call_kw(self, **kw):
+    @staticmethod
+    def check_call_kw(**kw):
         """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
         unhandled_kws = dict(
             loc=None,
