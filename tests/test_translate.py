@@ -52,16 +52,13 @@ class TestPgmplTranslate(unittest.TestCase):
         print('-' * 79)
 
     def test_defaults_from_rcparams(self):
-        unique_linewidth = 5.1234958293
+        unique_linewidth = 5.1234958293 + rcParams['lines.linewidth']
         ans0 = defaults_from_rcparams({})
         ans1 = defaults_from_rcparams({'linewidth': unique_linewidth})
         ans0b = copy.deepcopy(ans0)
         ans0b['linewidth'] = unique_linewidth
         assert ans1 == ans0b
-        if rcParams['lines.linewidth'] == unique_linewidth:
-            assert ans1 == ans0
-        else:
-            assert ans1 != ans0
+        assert ans1 != ans0
 
     def test_color_translator(self):
         newc = [None] * self.nt
