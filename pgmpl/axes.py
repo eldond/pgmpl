@@ -353,6 +353,50 @@ class Axes(pg.PlotItem):
 
         return errb
 
+    @staticmethod
+    def _setup_fill_between_colors(**kwargs):
+        """
+        Prepares edge plotting keywords and brush for fill_between
+        :param kwargs: dictionary of keywords from fill_between
+        :return: dict, brush
+        """
+        # Set up colors and display settings
+        ekw = copy.deepcopy(kwargs)
+        ekw['color'] = ekw.pop('edgecolor', ekw.pop('color', 'k'))
+
+        if 'facecolor' in kwargs:
+            brush = color_translator(color=kwargs['facecolor'], alpha=kwargs.get('alpha', None))
+        elif 'color' in kwargs:
+            brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
+        else:
+            brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
+        printd('  pgmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
+            brush, ekw, setup_pen_kw(**ekw)))
+        return ekw, brush
+
+    @staticmethod
+    def _setup_fill_between_where(x, **kwargs):
+        """
+        Handles where and interpolate keywords
+        :param x: x values
+        :param kwargs: dictionary of keywords received by fill_between
+        :return: tuple with two lists of ints giving start and end indices for each segment of data passing where
+        """
+        if kwargs.get('where', None) is not None:
+            if kwargs.pop('interpolate', False):
+                warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
+            d = np.diff(np.append(0, kwargs['where']))
+            start_i = np.where(d == 1)[0]
+            end_i = np.where(d == -1)[0]
+            if len(end_i) < len(start_i):
+                end_i = np.append(end_i, len(d))
+            printd('  fill_between where: start_i = {}, end_i = {}'.format(start_i, end_i))
+
+        else:
+            start_i = [0]
+            end_i = [len(x)]
+        return start_i, end_i
+
     def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
@@ -373,33 +417,9 @@ class Axes(pg.PlotItem):
         if len(y2) == 1:
             y2 = x*0 + y2
 
-        # Set up colors and display settings
-        ekw = copy.deepcopy(kwargs)
-        ekw['color'] = ekw.pop('edgecolor', ekw.pop('color', 'k'))
+        ekw, brush = self._setup_fill_between_colors(**kwargs)
 
-        if 'facecolor' in kwargs:
-            brush = color_translator(color=kwargs['facecolor'], alpha=kwargs.get('alpha', None))
-        elif 'color' in kwargs:
-            brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
-        else:
-            brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
-        printd('  pgmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
-            brush, ekw, setup_pen_kw(**ekw)))
-
-        # Handle special keywords
-        if kwargs.get('where', None) is not None:
-            if kwargs.pop('interpolate', False):
-                warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
-            d = np.diff(np.append(0, kwargs['where']))
-            start_i = np.where(d == 1)[0]
-            end_i = np.where(d == -1)[0]
-            if len(end_i) < len(start_i):
-                end_i = np.append(end_i, len(d))
-            printd('  fill_between where: start_i = {}, end_i = {}'.format(start_i, end_i))
-
-        else:
-            start_i = [0]
-            end_i = [len(x)]
+        start_i, end_i = self._setup_fill_between_where(x, **kwargs)
 
         if kwargs.pop('step', None) is not None:
             warnings.warn('Warning: step keyword to fill_between is not handled yet.')
