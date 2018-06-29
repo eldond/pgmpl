@@ -39,27 +39,21 @@ class Figure(pg.PlotWidget):
 
         super(Figure, self).__init__()
         self.patch_resize = True  # Controls whether resize events mess with margins or not (this works well now)
-        pg.setConfigOption('background', kw.pop('facecolor', 'w'))
-        pg.setConfigOption('foreground', 'k')
         tracker.window_opened(self)
         self.tight = kw.pop('tight_layout', None) or kw.pop('constrained_layout', None)
-        if self.tight:
-            self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10}
-        else:
-            self.margins = None
+        self.margins = {'left': 10, 'top': 10, 'right': 10, 'bottom': 10, 'hspace': 10, 'wspace': 10} \
+            if self.tight else None
         self.resizeEvent_original = self.resizeEvent
         self.resizeEvent = self.resize_event
-        if dpi is None:
-            dpi = rcParams['figure.dpi']
-        if figsize is None:
-            figsize = rcParams['figure.figsize']
+        dpi = rcParams['figure.dpi'] if dpi is None else dpi
+        figsize = rcParams['figure.figsize'] if figsize is None else figsize
         self.width, self.height = np.array(figsize)*dpi
         self.resize(self.width, self.height)
-        for init_to_none in ['axes', 'layout', 'suptitle_label']:
+        for init_to_none in ['axes', 'suptitle_label']:
             setattr(self, init_to_none, None)
         self.suptitle_text = ''
         self.fig_colspan = 1
-        self.mklay()
+        self.layout = self.mklay()
         self.clear = self.clearfig  # Just defining the thing as clear doesn't work; needs to be done this way.
 
         self.set_subplotpars(kw.pop('subplotpars', None))
@@ -72,13 +66,14 @@ class Figure(pg.PlotWidget):
         del self.layout
         self.suptitle_text = ''
         self.fig_colspan = 1
-        self.mklay()
+        self.layout = self.mklay()
 
     def mklay(self):
         """Method for creating layout; used in __init__ and after clear"""
-        self.layout = pg.GraphicsLayout()
-        self.setCentralItem(self.layout)
+        layout = pg.GraphicsLayout()
+        self.setCentralItem(layout)
         self.show()
+        return layout
 
     def resize_event(self, event):
         """

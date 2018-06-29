@@ -97,10 +97,8 @@ class Axes(pg.PlotItem):
             else [color_translator(color=ec, alpha=kwargs.get('alpha', None)) for ec in tolist(edgecolors)]
 
         # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
-        if (len(tolist(brush_colors)) == 1) and (n > 1):
-            brush_colors = tolist(brush_colors) * n
-        if (len(tolist(brush_edges)) == 1) and (n > 1):
-            brush_edges = tolist(brush_edges) * n
+        brush_colors = tolist(brush_colors) * n if (len(tolist(brush_colors)) == 1) and (n > 1) else brush_colors
+        brush_edges = tolist(brush_edges) * n if (len(tolist(brush_edges)) == 1) and (n > 1) else brush_edges
 
         return brush_colors, brush_edges
 
@@ -259,6 +257,9 @@ class Axes(pg.PlotItem):
         :param capsize: Size of error bar caps (sets size of markers)
         :param capkw: deepcopy of kwargs passed to errorbar. These are passed to plot when drawing the caps.
         """
+        if ((capkw.get('capsize', None) is not None) and (capkw.get('capsize', 0) <= 0)) or \
+                ((capkw.get('capthick', None) is not None) and (capkw.get('capthick', 0) <= 0)):
+            return
         # Remove unused keywords so they don't make trouble later
         capkw.pop('pg_label', None)
         capkw.pop('label', None)
@@ -275,17 +276,17 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        if yerr is not None and np.atleast_1d(yerr).max() > 0:
-            capkw['marker'] = 'v' if capkw.pop('lolims', None) else '_'
-            self.plot(x, y - yerr, **capkw)
-            capkw['marker'] = '^' if capkw.pop('uplims', None) else '_'
-            self.plot(x, y + yerr, **capkw)
+        def errbar_cap_mark(err, xy):
+            if err is not None and np.atleast_1d(err).max() > 0:
+                errx = err if xy == 'x' else 0
+                erry = err if xy != 'x' else 0
+                capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
+                self.plot(x - errx, y - erry, **capkw)
+                capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
+                self.plot(x + errx, y + erry, **capkw)
 
-        if xerr is not None and np.atleast_1d(xerr).max() > 0:
-            capkw['marker'] = '<' if capkw.pop('xlolims', None) else '|'
-            self.plot(x - xerr, y, **capkw)
-            capkw['marker'] = '>' if capkw.pop('xuplims', None) else '|'
-            self.plot(x + xerr, y, **capkw)
+        errbar_cap_mark(xerr, 'x')
+        errbar_cap_mark(yerr, '')
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
@@ -358,17 +359,57 @@ class Axes(pg.PlotItem):
         if kwargs.get('markeredgewidth', None) is not None:
             kwargs['capthick'] = kwargs.pop('markeredgewidth')
 
-        if ((kwargs.get('capsize', None) is not None) and (kwargs.get('capsize', 0) <= 0)) or \
-                ((kwargs.get('capthick', None) is not None) and (kwargs.get('capthick', 0) <= 0)):
-            printd('  Axes.errorbar no caps')
-        else:
-            self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
+        self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
 
         # OR draw the line above the errorbars
         if kwargs.pop('linestyle', None) not in [' '] and kwargs.pop('barsabove', None):
             self.plot(x, y, **kwargs)
 
         return errb
+
+    @staticmethod
+    def _setup_fill_between_colors(**kwargs):
+        """
+        Prepares edge plotting keywords and brush for fill_between
+        :param kwargs: dictionary of keywords from fill_between
+        :return: dict, brush
+        """
+        # Set up colors and display settings
+        ekw = copy.deepcopy(kwargs)
+        ekw['color'] = ekw.pop('edgecolor', ekw.pop('color', 'k'))
+
+        if 'facecolor' in kwargs:
+            brush = color_translator(color=kwargs['facecolor'], alpha=kwargs.get('alpha', None))
+        elif 'color' in kwargs:
+            brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
+        else:
+            brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
+        printd('  pgmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
+            brush, ekw, setup_pen_kw(**ekw)))
+        return ekw, brush
+
+    @staticmethod
+    def _setup_fill_between_where(x, **kwargs):
+        """
+        Handles where and interpolate keywords
+        :param x: x values
+        :param kwargs: dictionary of keywords received by fill_between
+        :return: tuple with two lists of ints giving start and end indices for each segment of data passing where
+        """
+        if kwargs.get('where', None) is not None:
+            if kwargs.pop('interpolate', False):
+                warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
+            d = np.diff(np.append(0, kwargs['where']))
+            start_i = np.where(d == 1)[0]
+            end_i = np.where(d == -1)[0]
+            if len(end_i) < len(start_i):
+                end_i = np.append(end_i, len(d))
+            printd('  fill_between where: start_i = {}, end_i = {}'.format(start_i, end_i))
+
+        else:
+            start_i = [0]
+            end_i = [len(x)]
+        return start_i, end_i
 
     def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
@@ -390,33 +431,9 @@ class Axes(pg.PlotItem):
         if len(y2) == 1:
             y2 = x*0 + y2
 
-        # Set up colors and display settings
-        ekw = copy.deepcopy(kwargs)
-        ekw['color'] = ekw.pop('edgecolor', ekw.pop('color', 'k'))
+        ekw, brush = self._setup_fill_between_colors(**kwargs)
 
-        if 'facecolor' in kwargs:
-            brush = color_translator(color=kwargs['facecolor'], alpha=kwargs.get('alpha', None))
-        elif 'color' in kwargs:
-            brush = color_translator(color=kwargs['color'], alpha=kwargs.get('alpha', None))
-        else:
-            brush = color_translator(color='b', alpha=kwargs.get('alpha', None))
-        printd('  pgmpl.axes.Axes.fill_between(): brush = {}, ekw = {}, setup_pen_kw(**ekw) = {}'.format(
-            brush, ekw, setup_pen_kw(**ekw)))
-
-        # Handle special keywords
-        if kwargs.get('where', None) is not None:
-            if kwargs.pop('interpolate', False):
-                warnings.warn('Warning: interpolate keyword to fill_between is not handled yet.')
-            d = np.diff(np.append(0, kwargs['where']))
-            start_i = np.where(d == 1)[0]
-            end_i = np.where(d == -1)[0]
-            if len(end_i) < len(start_i):
-                end_i = np.append(end_i, len(d))
-            printd('  fill_between where: start_i = {}, end_i = {}'.format(start_i, end_i))
-
-        else:
-            start_i = [0]
-            end_i = [len(x)]
+        start_i, end_i = self._setup_fill_between_where(x, **kwargs)
 
         if kwargs.pop('step', None) is not None:
             warnings.warn('Warning: step keyword to fill_between is not handled yet.')
@@ -619,6 +636,26 @@ class Legend:
                 isvis=handle.isVisible() if hasattr(handle, 'isVisible') else None,
             ))
 
+    def get_visible_handles(self):
+        """
+        :return: List of legend handles for visible plot items
+        """
+        handles = self.ax.getViewBox().allChildren()
+        self.handle_info(handles, comment='handles from allChildren')
+        return [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
+
+    @staticmethod
+    def _cleanup_legend_labels(handles, labels):
+        nlab = len(np.atleast_1d(labels))
+        if labels is not None and nlab == 1:
+            labels = tolist(labels)*len(handles)
+        elif labels is not None and nlab == len(handles):
+            labels = tolist(labels)
+        else:
+            handles = [item for item in handles if hasattr(item, 'name') and item.name() is not None]
+            labels = [item.name() for item in handles]
+        return handles, labels
+
     def __call__(self, handles=None, labels=None, **kw):
         """
         Adds a legend to the plot axes. This class should be added to axes as they are created so that calling it acts
@@ -630,23 +667,9 @@ class Legend:
         # preserve a reference to pgmpl.axes.Legend.
         self.ax.legend = self
 
-        if handles is None:
-            handles = self.ax.getViewBox().allChildren()
-            self.handle_info(handles, comment='handles from allChildren')
-            handles = [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
-        else:
-            handles = tolist(handles)
+        handles = tolist(handles if handles is not None else self.get_visible_handles())
 
-        nlab = len(np.atleast_1d(labels))
-        if labels is not None and nlab == 1:
-            labels = tolist(labels)*len(handles)
-        elif labels is not None and nlab == len(handles):
-            labels = tolist(labels)
-        else:
-            handles = [item for item in handles if hasattr(item, 'name') and item.name() is not None]
-            labels = [item.name() for item in handles]
-
-        for handle, label in zip(handles, labels):
+        for handle, label in zip(*self._cleanup_legend_labels(handles, labels)):
             if self.supported(handle):
                 self.leg.addItem(handle, label)
 
@@ -654,37 +677,15 @@ class Legend:
 
         return self
 
-    def check_call_kw(self, **kw):
+    @staticmethod
+    def check_call_kw(**kw):
         """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
         unhandled_kws = dict(
-            loc=None,
-            numpoints=None,    # the number of points in the legend line
-            markerscale=None,  # the relative size of legend markers vs. original
-            markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
-            scatterpoints=None,    # number of scatter points
-            scatteryoffsets=None,
-            prop=None,          # properties for the legend texts
-            fontsize=None,        # keyword to set font size directly
-            # spacing & pad defined as a fraction of the font-size
-            borderpad=None,      # the whitespace inside the legend border
-            labelspacing=None,   # the vertical space between the legend entries
-            handlelength=None,   # the length of the legend handles
-            handleheight=None,   # the height of the legend handles
-            handletextpad=None,  # the pad between the legend handle and text
-            borderaxespad=None,  # the pad between the axes and legend border
-            columnspacing=None,  # spacing between columns
-            ncol=1,     # number of columns
-            mode=None,  # mode for horizontal distribution of columns. None, "expand"
-            fancybox=None,  # True use a fancy box, false use a rounded box, none use rc
-            shadow=None,
-            title=None,  # set a title for the legend
-            framealpha=None,  # set frame alpha
-            edgecolor=None,  # frame patch edgecolor
-            facecolor=None,  # frame patch facecolor
-            bbox_to_anchor=None,  # bbox that the legend will be anchored.
-            bbox_transform=None,  # transform for the bbox
-            frameon=None,  # draw frame
-            handler_map=None,
+            loc=None, numpoints=None, markerscale=None, markerfirst=True, scatterpoints=None, scatteryoffsets=None,
+            prop=None, fontsize=None, borderpad=None, labelspacing=None, handlelength=None, handleheight=None,
+            handletextpad=None, borderaxespad=None, columnspacing=None, ncol=1, mode=None, fancybox=None, shadow=None,
+            title=None, framealpha=None, edgecolor=None, facecolor=None, bbox_to_anchor=None, bbox_transform=None,
+            frameon=None, handler_map=None,
         )
         for unhandled in unhandled_kws.keys():
             if unhandled in kw.keys():
