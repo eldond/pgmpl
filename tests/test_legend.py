@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+
+"""
+Test script for legend.py
+"""
+
 # Basic imports
 from __future__ import print_function, division
 import os
@@ -11,11 +18,7 @@ from pgmpl.axes import Axes
 from pgmpl.legend import Legend
 
 
-class TestPgmplAxes(unittest.TestCase):
-    """
-    Most test functions simply test one method of Axes. test_axes_plot tests Axes.plot(), for example.
-    More complicated behaviors will be mentioned in function docstrings.
-    """
+class TestPgmplLegend(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
@@ -39,7 +42,11 @@ class TestPgmplAxes(unittest.TestCase):
             print(*args)
 
     def test_Legend(self):
-        """Tests both the legend method of Axes and the Legend class implicitly"""
+        leg = Legend()
+        assert isinstance(leg, Legend)
+
+    def test_axes_legend(self):
+        """Test Legend class through axes method legend"""
         ax = Axes()
         line = ax.plot(self.x, self.y, label='y(x) plot')
         leg = ax.legend()
@@ -53,7 +60,7 @@ class TestPgmplAxes(unittest.TestCase):
 
         self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
 
-    def test_Legend_warnings(self):
+    def test_axes_legend_warnings(self):
         ax = Axes()
         ax.plot(self.x, self.y, label='y(x) plot')
         leg = ax.legend()
