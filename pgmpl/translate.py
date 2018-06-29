@@ -171,35 +171,19 @@ def symbol_translator(**kw):
     :return: string
         Code for the relevant pyqtgraph symbol.
     """
-    if 'marker' in kw:
-        theta = np.linspace(0, 2 * np.pi, 36)
-        symbol = {  # mpl symbol : pyqt4 symbol
-            '.': pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
-            ',': pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]),
-                                 np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
-            'x': pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]),
-                                 np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'),
-            '+': '+',
-            '*': 'star',
-            'o': 'o',
-            'v': 't',
-            '^': 't1',
-            '>': 't2',
-            '<': 't3',
-            'd': 'd',
-            's': 's',
-            'p': 'p',
-            'h': 'h',
-            '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
-            '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
-            'None': None,
-            'none': None,
-            None: None,
-        }.get(kw['marker'], 'o')
-    else:
-        symbol = None
-
-    return symbol
+    theta = np.linspace(0, 2 * np.pi, 36)
+    return {  # mpl symbol : pyqt4 symbol
+        '.': pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
+        ',': pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]),
+                             np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
+        'x': pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]),
+                             np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'),
+        '+': '+', '*': 'star', 'o': 'o', 'v': 't', '^': 't1', '>': 't2', '<': 't3',
+        'd': 'd', 's': 's', 'p': 'p', 'h': 'h',
+        '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
+        '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
+        'None': None, 'none': None, None: None,
+    }.get(kw['marker'], 'o') if 'marker' in kw else None
 
 
 def symbol_edge_setup(pgkw, plotkw):
