@@ -240,6 +240,9 @@ class Axes(pg.PlotItem):
         :param capsize: Size of error bar caps (sets size of markers)
         :param capkw: deepcopy of kwargs passed to errorbar. These are passed to plot when drawing the caps.
         """
+        if ((capkw.get('capsize', None) is not None) and (capkw.get('capsize', 0) <= 0)) or \
+                ((capkw.get('capthick', None) is not None) and (capkw.get('capthick', 0) <= 0)):
+            return
         # Remove unused keywords so they don't make trouble later
         capkw.pop('pg_label', None)
         capkw.pop('label', None)
@@ -339,11 +342,7 @@ class Axes(pg.PlotItem):
         if kwargs.get('markeredgewidth', None) is not None:
             kwargs['capthick'] = kwargs.pop('markeredgewidth')
 
-        if ((kwargs.get('capsize', None) is not None) and (kwargs.get('capsize', 0) <= 0)) or \
-                ((kwargs.get('capthick', None) is not None) and (kwargs.get('capthick', 0) <= 0)):
-            printd('  Axes.errorbar no caps')
-        else:
-            self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
+        self._draw_errbar_caps(xp, yp, xerr=xerrp, yerr=yerrp, **copy.deepcopy(kwargs))
 
         # OR draw the line above the errorbars
         if kwargs.pop('linestyle', None) not in [' '] and kwargs.pop('barsabove', None):
