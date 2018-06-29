@@ -619,6 +619,26 @@ class Legend:
                 isvis=handle.isVisible() if hasattr(handle, 'isVisible') else None,
             ))
 
+    def get_visible_handles(self):
+        """
+        :return: List of legend handles for visible plot items
+        """
+        handles = self.ax.getViewBox().allChildren()
+        self.handle_info(handles, comment='handles from allChildren')
+        return [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
+
+    @staticmethod
+    def _cleanup_legend_labels(handles, labels):
+        nlab = len(np.atleast_1d(labels))
+        if labels is not None and nlab == 1:
+            labels = tolist(labels)*len(handles)
+        elif labels is not None and nlab == len(handles):
+            labels = tolist(labels)
+        else:
+            handles = [item for item in handles if hasattr(item, 'name') and item.name() is not None]
+            labels = [item.name() for item in handles]
+        return handles, labels
+
     def __call__(self, handles=None, labels=None, **kw):
         """
         Adds a legend to the plot axes. This class should be added to axes as they are created so that calling it acts
@@ -630,23 +650,9 @@ class Legend:
         # preserve a reference to pgmpl.axes.Legend.
         self.ax.legend = self
 
-        if handles is None:
-            handles = self.ax.getViewBox().allChildren()
-            self.handle_info(handles, comment='handles from allChildren')
-            handles = [item for item in handles if hasattr(item, 'isVisible') and item.isVisible()]
-        else:
-            handles = tolist(handles)
+        handles = tolist(handles if handles is not None else self.get_visible_handles())
 
-        nlab = len(np.atleast_1d(labels))
-        if labels is not None and nlab == 1:
-            labels = tolist(labels)*len(handles)
-        elif labels is not None and nlab == len(handles):
-            labels = tolist(labels)
-        else:
-            handles = [item for item in handles if hasattr(item, 'name') and item.name() is not None]
-            labels = [item.name() for item in handles]
-
-        for handle, label in zip(handles, labels):
+        for handle, label in zip(*self._cleanup_legend_labels(handles, labels)):
             if self.supported(handle):
                 self.leg.addItem(handle, label)
 
