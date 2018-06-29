@@ -59,6 +59,10 @@ class TestPgmplContour(unittest.TestCase):
         ax = Axes()
         ax.contourf(self.z)
 
+    def test_contour_errors(self):
+        ax = Axes()
+        self.assertRaises(TypeError, ax.contour, self.x, self.y, self.z, self.levels, self.nlvl)
+
     def setUp(self):
         test_id = self.id()
         test_name = '.'.join(test_id.split('.')[-2:])
