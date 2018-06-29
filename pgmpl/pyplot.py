@@ -57,6 +57,24 @@ def pick_share(share, ii, jj, axs_):
         return None
 
 
+def _set_gridspec(fig=None, **gridspec_kw):
+    """
+    Utility for setting up gridspec
+    :param fig: Figure instance
+    :param gridspec_kw: dictionary of keywords for gridspec/subplotparams
+    """
+    if fig is None:
+        fig = gcf()
+    gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
+    if any([thing in gridspec_kw.keys() for thing in gridkw]):
+        from matplotlib.figure import SubplotParams
+        spkw = {}
+        for thing in gridkw:
+            spkw[thing] = gridspec_kw.pop(thing, None)
+        sp = SubplotParams(**spkw)
+        fig.set_subplotpars(sp)
+
+
 def subplots(nrows=1, ncols=1, **fig_kw):
     """
     Imitates matplotlib.pyplot.subplots() using PyQtGraph
@@ -76,29 +94,18 @@ def subplots(nrows=1, ncols=1, **fig_kw):
     fig = figure(**fig_kw)
 
     if gridspec_kw is not None:
-        gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
-        if any([thing in gridspec_kw.keys() for thing in gridkw]):
-            from matplotlib.figure import SubplotParams
-            spkw = {}
-            for thing in gridkw:
-                spkw[thing] = gridspec_kw.pop(thing, None)
-            sp = SubplotParams(**spkw)
-            fig.set_subplotpars(sp)
+        _set_gridspec(fig, **gridspec_kw)
 
     axs = np.zeros((nrows, ncols), object)
     for i in range(nrows):
         for j in range(ncols):
             index = i*ncols + j + 1
             axs[i, j] = fig.add_subplot(
-                nrows, ncols, index,
-                sharex=pick_share(fig_kw.get('sharex', 'none'), i, j, axs),
-                sharey=pick_share(fig_kw.get('sharey', 'none'), i, j, axs),
-                **fig_kw.pop('subplot_kw', {}))
-            printd('index {}, row {}, col {}'.format(index, i, j))
+                nrows, ncols, index, sharex=pick_share(fig_kw.get('sharex', 'none'), i, j, axs),
+                sharey=pick_share(fig_kw.get('sharey', 'none'), i, j, axs), **fig_kw.pop('subplot_kw', {}))
     if fig_kw.pop('squeeze', True):
         axs = np.squeeze(axs)
-        if len(np.shape(axs)) == 0:
-            axs = axs[()]  # https://stackoverflow.com/a/35160426/6605826
+        axs = axs[()] if len(np.shape(axs)) == 0 else axs  # https://stackoverflow.com/a/35160426/6605826
     return fig, axs
 
 
