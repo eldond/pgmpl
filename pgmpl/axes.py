@@ -45,7 +45,6 @@ class Axes(pg.PlotItem):
         tmp = self.prop_cycle()
         self.cyc = defaultdict(lambda: next(tmp))
         self.prop_cycle_index = 0
-        self._hold = False
         if self.sharex is not None:
             self.setXLink(self.sharex)
         if self.sharey is not None:
@@ -183,16 +182,12 @@ class Axes(pg.PlotItem):
 
     def contour(self, *args, **kwargs):
         printd('  pgmpl.axes.Axes.contour()...')
-        if not self._hold:
-            self.clear()
         kwargs['filled'] = False
         contours = QuadContourSet(self, *args, **kwargs)
         return contours
 
     def contourf(self, *args, **kwargs):
         printd('  pgmpl.axes.Axes.contourf()...')
-        if not self._hold:
-            self.clear()
         kwargs['filled'] = True
         contours = QuadContourSet(self, *args, **kwargs)
         return contours

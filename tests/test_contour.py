@@ -27,7 +27,7 @@ class TestPgmplContour(unittest.TestCase):
     y = np.linspace(0, 2.1, 25)
     z = (x[:, np.newaxis] - 0.94)**2 + (y[np.newaxis, :] - 1.2)**2 + 1.145
     levels = [1, 1.5, 2, 2.5, 3]
-    nlvl = len(levels)
+    nlvl = len(levels) * 4
 
     def printv(self, *args):
         if self.verbose:
@@ -35,12 +35,24 @@ class TestPgmplContour(unittest.TestCase):
 
     def test_contour(self):
         fig, axs = subplots(4, 2)
+        axs[0, 0].set_title('z')
         axs[0, 0].contour(self.z)
+        axs[0, 1].set_title('-z')
         axs[0, 1].contour(-self.z)
+
+        axs[1, 0].set_title('z, levels')
         axs[1, 0].contour(self.z, self.levels)
+        axs[1, 1].set_title('z, nlvl')
         axs[1, 1].contour(self.z, self.nlvl)
+
+        axs[2, 0].set_title('x, y, z')
         axs[2, 0].contour(self.x, self.y, self.z)
+        axs[2, 0].set_title('x, y, -z')
+        axs[2, 1].contour(self.x, self.y, -self.z)
+
+        axs[3, 0].set_title('x, y, z, levels')
         axs[3, 0].contour(self.x, self.y, self.z, self.levels)
+        axs[3, 1].set_title('x, y, z, nlvl')
         axs[3, 1].contour(self.x, self.y, self.z, self.nlvl)
 
     def test_contourf(self):

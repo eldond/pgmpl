@@ -46,8 +46,14 @@ class ContourSet(object):
             self.antialiased = False
         self.nchunk = kwargs.pop('nchunk', 0)
         self.x, self.y, self.z, self.levels = self.choose_xyz_levels(*args)
+        self.auto_range(self.z)
+        self.draw()
 
         return
+
+    def auto_range(self, z):
+        self.vmin = z.min() if self.vmin is None else self.vmin
+        self.vmax = z.max() if self.vmax is None else self.vmax
 
     def auto_pick_levels(self, z, nlvl=None):
         """
@@ -58,8 +64,7 @@ class ContourSet(object):
         :return: array
         """
         nlvl = 5 if nlvl is None else nlvl
-        self.vmin = z.min() if self.vmin is None else self.vmin
-        self.vmax = z.max() if self.vmax is None else self.vmax
+        self.auto_range(z)
         return np.linspace(self.vmin, self.vmax, nlvl)
 
     def choose_xyz_levels(self, *args):
@@ -89,40 +94,21 @@ class ContourSet(object):
 
         return x, y, z, levels
 
-    def _process_args(self, *args, **kwargs):
-        """
-        Process *args* and *kwargs*; override in derived classes.
+    def draw(self):
+        if self.filled:
+            self.draw_filled()
+        else:
+            self.draw_unfilled()
 
-        Must set self.levels, self.zmin and self.zmax, and update axes limits.
-        Adapted from matplotlib.contour.ContourSet
-        """
-        self.levels = args[0]
-        self.allsegs = args[1]
-        self.allkinds = len(args) > 2 and args[2] or None
-        self.zmax = np.max(self.levels)
-        self.zmin = np.min(self.levels)
-        # self._auto = False
-        #
-        # # Check lengths of levels and allsegs.
-        # if self.filled:
-        #     if len(self.allsegs) != len(self.levels) - 1:
-        #         raise ValueError('must be one less number of segments as '
-        #                          'levels')
-        # else:
-        #     if len(self.allsegs) != len(self.levels):
-        #         raise ValueError('must be same number of segments as levels')
-        #
-        # # Check length of allkinds.
-        # if self.allkinds is not None and len(self.allkinds) != len(self.allsegs):
-        #     raise ValueError('allkinds has different length to allsegs')
-        #
-        # # Determine x,y bounds and update axes data limits.
-        # flatseglist = [s for seg in self.allsegs for s in seg]
-        # points = np.concatenate(flatseglist, axis=0)
-        # self._mins = points.min(axis=0)
-        # self._maxs = points.max(axis=0)
+    def draw_filled(self):
+        printd(' not ready yet lol')
 
-        return kwargs
+    def draw_unfilled(self):
+        contours = [pg.IsocurveItem(data=self.z, level=level, pen='r') for level in self.levels]
+        for contour in contours:
+            contour.setParentItem(self.ax)
+            contour.setZValue(10)
+            self.ax.addItem(contour)
 
 
 class QuadContourSet(ContourSet):
