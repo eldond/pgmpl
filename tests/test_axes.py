@@ -201,23 +201,34 @@ class TestPgmplAxes(unittest.TestCase):
         leg = ax.legend()
         leg.addItem(line, name='yx plot')
         leg.draggable()
+        leg.clear()
+        ax2 = Axes()
+        ax2.plot(self.x, self.y, color='r', label='y(x) plot red')
+        ax2.plot(self.x, -self.y, color='b', label='y(x) plot blue')
+        ax2.legend(labels='blah')
+
+        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+
+    def test_Legend_warnings(self):
+        ax = Axes()
+        ax.plot(self.x, self.y, label='y(x) plot')
+        leg = ax.legend()
 
         # Test warnings
-        warnings_expected = 3
+        warnings_expected = 5
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            # Trigger a warning.
-            leg.draggable(False)
+            # Trigger warnings.
+            leg.draggable(False)  # 1 warning
             # Trigger more warnings:
-            ax.legend(blah='unrecognized keyword should make warning', borderaxespad=5)
+            ax.legend(blah='unrecognized keyword should make warning', borderaxespad=5)  # 2 warnings
+            ax.legend(loc=0)  # 1 warning
+            ax.legend(loc=4)  # 1 warning
             # Verify that warnings were made.
-            assert len(w) == warnings_expected
         self.printv('      test_axes_Legend: triggered a warning from Legend and got {}/{} warnings. leg = {}'.format(
             len(w), warnings_expected, leg))
-
-        leg.clear()
-        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+        assert len(w) == warnings_expected
 
     def setUp(self):
         test_id = self.id()
