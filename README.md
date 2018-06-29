@@ -1,6 +1,12 @@
 [![Build Status](https://travis-ci.org/eldond/pgmpl.svg?branch=master)](https://travis-ci.org/eldond/pgmpl)
 [![codecov](https://codecov.io/gh/eldond/pgmpl/branch/master/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl)
 [![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=master)](https://bettercodehub.com/)
+(branch = master)
+
+[![Build Status](https://travis-ci.org/eldond/pgmpl.svg?branch=dev)](https://travis-ci.org/eldond/pgmpl)
+[![codecov](https://codecov.io/gh/eldond/pgmpl/branch/dev/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl)
+[![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=dev)](https://bettercodehub.com/)
+(branch = dev)
 
 PgMpl
 =====
