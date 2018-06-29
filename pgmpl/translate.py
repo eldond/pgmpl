@@ -112,18 +112,13 @@ def color_translator(**kw):
         except ValueError:
             printd('    color_translator input: kw["color"] = {}'.format(kw.get('color', None)), level=3)
         if kw['color'] in ['', ' ']:
-            new_color = (0, 0, 0, 0)  # Empty strings and spaces are code for invisible (alpha = 0)
+            return 0, 0, 0, 0  # Empty strings and spaces are code for invisible (alpha = 0)
         elif 'alpha' in kw and kw['alpha'] is not None:
-            new_color = np.array(to_rgba(kw['color'])) * 255
-            new_color[3] = kw['alpha'] * 255
+            return np.append(np.array(to_rgba(kw['color']))[0:3], kw['alpha']) * 255
         else:
-            new_color = np.array(to_rgba(kw['color'])) * 255
+            return np.array(to_rgba(kw['color'])) * 255
     else:
-        if 'alpha' in kw and kw['alpha'] is not None:
-            new_color = (0, 0, 0, int(round(kw['alpha'] * 255)))
-        else:
-            new_color = None
-    return new_color
+        return (0, 0, 0, int(round(kw['alpha'] * 255))) if 'alpha' in kw and kw['alpha'] is not None else None
 
 
 def color_map_translator(x, **kw):
@@ -279,9 +274,7 @@ def setup_pen_kw(**kw):
     if news is not None:
         penkw['style'] = news
 
-    pen = pg.mkPen(**penkw) if len(penkw.keys()) else None
-
-    return pen
+    return pg.mkPen(**penkw) if len(penkw.keys()) else None
 
 
 def plotkw_translator(**plotkw):

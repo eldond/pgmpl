@@ -3,7 +3,6 @@
 
 # Basic imports
 from setuptools import setup
-import glob
 import os
 
 # pgmpl imports
@@ -18,8 +17,7 @@ from pgmpl.info import *
 with open('requirements.txt') as f:
     required = filter(None, map(lambda x: x.split("#")[0].strip(), f.read().splitlines()))
 
-print required
-print('pgmpl setup.py...')
+print('pgmpl setup.py...\nRequired packages = \n{}'.format(required))
 
 # Run setup
 setup(
@@ -29,9 +27,7 @@ setup(
     url='https://github.com/eldond/pgmpl',
     author=__maintainer__,
     author_email=__email__,
-    packages=[
-        'pgmpl',
-    ],
+    packages=['pgmpl'],
     keywords='plotting plot matplotlib pyqtgraph',
     install_requires=required,
 )
