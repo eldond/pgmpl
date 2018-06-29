@@ -638,7 +638,8 @@ class Legend:
 
     def check_call_kw(self, **kw):
         """Checks keywords passed to Legend.__call__ and warns about unsupported ones"""
-        unhandled_kws = dict(loc=None,
+        unhandled_kws = dict(
+            loc=None,
             numpoints=None,    # the number of points in the legend line
             markerscale=None,  # the relative size of legend markers vs. original
             markerfirst=True,  # controls ordering (left-to-right) of legend marker and label
@@ -670,8 +671,8 @@ class Legend:
         for unhandled in unhandled_kws.keys():
             if unhandled in kw.keys():
                 kw.pop(unhandled)
-                warnings.warn(
-                    'pgmpl.axes.Legend.__call__ got unhandled keyword: {}. This keyword might be implemented later.')
+                warnings.warn('pgmpl.axes.Legend.__call__ got unhandled keyword: {}. '
+                              'This keyword might be implemented later.'.format(unhandled))
         if len(kw.keys()):
             warnings.warn('pgmpl.axes.Legend.__call__ got unrecognized keywords: {}'.format(kw.keys()))
 
