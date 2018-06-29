@@ -67,6 +67,8 @@ class TestPgmplFigure(unittest.TestCase):
         fig = Figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.plot([0, 1])
+        self.assertRaises(NotImplementedError, fig.add_subplot, 1, 1, 1, projection='polar')
+        self.assertRaises(ValueError, fig.add_subplot, 2, 2, 7)
         fig.close()
 
     def test_figure_set_subplotpars(self):
@@ -78,6 +80,8 @@ class TestPgmplFigure(unittest.TestCase):
         ax2 = fig.add_subplot(2, 2, 4)
         ax2.plot([1, 0, 1])
         fig.set_subplotpars(sp)
+        fig2 = Figure(tight_layout=True)
+        fig2.set_subplotpars(sp)
         fig.close()
 
     def test_fig_colorbar(self):
