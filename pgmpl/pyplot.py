@@ -57,14 +57,12 @@ def pick_share(share, ii, jj, axs_):
         return None
 
 
-def _set_gridspec(fig=None, **gridspec_kw):
+def _set_gridspec(fig, **gridspec_kw):
     """
     Utility for setting up gridspec
     :param fig: Figure instance
     :param gridspec_kw: dictionary of keywords for gridspec/subplotparams
     """
-    if fig is None:
-        fig = gcf()
     gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
     if any([thing in gridspec_kw.keys() for thing in gridkw]):
         from matplotlib.figure import SubplotParams

@@ -38,17 +38,21 @@ else:
     import matplotlib.pyplot as plt
 
 
-def demo_plot():
+def sample_data():
     x = np.linspace(0, 10, 151)
     y1 = x**2 + 1
     y2 = x*10 - 0.1 * x**3 + 50
     y3 = 85 - y1
+    return x, y1, y2, y3
+
+
+def demo_plot():
+    x, y1, y2, y3 = sample_data()
     fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
-    axs[-1, 0].set_xlabel('x')
-    axs[-1, 1].set_xlabel('X')
-    axs[0, 0].set_ylabel('y')
-    axs[1, 0].set_ylabel('y')
-    axs[2, 0].set_ylabel('y')
+    for ax in axs[-1, :]:
+        ax.set_xlabel('x')
+    for ax in axs[:, 0]:
+        ax.set_ylabel('y')
 
     axs[0, 0].plot(x, y1)
     axs[0, 1].plot(x, y2)
