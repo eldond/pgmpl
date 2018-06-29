@@ -105,9 +105,10 @@ class ContourSet(object):
 
     def draw_unfilled(self):
         contours = [pg.IsocurveItem(data=self.z, level=level, pen='r') for level in self.levels]
+        x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
-            contour.setParentItem(self.ax)
-            contour.setZValue(10)
+            contour.translate(x0, y0) # https://stackoverflow.com/a/51109935/6605826
+            contour.scale((x1 - x0) / np.shape(self.z)[0], (y1 - y0) / np.shape(self.z)[1])
             self.ax.addItem(contour)
 
 
