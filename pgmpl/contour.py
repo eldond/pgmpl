@@ -8,7 +8,6 @@ Classes and methods imitate Matplotlib counterparts as closely as possible, so p
 more information.
 """
 
-
 # Basic imports
 from __future__ import print_function, division
 import warnings
@@ -95,6 +94,13 @@ class ContourSet(object):
         return x, y, z, levels
 
     def draw(self):
+        if self.colors is None:
+            # Assign color map
+            self.colors = color_map_translator(
+                self.levels, **{a: self.__getattribute__(a) for a in ['alpha', 'cmap', 'norm', 'vmin', 'vmax']})
+        else:
+            self.colors = tolist(self.colors) * np.ceil(len(self.levels)/len(tolist(self.colors)))
+
         if self.filled:
             self.draw_filled()
         else:
@@ -104,7 +110,7 @@ class ContourSet(object):
         printd(' not ready yet lol')
 
     def draw_unfilled(self):
-        contours = [pg.IsocurveItem(data=self.z, level=level, pen='r') for level in self.levels]
+        contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=self.colors[i]) for i, lvl in enumerate(self.levels)]
         x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
             contour.translate(x0, y0) # https://stackoverflow.com/a/51109935/6605826
