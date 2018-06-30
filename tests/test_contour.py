@@ -48,7 +48,7 @@ class TestPgmplContour(unittest.TestCase):
         axs[2, 0].set_title('x, y, z')
         axs[2, 0].contour(self.x, self.y, self.z)
         axs[2, 0].set_title('x, y, -z')
-        axs[2, 1].contour(self.x, self.y, -self.z, linewidths=[4, 2, 1])
+        axs[2, 1].contour(self.x, self.y, -self.z, colors=['r', 'g', 'b'])
 
         axs[3, 0].set_title('x, y, z, levels')
         axs[3, 0].contour(self.x, self.y, self.z, self.levels)
