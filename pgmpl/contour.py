@@ -18,8 +18,6 @@ import numpy as np
 
 # Plotting imports
 import pyqtgraph as pg
-from matplotlib import rcParams
-from collections import defaultdict
 
 # pgmpl
 # noinspection PyUnresolvedReferences
@@ -120,7 +118,8 @@ class ContourSet(object):
 
     def draw_unfilled(self):
         lws, lss = self.extl(self.linewidths), self.extl(self.linestyles)
-        pens = [setup_pen_kw(penkw=dict(color=self.colors[i]), linestyle=lss[i], linewidth=lws[i]) for i in range(len(self.levels))]
+        pens = [setup_pen_kw(penkw=dict(color=self.colors[i]), linestyle=lss[i], linewidth=lws[i])
+                for i in range(len(self.levels))]
         contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=pens[i]) for i, lvl in enumerate(self.levels)]
         x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
