@@ -18,6 +18,7 @@ import numpy as np
 
 # Plotting imports
 import pyqtgraph as pg
+from pyqtgraph import functions as fn
 
 # pgmpl
 # noinspection PyUnresolvedReferences
@@ -113,8 +114,85 @@ class ContourSet(object):
         else:
             self.draw_unfilled()
 
+    def isocurve2plotcurve(self, curve):
+        """
+        Converts an IsocuveItem instance to a PlotCurveItem instance so it can be used with FillBetweenItem
+
+        FAILS because the curves aren't sorted properly to allow good connections between segments. That is, a contour
+        can break where it intersects the edge of the plot/data range, and restart later where it re-enters. These entry
+        and exit points are reconnected arbitrarily or incorrectly.
+
+        :param curve: IsocurveItem instance
+        :return: PlotCurveItem with the same path
+        """
+        curve.generatePath()
+        new_curve = pg.PlotCurveItem()
+        new_curve.path = curve.path
+        return new_curve
+
+    def _detect_direction(self, x, y):
+        """
+        Tries to decide whether path goes CCW or not
+
+        UNFINISHED. Failing because I didn't subtract out a reference center point from x and y first. Might work.
+
+        :param x: array of numbers
+        :param y: array of numbers
+        :return: True if path appears to run CCW
+        """
+        theta = np.arctan2(y, x)
+        dth = np.diff(theta)
+        print('theta = ', theta)
+        print('max|dtheta| = ', abs(dth).max())
+        mdth = np.median(dth)
+        jumps = (np.sign(dth) == -np.sign(mdth)) & (abs(dth) > (2*abs(mdth)))
+        for jump in np.where(jumps)[0]:
+            dth[jump] -= 2*np.pi * np.sign(dth[jump])
+        print('jumps', np.where(jumps)[0], dth[jumps])
+        print('max|dtheta| = ', abs(dth).max())
+        print('int(dtheta) = ', np.append(theta[0], np.cumsum(dth)))
+        print('\n')
+
+    def _join_lines(self, lines, bounds=None):
+        """
+        Joins segments of a broken path. Use for contours which cross out of bounds and back in. Has to find the right
+        direction of path segments and join them in the right order.
+
+        UNFINISHED. Still working on determining the order correctly.
+
+        :param lines: List of path segments. e.g. [[(x, y), (x,y)], [(x, y), (x, y)]]
+        :param bounds: List of 4 numbers giving the [left, right, bottom, top] edges of the plot/data range
+        :return: Flattened list of correctly joined path segments e.g. [(x, y), (x,y), (x, y), (x, y)]
+        """
+        bounds = [self.x.min(), self.x.max(), self.y.min(), self.y.max()] if bounds is None else bounds
+        for line in lines:
+            x, y = map(list, zip(*line))
+            self._detect_direction(x, y)
+
     def draw_filled(self):
-        printd(' not ready yet lol')
+        invis = setup_pen_kw(color='k', alpha=0)
+        contours = [self.isocurve2plotcurve(pg.IsocurveItem(data=self.z, level=lvl, pen=invis))
+                    for i, lvl in enumerate(self.levels)]
+        for i in range(len(self.levels)-1):
+            fill = pg.FillBetweenItem(contours[i], contours[i+1], brush=pg.mkBrush(color=self.colors[i]))
+            #self.ax.addItem(fill)  # THIS DOESN'T WORK RIGHT because isocurve2plotcurve doesn't stitch path segments
+            #                         together in the right order.
+        #self.draw_unfilled()  # Temporary for debugging
+
+        pens = [setup_pen_kw(penkw=dict(color=self.colors[i])) for i in range(len(self.levels))]
+        for i in range(len(self.levels)):
+            lines = fn.isocurve(self.z, self.levels[i], connected=True, extendToEdge=True)[::-1]
+            self._join_lines(lines)
+
+            # TESTING: doesn't work. Just scratch / brainstorming here.
+            oneline = [point for line in lines for point in line]
+            #print(oneline)
+            #x, y = [item[0] for item in oneline]
+            x, y = map(list, zip(*oneline))
+            curve = pg.PlotDataItem(x, y, pen=pens[i])
+            self.ax.addItem(curve)
+            #print(x, y)
+            #print('\n\n')
 
     def draw_unfilled(self):
         lws, lss = self.extl(self.linewidths), self.extl(self.linestyles)
