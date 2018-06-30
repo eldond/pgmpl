@@ -221,11 +221,13 @@ def symbol_edge_setup(pgkw, plotkw):
     printd('plotkw symbol = {}; symbol = {}'.format(plotkw.get('symbol', 'no symbol defined'), symbol), level=1)
 
 
-def setup_pen_kw(**kw):
+def setup_pen_kw(penkw={}, **kw):
     """
     Builds a pyqtgraph pen (object containing color, linestyle, etc. information) from Matplotlib keywords.
     Please dealias first.
 
+    :param penkw: dict
+        Dictionary of pre-translated pyqtgraph keywords to pass to pen
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which line plot relevant settings may be specified. The entire
         set of mpl plot keywords may be passed in, although only the keywords related to displaying line plots will be
@@ -233,14 +235,13 @@ def setup_pen_kw(**kw):
     :return: pyqtgraph pen instance
         A pen which can be input with the pen keyword to many pyqtgraph functions
     """
-    penkw = {}
 
     # Move the easy keywords over directly
     direct_translations_pen = {  # plotkw: pgkw
         'linewidth': 'width',
     }
     for direct in direct_translations_pen:
-        if direct in kw:
+        if direct in kw and kw[direct] is not None:
             penkw[direct_translations_pen[direct]] = kw[direct]
 
     # Handle colors

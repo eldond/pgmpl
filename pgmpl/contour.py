@@ -51,8 +51,9 @@ class ContourSet(object):
         return
 
     def auto_range(self, z):
-        self.vmin = z.min() if self.vmin is None else self.vmin
-        self.vmax = z.max() if self.vmax is None else self.vmax
+        pad = (z.max() - z.min()) * 0.025
+        self.vmin = z.min()+pad if self.vmin is None else self.vmin
+        self.vmax = z.max()-pad if self.vmax is None else self.vmax
 
     def auto_pick_levels(self, z, nlvl=None):
         """
@@ -93,13 +94,21 @@ class ContourSet(object):
 
         return x, y, z, levels
 
+    def extl(self, v):
+        """
+        Casts input argument as a list and ensures it is at least as long as levels
+        :param v: Some variable
+        :return: List of values for variable v; at least as long as self.levels
+        """
+        return tolist(v) * int(np.ceil(len(self.levels) / len(tolist(v))))
+
     def draw(self):
         if self.colors is None:
             # Assign color map
             self.colors = color_map_translator(
                 self.levels, **{a: self.__getattribute__(a) for a in ['alpha', 'cmap', 'norm', 'vmin', 'vmax']})
         else:
-            self.colors = tolist(self.colors) * np.ceil(len(self.levels)/len(tolist(self.colors)))
+            self.colors = self.extl(self.colors)
 
         if self.filled:
             self.draw_filled()
@@ -110,7 +119,9 @@ class ContourSet(object):
         printd(' not ready yet lol')
 
     def draw_unfilled(self):
-        contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=self.colors[i]) for i, lvl in enumerate(self.levels)]
+        lws, lss = self.extl(self.linewidths), self.extl(self.linestyles)
+        pens = [setup_pen_kw(penkw=dict(color=self.colors[i]), linestyle=lss[i], linewidth=lws[i]) for i in range(len(self.levels))]
+        contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=pens[i]) for i, lvl in enumerate(self.levels)]
         x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
             contour.translate(x0, y0) # https://stackoverflow.com/a/51109935/6605826
