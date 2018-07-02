@@ -114,7 +114,8 @@ class ContourSet(object):
         else:
             self.draw_unfilled()
 
-    def isocurve2plotcurve(self, curve):
+    @staticmethod
+    def _isocurve2plotcurve(curve):
         """
         Converts an IsocuveItem instance to a PlotCurveItem instance so it can be used with FillBetweenItem
 
@@ -134,44 +135,51 @@ class ContourSet(object):
         """
         Tries to decide whether path goes CCW or not
 
-        UNFINISHED. Failing because I didn't subtract out a reference center point from x and y first. Might work.
-
         :param x: array of numbers
         :param y: array of numbers
         :return: True if path appears to run CCW
         """
-        theta = np.arctan2(y, x)
+
+        if len(x) < 2:
+            return True  # No need to reverse if 0 or 1 element
+
+        x0, y0 = np.mean([self.x.min(), self.x.max()]), np.mean([self.y.min(), self.y.max()])
+        theta = np.arctan2(y-y0, x-x0)
+
+        # Find theta increment
         dth = np.diff(theta)
-        print('theta = ', theta)
-        print('max|dtheta| = ', abs(dth).max())
+
+        # Unwrap theta increment so there are no jumps as theta loops around
         mdth = np.median(dth)
         jumps = (np.sign(dth) == -np.sign(mdth)) & (abs(dth) > (2*abs(mdth)))
         for jump in np.where(jumps)[0]:
             dth[jump] -= 2*np.pi * np.sign(dth[jump])
-        print('jumps', np.where(jumps)[0], dth[jumps])
-        print('max|dtheta| = ', abs(dth).max())
-        print('int(dtheta) = ', np.append(theta[0], np.cumsum(dth)))
-        print('\n')
 
-    def _join_lines(self, lines, bounds=None):
+        return np.mean(dth) > 0
+
+    def _join_lines(self, lines):
         """
         Joins segments of a broken path. Use for contours which cross out of bounds and back in. Has to find the right
         direction of path segments and join them in the right order.
 
-        UNFINISHED. Still working on determining the order correctly.
-
         :param lines: List of path segments. e.g. [[(x, y), (x,y)], [(x, y), (x, y)]]
-        :param bounds: List of 4 numbers giving the [left, right, bottom, top] edges of the plot/data range
         :return: Flattened list of correctly joined path segments e.g. [(x, y), (x,y), (x, y), (x, y)]
         """
-        bounds = [self.x.min(), self.x.max(), self.y.min(), self.y.max()] if bounds is None else bounds
-        for line in lines:
-            x, y = map(list, zip(*line))
-            self._detect_direction(x, y)
+        for i in range(len(lines)):
+            # Make sure all segments run CCW within themselves
+            x, y = map(list, zip(*lines[i]))
+            if not self._detect_direction(x, y):
+                lines[i] = lines[i][::-1]
+        # Make sure the set of start points of each segment runs CCW
+        x1 = np.array([line[0][0] for line in lines])
+        y1 = np.array([line[0][1] for line in lines])
+        if not self._detect_direction(x1, y1):
+            lines = lines[::-1]
+        return [point for line in lines for point in line]
 
     def draw_filled(self):
         invis = setup_pen_kw(color='k', alpha=0)
-        contours = [self.isocurve2plotcurve(pg.IsocurveItem(data=self.z, level=lvl, pen=invis))
+        contours = [self._isocurve2plotcurve(pg.IsocurveItem(data=self.z, level=lvl, pen=invis))
                     for i, lvl in enumerate(self.levels)]
         for i in range(len(self.levels)-1):
             fill = pg.FillBetweenItem(contours[i], contours[i+1], brush=pg.mkBrush(color=self.colors[i]))
@@ -182,15 +190,20 @@ class ContourSet(object):
         pens = [setup_pen_kw(penkw=dict(color=self.colors[i])) for i in range(len(self.levels))]
         for i in range(len(self.levels)):
             lines = fn.isocurve(self.z, self.levels[i], connected=True, extendToEdge=True)[::-1]
-            self._join_lines(lines)
+            oneline = self._join_lines(lines)
 
             # TESTING: doesn't work. Just scratch / brainstorming here.
-            oneline = [point for line in lines for point in line]
+            #oneline = [point for line in lines for point in line]
             #print(oneline)
             #x, y = [item[0] for item in oneline]
             x, y = map(list, zip(*oneline))
             curve = pg.PlotDataItem(x, y, pen=pens[i])
             self.ax.addItem(curve)
+            if i > 0:
+                fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
+                #self.ax.addItem(fill)  # doesn't work
+            prev_curve = curve
+
             #print(x, y)
             #print('\n\n')
 
@@ -201,7 +214,7 @@ class ContourSet(object):
         contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=pens[i]) for i, lvl in enumerate(self.levels)]
         x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
-            contour.translate(x0, y0) # https://stackoverflow.com/a/51109935/6605826
+            contour.translate(x0, y0)  # https://stackoverflow.com/a/51109935/6605826
             contour.scale((x1 - x0) / np.shape(self.z)[0], (y1 - y0) / np.shape(self.z)[1])
             self.ax.addItem(contour)
 
