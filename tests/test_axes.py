@@ -29,12 +29,12 @@ class TestPgmplAxes(unittest.TestCase):
     y = x**2 + 2.5
     z = x**3 - x**2 * 1.444
 
-    imgdat1 = np.zeros((8, 8, 3))
-    imgdat1[0, 0, :] = 0.9
-    imgdat1[4, 4, :] = 1
-    imgdat1[3, 2, 0] = 0.5
-    imgdat1[2, 3, 1] = 0.7
-    imgdat1[3, 3, 2] = 0.6
+    rgb2d = np.zeros((8, 8, 3))
+    rgb2d[0, 0, :] = 0.9
+    rgb2d[4, 4, :] = 1
+    rgb2d[3, 2, 0] = 0.5
+    rgb2d[2, 3, 1] = 0.7
+    rgb2d[3, 3, 2] = 0.6
 
     x1 = x
     x2 = np.linspace(0, 2.1, 25)
@@ -63,7 +63,7 @@ class TestPgmplAxes(unittest.TestCase):
 
     def test_axes_imshow(self):
         from pgmpl.axes import AxesImage
-        a = self.imgdat1
+        a = self.rgb2d
         ax = Axes()
         img = ax.imshow(a)
         ax1 = Axes()
@@ -77,9 +77,19 @@ class TestPgmplAxes(unittest.TestCase):
         self.printv('      test_axes_imshow: ax = {}, ax1 = {}, ax2 = {}, img = {}, img1 = {}, img2 = {}'.format(
                ax, ax1, ax2, img, img1, img2))
 
+    def test_axes_contour(self):
+        a = sum(self.rgb2d, 2) * 10
+        levels = [0, 0.5, 1.2, 5, 9, 10, 20, 30]
+        ax = Axes()
+        ax.contour(a)
+        ax2 = Axes()
+        ax2.contour(a, levels)
+        ax3 = Axes()
+        ax3.contour(a, 3)
+
     def test_axes_imshow_warnings(self):
         from pgmpl.axes import AxesImage
-        a = self.imgdat1
+        a = self.rgb2d
         ax = Axes()
 
         warnings_expected = 8
@@ -193,42 +203,6 @@ class TestPgmplAxes(unittest.TestCase):
         ax.plot(self.y, self.x)  # Switch them so the test doesn't get bored.
         ax.clear()
         # Should add something to try to get the number of objects on the test and assert that there are none
-
-    def test_Legend(self):
-        """Tests both the legend method of Axes and the Legend class implicitly"""
-        ax = Axes()
-        line = ax.plot(self.x, self.y, label='y(x) plot')
-        leg = ax.legend()
-        leg.addItem(line, name='yx plot')
-        leg.draggable()
-        leg.clear()
-        ax2 = Axes()
-        ax2.plot(self.x, self.y, color='r', label='y(x) plot red')
-        ax2.plot(self.x, -self.y, color='b', label='y(x) plot blue')
-        ax2.legend(labels='blah')
-
-        self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
-
-    def test_Legend_warnings(self):
-        ax = Axes()
-        ax.plot(self.x, self.y, label='y(x) plot')
-        leg = ax.legend()
-
-        # Test warnings
-        warnings_expected = 5
-        with warnings.catch_warnings(record=True) as w:
-            # Cause all warnings to always be triggered.
-            warnings.simplefilter("always")
-            # Trigger warnings.
-            leg.draggable(False)  # 1 warning
-            # Trigger more warnings:
-            ax.legend(blah='unrecognized keyword should make warning', borderaxespad=5)  # 2 warnings
-            ax.legend(loc=0)  # 1 warning
-            ax.legend(loc=4)  # 1 warning
-            # Verify that warnings were made.
-        self.printv('      test_axes_Legend: triggered a warning from Legend and got {}/{} warnings. leg = {}'.format(
-            len(w), warnings_expected, leg))
-        assert len(w) == warnings_expected
 
     def setUp(self):
         test_id = self.id()
