@@ -56,11 +56,8 @@ class TestPgmplContour(unittest.TestCase):
         axs[3, 1].contour(self.x, self.y, self.z, self.nlvl, linestyles=['-', '--', '-.', ':'])
 
     def test_contourf(self):
-        fig, axs = subplots(4, 2)
-        axs[0, 0].set_title('z')
-        axs[0, 0].contourf(self.z)
-        # import pgmpl  # for testing only; delete later
-        # pgmpl.app.exec_()  # for testing only; delete later
+        fig, ax = subplots(1)
+        self.assertRaises(NotImplementedError, ax.contourf, self.z)
 
     def test_contour_errors(self):
         ax = Axes()

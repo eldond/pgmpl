@@ -82,8 +82,6 @@ class TestPgmplAxes(unittest.TestCase):
         levels = [0, 0.5, 1.2, 5, 9, 10, 20, 30]
         ax = Axes()
         ax.contour(a)
-        ax1 = Axes()
-        ax1.contourf(a)
         ax2 = Axes()
         ax2.contour(a, levels)
         ax3 = Axes()
