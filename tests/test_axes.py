@@ -84,6 +84,7 @@ class TestPgmplAxes(unittest.TestCase):
         ax.contour(a)
         ax1 = Axes()
         ax1.contourf(a)
+
         ax2 = Axes()
         ax2.contour(a, levels)
         ax3 = Axes()
