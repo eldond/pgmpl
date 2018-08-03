@@ -15,7 +15,7 @@ import copy
 import numpy as np
 
 # Plotting imports
-from PyQt4 import QtCore
+from pyqtgraph import QtCore
 import pyqtgraph as pg
 import matplotlib.cm
 from matplotlib import rcParams

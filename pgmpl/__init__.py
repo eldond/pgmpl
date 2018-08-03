@@ -7,7 +7,7 @@ import sys
 import os
 
 # GUI imports
-from PyQt4 import QtGui
+from pyqtgraph import QtGui
 
 # Plotting imports
 import pyqtgraph as pg
