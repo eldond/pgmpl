@@ -16,6 +16,7 @@ import warnings
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.tracking import WTracker, tracker
+from pgmpl.figure import Figure
 
 
 class TestPgmplTracking(unittest.TestCase):
@@ -55,10 +56,9 @@ class TestPgmplTracking(unittest.TestCase):
                     'and got {}/{} warnings.'.format(len(w), warnings_expected))
 
     def test_close_all(self):
-        dummy = 'dummy_window'
-        tracker.window_opened(dummy)
+        Figure()
         tracker.close_all()
-        assert len(tracke.open_windows) == 0
+        assert len(tracker.open_windows) == 0
 
     def setUp(self):
         test_id = self.id()
