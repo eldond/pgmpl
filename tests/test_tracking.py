@@ -54,6 +54,12 @@ class TestPgmplTracking(unittest.TestCase):
         self.printv('      test_tracker_warnings: called window_closed with a nonsense window to trigger a warning  '
                     'and got {}/{} warnings.'.format(len(w), warnings_expected))
 
+    def test_close_all(self):
+        dummy = 'dummy_window'
+        tracker.window_opened(dummy)
+        tracker.close_all()
+        assert len(tracke.open_windows) == 0
+
     def setUp(self):
         test_id = self.id()
         test_name = '.'.join(test_id.split('.')[-2:])
