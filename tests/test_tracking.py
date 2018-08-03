@@ -28,6 +28,7 @@ class TestPgmplTracking(unittest.TestCase):
 
     def test_tracker(self):
         assert isinstance(tracker, WTracker)
+        tracker.close_all()
         dummy = 'dummy_window'
         open_windows0 = copy.deepcopy(tracker.open_windows)
         tracker.window_opened(dummy)

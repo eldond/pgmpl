@@ -34,5 +34,9 @@ class WTracker:
     def status(self):
         printd('  {} tracked windows = {}'.format(len(self.open_windows), self.open_windows))
 
+    def close_all(self):
+        while len(self.open_windows):
+            self.open_windows[0].close()
+
 
 tracker = WTracker()
