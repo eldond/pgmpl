@@ -22,11 +22,11 @@ from matplotlib import rcParams
 
 # pgmpl
 # noinspection PyUnresolvedReferences
-import __init__  # __init__ does setup stuff like making sure a QApp exists
-from tracking import tracker
-from axes import Axes
-from util import printd, tolist
-from colorbar import Colorbar
+import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
+from pgmpl.tracking import tracker
+from pgmpl.axes import Axes
+from pgmpl.util import printd, tolist
+from pgmpl.colorbar import Colorbar
 
 
 class Figure(pg.PlotWidget):

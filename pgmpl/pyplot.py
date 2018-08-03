@@ -12,10 +12,10 @@ from __future__ import print_function, division
 import numpy as np
 
 # pgmpl
-from tracking import tracker
-from figure import Figure
-from axes import Axes
-from util import printd
+from pgmpl.tracking import tracker
+from pgmpl.figure import Figure
+from pgmpl.axes import Axes
+from pgmpl.util import printd
 
 
 def figure(*args, **kwargs):

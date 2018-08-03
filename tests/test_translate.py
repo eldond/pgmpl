@@ -10,7 +10,7 @@ from __future__ import print_function, division
 import os
 import unittest
 import numpy as np
-from PyQt4 import QtCore, QtGui
+from pyqtgraph import QtCore, QtGui
 import copy
 from matplotlib import rcParams
 

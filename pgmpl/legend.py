@@ -21,8 +21,8 @@ import pyqtgraph as pg
 
 # pgmpl
 # noinspection PyUnresolvedReferences
-import __init__  # __init__ does setup stuff like making sure a QApp exists
-from util import printd, tolist, is_numeric
+import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
+from pgmpl.util import printd, tolist, is_numeric
 
 
 class Legend:

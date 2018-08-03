@@ -16,6 +16,7 @@ import warnings
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.tracking import WTracker, tracker
+from pgmpl.figure import Figure
 
 
 class TestPgmplTracking(unittest.TestCase):
@@ -28,6 +29,7 @@ class TestPgmplTracking(unittest.TestCase):
 
     def test_tracker(self):
         assert isinstance(tracker, WTracker)
+        tracker.close_all()
         dummy = 'dummy_window'
         open_windows0 = copy.deepcopy(tracker.open_windows)
         tracker.window_opened(dummy)
@@ -52,6 +54,11 @@ class TestPgmplTracking(unittest.TestCase):
             assert len(w) == warnings_expected
         self.printv('      test_tracker_warnings: called window_closed with a nonsense window to trigger a warning  '
                     'and got {}/{} warnings.'.format(len(w), warnings_expected))
+
+    def test_close_all(self):
+        Figure()
+        tracker.close_all()
+        assert len(tracker.open_windows) == 0
 
     def setUp(self):
         test_id = self.id()

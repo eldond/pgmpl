@@ -14,7 +14,7 @@ import warnings
 
 # Plotting imports
 import pyqtgraph as pg
-from translate import color_translator, dealias
+from pgmpl.translate import color_translator, dealias
 
 
 class Text(pg.TextItem):

@@ -7,16 +7,16 @@ import sys
 import os
 
 # GUI imports
-from PyQt4 import QtGui
+from pyqtgraph import QtGui
 
 # Plotting imports
 import pyqtgraph as pg
 from matplotlib import rcParams
 
 # pgmpl imports
-from info import *  # Defines __version__, etc.
-from util import printd
-from translate import color_translator
+from pgmpl.info import *  # Defines __version__, etc.
+from pgmpl.util import printd
+from pgmpl.translate import color_translator
 
 __all__ = ['figure', 'axes', 'pyplot', 'translate', 'text', 'util']
 

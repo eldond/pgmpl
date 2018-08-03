@@ -74,10 +74,10 @@ def demo_plot():
     axs[1, 1].errorbar(-x[40:45], y1[40:45], y1[40:45] * 0.1, x[40:45] * 0.05, color='g', xuplims=True, xlolims=True)
 
     axs[2, 0].plot(x, y1, color='m', marker='o', label='y1 purple circles')
-    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 05], c=['r', 'b', 'g', 'k', 'm', 'y'], linewidths=1)
+    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [80, 40, 90, 10, 20, 5], c=['r', 'b', 'g', 'k', 'm', 'y'], linewidths=1)
     axs[2, 0].scatter(x, x*0+60, c=x, marker='v', s=4, edgecolors=' ')
     axs[2, 0].scatter(x, x*0+50, c=x, marker='s', s=5, cmap='plasma', linewidths=0)
-    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [50, 90, 80, 00, 50, 90], c=[90, 0, 50, 20, 75, 66],
+    axs[2, 0].scatter([0, 2, 4, 6, 8, 10], [50, 90, 80, 0, 50, 90], c=[90, 0, 50, 20, 75, 66],
                       marker='^', linewidths=2, edgecolors='r')
     axs[2, 0].scatter(x, x*0-10, c=x, cmap='jet', marker=None,
                       verts=[(0, 0), (0.5, 0.5), (0, 0.5), (-0.5, 0), (0, -0.5), (0.5, -0.5)])

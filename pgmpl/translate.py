@@ -15,7 +15,7 @@ import copy
 import numpy as np
 
 # Plotting imports
-from PyQt4 import QtCore
+from pyqtgraph import QtCore
 import pyqtgraph as pg
 import matplotlib.cm
 from matplotlib import rcParams
@@ -27,7 +27,7 @@ except ImportError:  # Older Matplotlib versions were organized differently
     to_rgba = colorConverter.to_rgba
 
 # pgmpl imports
-from util import set_debug, printd, tolist
+from pgmpl.util import set_debug, printd, tolist
 
 
 def dealias(**kws):
@@ -49,12 +49,12 @@ def dealias(**kws):
         'verticalalignment': ['va'],
         'horizontalalignment': ['ha'],
     }
-    for primary, aliases in alias_lists.iteritems():
+    for primary, aliases in list(alias_lists.items()):  # https://stackoverflow.com/a/13998534/6605826
         aliasv = {alias: kws.pop(alias, missing_value_mark) for alias in aliases}
         not_missing = [v != missing_value_mark for v in aliasv.values()]
         if primary not in kws.keys() and any(not_missing):
             # The aliases only need be considered if the primary is missing.
-            aliasu = np.atleast_1d(aliasv.keys())[np.atleast_1d(not_missing)][0]
+            aliasu = np.atleast_1d(list(aliasv.keys()))[np.atleast_1d(not_missing)][0]
             kws[primary] = aliasv[aliasu]
             printd("  assigned kws['{}'] = kws.pop('{}')".format(primary, aliasu))
         else:
