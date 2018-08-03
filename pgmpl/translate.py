@@ -27,7 +27,7 @@ except ImportError:  # Older Matplotlib versions were organized differently
     to_rgba = colorConverter.to_rgba
 
 # pgmpl imports
-from util import set_debug, printd, tolist
+from pgmpl.util import set_debug, printd, tolist
 
 
 def dealias(**kws):

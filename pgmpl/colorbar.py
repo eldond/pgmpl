@@ -20,8 +20,8 @@ import numpy as np
 import pyqtgraph as pg
 
 # pgmpl
-import __init__
-from util import printd, tolist
+import pgmpl.__init__
+from pgmpl.util import printd, tolist
 
 
 class ColorbarBase(object):

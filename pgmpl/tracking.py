@@ -10,7 +10,7 @@ from __future__ import print_function, division
 import warnings
 
 # pgmpl
-from util import printd
+from pgmpl.util import printd
 
 
 class WTracker:

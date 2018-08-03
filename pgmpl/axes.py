@@ -24,11 +24,11 @@ from collections import defaultdict
 # pgmpl
 # noinspection PyUnresolvedReferences
 import __init__  # __init__ does setup stuff like making sure a QApp exists
-from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
-from legend import Legend
-from util import printd, tolist, is_numeric
-from text import Text
-from contour import QuadContourSet
+from pgmpl.translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
+from pgmpl.legend import Legend
+from pgmpl.util import printd, tolist, is_numeric
+from pgmpl.text import Text
+from pgmpl.contour import QuadContourSet
 
 
 class Axes(pg.PlotItem):

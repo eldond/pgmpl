@@ -23,8 +23,8 @@ from pyqtgraph import functions as fn
 # pgmpl
 # noinspection PyUnresolvedReferences
 import __init__  # __init__ does setup stuff like making sure a QApp exists
-from translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
-from util import printd, tolist, is_numeric
+from pgmpl.translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
+from pgmpl.util import printd, tolist, is_numeric
 
 
 class ContourSet(object):
