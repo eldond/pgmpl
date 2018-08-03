@@ -23,7 +23,7 @@ from collections import defaultdict
 
 # pgmpl
 # noinspection PyUnresolvedReferences
-import __init__  # __init__ does setup stuff like making sure a QApp exists
+import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
 from pgmpl.legend import Legend
 from pgmpl.util import printd, tolist, is_numeric
