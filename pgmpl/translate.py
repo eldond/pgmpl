@@ -49,7 +49,7 @@ def dealias(**kws):
         'verticalalignment': ['va'],
         'horizontalalignment': ['ha'],
     }
-    for primary, aliases in list(alias_lists.items()):
+    for primary, aliases in list(alias_lists.items()):  # https://stackoverflow.com/a/13998534/6605826
         aliasv = {alias: kws.pop(alias, missing_value_mark) for alias in aliases}
         not_missing = [v != missing_value_mark for v in aliasv.values()]
         if primary not in kws.keys() and any(not_missing):
