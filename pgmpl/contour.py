@@ -93,7 +93,7 @@ class ContourSet(object):
 
         return x, y, z.T, levels
 
-    def extl(self, v):
+    def _extl(self, v):
         """
         Casts input argument as a list and ensures it is at least as long as levels
         :param v: Some variable
@@ -107,14 +107,14 @@ class ContourSet(object):
             self.colors = color_map_translator(
                 self.levels, **{a: self.__getattribute__(a) for a in ['alpha', 'cmap', 'norm', 'vmin', 'vmax']})
         else:
-            self.colors = self.extl(self.colors)
+            self.colors = self._extl(self.colors)
 
         if self.filled:
             self.draw_filled()
         else:
             self.draw_unfilled()
 
-    @staticmethod
+    @staticmethod ############### delete during cleanup ####################################################
     def _isocurve2plotcurve(curve):
         """
         Converts an IsocuveItem instance to a PlotCurveItem instance so it can be used with FillBetweenItem
@@ -253,7 +253,7 @@ class ContourSet(object):
             prev_curve = curve
 
     def draw_unfilled(self):
-        lws, lss = self.extl(self.linewidths), self.extl(self.linestyles)
+        lws, lss = self._extl(self.linewidths), self._extl(self.linestyles)
         pens = [setup_pen_kw(penkw=dict(color=self.colors[i]), linestyle=lss[i], linewidth=lws[i])
                 for i in range(len(self.levels))]
         contours = [pg.IsocurveItem(data=self.z, level=lvl, pen=pens[i]) for i, lvl in enumerate(self.levels)]
