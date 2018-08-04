@@ -25,7 +25,7 @@ class TestPgmplContour(unittest.TestCase):
 
     x = np.linspace(0, 1.8, 30)
     y = np.linspace(1, 3.1, 25)
-    z = (x[:, np.newaxis] - 0.94)**2 + (y[np.newaxis, :] - 2.2)**2 + 1.145
+    z = (x[np.newaxis, :] - 0.94)**2 + (y[:, np.newaxis] - 2.2)**2 + 1.145
     levels = [1.2, 1.5, 2, 2.5, 2.95]
     nlvl = len(levels) * 4
 

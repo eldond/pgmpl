@@ -89,9 +89,9 @@ class ContourSet(object):
         levels = lvlinfo if ((lvlinfo is not None) and np.iterable(lvlinfo)) else self.auto_pick_levels(z, lvlinfo)
 
         if x is None:
-            x, y = np.arange(np.shape(z)[0]), np.arange(np.shape(z)[1])
+            x, y = np.arange(np.shape(z)[1]), np.arange(np.shape(z)[0])
 
-        return x, y, z, levels
+        return x, y, z.T, levels
 
     def extl(self, v):
         """
