@@ -131,6 +131,20 @@ class ContourSet(object):
         new_curve.path = curve.path
         return new_curve
 
+    def _scale_contour_lines(self, lines):
+        """
+        Translates and stretches contour lines
+        :param lines: A list of path segments. e.g. [[(x, y), (x, y)], [(x, y), (x, y)]]
+        :return: A list of path segments, shifted and stretched to fit the x, y data range.
+        """
+        x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
+        for i in range(len(lines)):
+            for j in range(len(lines[i])):
+                newx = lines[i][j][0] * (x1 - x0) / np.shape(self.z)[0] + x0
+                newy = lines[i][j][1] * (y1 - y0) / np.shape(self.z)[1] + y0
+                lines[i][j] = (newx, newy)
+        return lines
+
     def _detect_direction(self, x, y):
         """
         Tries to decide whether path goes CCW or not
@@ -163,7 +177,7 @@ class ContourSet(object):
         direction of path segments and join them in the right order.
 
         :param lines: List of path segments. e.g. [[(x, y), (x,y)], [(x, y), (x, y)]]
-        :return: Flattened list of correctly joined path segments e.g. [(x, y), (x,y), (x, y), (x, y)]
+        :return: Flattened list of correctly joined path segments e.g. [(x, y), (x,y), (x, y), (x, y)], running CCW
         """
         for i in range(len(lines)):
             # Make sure all segments run CCW within themselves
@@ -177,35 +191,66 @@ class ContourSet(object):
             lines = lines[::-1]
         return [point for line in lines for point in line]
 
-    def draw_filled(self):
-        invis = setup_pen_kw(color='k', alpha=0)
-        contours = [self._isocurve2plotcurve(pg.IsocurveItem(data=self.z, level=lvl, pen=invis))
-                    for i, lvl in enumerate(self.levels)]
-        for i in range(len(self.levels)-1):
-            fill = pg.FillBetweenItem(contours[i], contours[i+1], brush=pg.mkBrush(color=self.colors[i]))
-            #self.ax.addItem(fill)  # THIS DOESN'T WORK RIGHT because isocurve2plotcurve doesn't stitch path segments
-            #                         together in the right order.
-        #self.draw_unfilled()  # Temporary for debugging
+    def _close_curve(self, line):
+        """
+        Closes a curve which may be open between the two end points because it intersects the edge of the plot
+        :param line: List of vertices along a CCW path. e.g. [(x, y), (x, y), ...] such as output by _join_lines()
+        :return: List of vertices along a closed CCW path
+        """
 
+        if all(np.atleast_1d(line[0] == line[-1])):
+            # Path is already closed; return it with no changes
+            return line
+
+        # Determine which endpoints are on which edges
+        edge0 = np.append(line[0][0] == np.array([self.x.min(), self.x.max()]),
+                          line[0][1] == np.array([self.y.min(), self.y.max()]))
+        edge1 = np.append(line[-1][0] == np.array([self.x.min(), self.x.max()]),
+                          line[-1][1] == np.array([self.y.min(), self.y.max()]))
+        same_edge = edge0 == edge1
+
+        if (not any(edge0) and not any(edge1)) or all(same_edge):
+            # Endpoints are not on the edges, or are on the same edge. Just close the loop.
+            newline = line + [line[0]]
+        else:
+            # Endpoints are not on the same edge; complicated closure
+
+            # Get the boundary path
+            boundary = [
+                (self.x.min(), self.y.min()),
+                (self.x.max(), self.y.min()),
+                (self.x.max(), self.y.max()),
+                (self.x.min(), self.y.max()),
+            ]
+            # Find which boundary path points are between the endpoints of the curve
+            x0, y0 = np.mean([self.x.min(), self.x.max()]), np.mean([self.y.min(), self.y.max()])
+            theta0 = np.arctan2(line[0][1] - y0, line[0][0] - x0)
+            theta1 = np.arctan2(line[-1][1] - y0, line[-1][0] - x0)
+            thetab = np.array([np.arctan2(b[1] - y0, b[0] - x0) for b in boundary])
+            # Make sure the thing wraps the right way; we are continuing from point -1 back to point 0
+            theta0 = theta0 + 2*np.pi if theta0 < theta1 else theta0
+            thetab = np.array([b + (2*np.pi if b < theta1 else 0) for b in thetab])
+            # Add in corners of the data range boundary to complete the curve
+            newline = line + tolist(np.array(boundary)[thetab < theta0])
+            # And finally, close it
+            newline += [line[0]]
+        return newline
+
+    def draw_filled(self):
         pens = [setup_pen_kw(penkw=dict(color=self.colors[i])) for i in range(len(self.levels))]
         for i in range(len(self.levels)):
             lines = fn.isocurve(self.z, self.levels[i], connected=True, extendToEdge=True)[::-1]
+            lines = self._scale_contour_lines(lines)
             oneline = self._join_lines(lines)
+            oneline = self._close_curve(oneline)
 
-            # TESTING: doesn't work. Just scratch / brainstorming here.
-            #oneline = [point for line in lines for point in line]
-            #print(oneline)
-            #x, y = [item[0] for item in oneline]
             x, y = map(list, zip(*oneline))
             curve = pg.PlotDataItem(x, y, pen=pens[i])
             self.ax.addItem(curve)
             if i > 0:
                 fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
-                #self.ax.addItem(fill)  # doesn't work
+                self.ax.addItem(fill)  # doesn't work well
             prev_curve = curve
-
-            #print(x, y)
-            #print('\n\n')
 
     def draw_unfilled(self):
         lws, lss = self.extl(self.linewidths), self.extl(self.linestyles)

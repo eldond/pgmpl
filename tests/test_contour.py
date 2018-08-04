@@ -35,6 +35,7 @@ class TestPgmplContour(unittest.TestCase):
 
     def test_contour(self):
         fig, axs = subplots(4, 2)
+        fig.suptitle('TestPgmplContour.test_contour')
         axs[0, 0].set_title('z')
         axs[0, 0].contour(self.z)
         axs[0, 1].set_title('-z')
@@ -57,10 +58,15 @@ class TestPgmplContour(unittest.TestCase):
 
     def test_contourf(self):
         fig, axs = subplots(4, 2)
+        fig.suptitle('TestPgmplContour.test_contourf')
         axs[0, 0].set_title('z')
         axs[0, 0].contourf(self.z)
-        # import pgmpl  # for testing only; delete later
-        # pgmpl.app.exec_()  # for testing only; delete later
+
+        axs[2, 0].set_title('x, y, z')
+        axs[2, 0].contourf(self.x, self.y, self.z)
+
+        import pgmpl  # for testing only; delete later
+        pgmpl.app.exec_()  # for testing only; delete later
 
     def test_contour_errors(self):
         ax = Axes()
