@@ -179,6 +179,12 @@ class ContourSet(object):
 
         return np.mean(dth) > 0
 
+    def _find_which_edge(self, xy_point):
+        return np.where([xy_point[0] == self.x.max(), xy_point[1] == self.y.max(),
+                         xy_point[0] == self.x.min(), xy_point[1] == self.y.min()])[0][0]
+        # return np.append(xy_point[0] == np.array([self.x.min(), self.x.max()]),
+        #          xy_point[1] == np.array([self.y.min(), self.y.max()]))
+
     def _join_lines(self, lines):
         """
         Joins segments of a broken path. Use for contours which cross out of bounds and back in. Has to find the right
@@ -197,10 +203,58 @@ class ContourSet(object):
         y1 = np.array([line[0][1] for line in lines])
         if not self._detect_direction(x1, y1):
             lines = lines[::-1]
-        return [point for line in lines for point in line]
+        #return self._close_curve([point for line in lines for point in line])
 
-    def _close_curve(self, line):
+        #edges0 = [self._find_which_edge(line[0]) for line in lines]
+        #edges1 = [self._find_which_edge(line[-1]) for line in lines]
+        #same_edge = [all(edge0 == edge1) for edge0, edge1 in zip(edges0, edges1)]
+        if not lines:
+            return self.boundary
+
+        corners = np.roll(self.boundary, 2)
+
+        def get_more_corners(next_e0_, edge_):
+            corners_ = []
+            if (next_e0_ - edge_) >= 1:
+                corners_ += [corners[edge_]]
+                print('Add corner {}'.format(corners[edge_]))
+            if (next_e0_ - edge_) >= 2:
+                corners_ += [corners[edge_+1]]
+                print('Add corner {}'.format(corners[edge_+1]))
+            if (next_e0_ - edge_) >= 3:
+                corners_ += [corners[edge_+2]]
+                print('Add corner {}'.format(corners[edge_+2]))
+            return corners_
+
+        oneline = lines.pop(0)
+        if not lines:
+            return oneline
+
+        while len(lines):
+            # Find which edge each segment starts/ends on
+            edge = self._find_which_edge(oneline[-1])
+            edge0 = np.array([self._find_which_edge(line[0]) for line in lines])
+            #edge1 = [self._find_which_edge(line[1]) for line in lines]
+            if not any(edge0 >= edge): #or any(edge1 >= edge)):
+                edge -= 4
+            #eligible = np.array(lines)[edge0 >= edge]
+            eligible = [line for line, e0 in zip(lines, edge0) if e0 >= edge]
+            next_line = eligible[edge0[edge0 >= edge].argmin()]
+            next_e0 = edge0[edge0 >= edge].min()
+            print('edge: {}, next_edge start: {}'.format(edge, next_e0))
+            oneline += get_more_corners(next_e0, edge)
+
+            lines.remove(next_line)
+            oneline += next_line
+
+        oneline += get_more_corners(self._find_which_edge(oneline[0]), self._find_which_edge(oneline[-1]))
+        oneline += [oneline[0]]
+        #print('oneline ', oneline)
+        return oneline
+
+    def _close_curve(self, line):  # Remove during cleanup -----------------------------------
         """
+        OLD IDEA; DON'T USE ANYMORE
         Closes a curve which may be open between the two end points because it intersects the edge of the plot
         :param line: List of vertices along a CCW path. e.g. [(x, y), (x, y), ...] such as output by _join_lines()
         :return: List of vertices along a closed CCW path
