@@ -52,7 +52,7 @@ class ContourSet(object):
     def auto_range(self, z):
         pad = (z.max() - z.min()) * 0.025
         self.vmin = z.min()+pad if self.vmin is None else self.vmin
-        self.vmax = z.max()-pad if self.vmax is None else self.vmax
+        self.vmax = z.max() + (pad if self.filled else -pad) if self.vmax is None else self.vmax
 
     def auto_pick_levels(self, z, nlvl=None):
         """
@@ -62,7 +62,7 @@ class ContourSet(object):
             Number of levels; set to some arbitrary default if None
         :return: array
         """
-        nlvl = 5 if nlvl is None else nlvl
+        nlvl = (8 if self.filled else 7) if nlvl is None else nlvl
         self.auto_range(z)
         return np.linspace(self.vmin, self.vmax, nlvl)
 
