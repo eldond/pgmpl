@@ -247,7 +247,15 @@ class ContourSet(object):
             x, y = map(list, zip(*oneline))
             curve = pg.PlotDataItem(x, y, pen=pens[i])
             self.ax.addItem(curve)
-            if i > 0:
+            if i == 0:
+                x0 = np.mean([point[0] for point in oneline])
+                y0 = np.mean([point[1] for point in oneline])
+                xc = [x0, x0 + 1e-12]
+                yc = [y0, y0 + 1e-12]
+                curve_c = pg.PlotDataItem(xc, yc, pen=pens[i])
+                fill = pg.FillBetweenItem(curve, curve_c, brush=pg.mkBrush(color=self.colors[i]))
+                self.ax.addItem(fill)
+            else:  # i > 0:
                 fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
                 self.ax.addItem(fill)  # doesn't work well
             prev_curve = curve
