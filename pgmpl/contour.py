@@ -45,6 +45,14 @@ class ContourSet(object):
         self.nchunk = kwargs.pop('nchunk', 0)
         self.x, self.y, self.z, self.levels = self.choose_xyz_levels(*args)
         self.auto_range(self.z)
+
+        # Get the boundary path
+        self.boundary = [
+            (self.x.min(), self.y.min()),
+            (self.x.max(), self.y.min()),
+            (self.x.max(), self.y.max()),
+            (self.x.min(), self.y.max()),
+        ]
         self.draw()
 
         return
@@ -198,6 +206,10 @@ class ContourSet(object):
         :return: List of vertices along a closed CCW path
         """
 
+        if not line:
+            # Empty line; nothing to do
+            return self.boundary
+
         if all(np.atleast_1d(line[0] == line[-1])):
             # Path is already closed; return it with no changes
             return line
@@ -215,23 +227,16 @@ class ContourSet(object):
         else:
             # Endpoints are not on the same edge; complicated closure
 
-            # Get the boundary path
-            boundary = [
-                (self.x.min(), self.y.min()),
-                (self.x.max(), self.y.min()),
-                (self.x.max(), self.y.max()),
-                (self.x.min(), self.y.max()),
-            ]
             # Find which boundary path points are between the endpoints of the curve
             x0, y0 = np.mean([self.x.min(), self.x.max()]), np.mean([self.y.min(), self.y.max()])
             theta0 = np.arctan2(line[0][1] - y0, line[0][0] - x0)
             theta1 = np.arctan2(line[-1][1] - y0, line[-1][0] - x0)
-            thetab = np.array([np.arctan2(b[1] - y0, b[0] - x0) for b in boundary])
+            thetab = np.array([np.arctan2(b[1] - y0, b[0] - x0) for b in self.boundary])
             # Make sure the thing wraps the right way; we are continuing from point -1 back to point 0
             theta0 = theta0 + 2*np.pi if theta0 < theta1 else theta0
             thetab = np.array([b + (2*np.pi if b < theta1 else 0) for b in thetab])
             # Add in corners of the data range boundary to complete the curve
-            newline = line + tolist(np.array(boundary)[thetab < theta0])
+            newline = line + tolist(np.array(self.boundary)[thetab < theta0])
             # And finally, close it
             newline += [line[0]]
         return newline
