@@ -23,9 +23,15 @@ class TestPgmplContour(unittest.TestCase):
 
     verbose = int(os.environ.get('PGMPL_TEST_VERBOSE', '0'))
 
+    x0 = 0.94
+    y0 = 2.2
+    z0 = 1.145
+    slant = .0
     x = np.linspace(0, 1.8, 30)
     y = np.linspace(1, 3.1, 25)
-    z = (x[np.newaxis, :] - 0.94)**2 + (y[:, np.newaxis] - 2.2)**2 + 1.145
+    dx = x[np.newaxis, :] - x0
+    dy = y[:, np.newaxis] - y0
+    z = dx**2 + dy**2 + z0 + slant*(dx+dy)**2
     levels = [1.2, 1.5, 2, 2.5, 2.95]
     nlvl = len(levels) * 4
 

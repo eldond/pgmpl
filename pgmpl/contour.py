@@ -70,7 +70,7 @@ class ContourSet(object):
             Number of levels; set to some arbitrary default if None
         :return: array
         """
-        nlvl = (8 if self.filled else 7) if nlvl is None else nlvl
+        nlvl = 8 if nlvl is None else nlvl
         self.auto_range(z)
         return np.linspace(self.vmin, self.vmax, nlvl)
 
@@ -95,8 +95,6 @@ class ContourSet(object):
             raise TypeError('choose_xyz_levels takes 1, 2, 3, or 4 arguments. Got {} arguments.'.format(len(args)))
 
         levels = lvlinfo if ((lvlinfo is not None) and np.iterable(lvlinfo)) else self.auto_pick_levels(z, lvlinfo)
-#        levels = np.append(np.append(-np.inf, levels), np.inf) if self.filled else levels
-        #levels = np.append(levels, np.inf) if self.filled else levels
 
         if x is None:
             x, y = np.arange(np.shape(z)[1]), np.arange(np.shape(z)[0])
@@ -182,10 +180,13 @@ class ContourSet(object):
         return np.mean(dth) > 0
 
     def _find_which_edge(self, xy_point):
-        return np.where([xy_point[0] == self.x.max(), xy_point[1] == self.y.max(),
-                         xy_point[0] == self.x.min(), xy_point[1] == self.y.min()])[0][0]
-        # return np.append(xy_point[0] == np.array([self.x.min(), self.x.max()]),
-        #          xy_point[1] == np.array([self.y.min(), self.y.max()]))
+        print(xy_point, 'xy_point')
+        a = np.where([xy_point[0] == self.x.max(), xy_point[1] == self.y.max(),
+                      xy_point[0] == self.x.min(), xy_point[1] == self.y.min()])[0]
+        if len(a):
+            return a[0]
+        else:
+            return 4
 
     def _join_lines(self, lines):
         """
@@ -205,13 +206,10 @@ class ContourSet(object):
         y1 = np.array([line[0][1] for line in lines])
         if not self._detect_direction(x1, y1):
             lines = lines[::-1]
-        #return self._close_curve([point for line in lines for point in line])
 
-        #edges0 = [self._find_which_edge(line[0]) for line in lines]
-        #edges1 = [self._find_which_edge(line[-1]) for line in lines]
-        #same_edge = [all(edge0 == edge1) for edge0, edge1 in zip(edges0, edges1)]
         if not lines:
-            return self.boundary
+            print('return early because not lines:', lines)
+            return tolist(np.array(self.boundary)[np.array([0, 1, 2, 3, 0])])
 
         corners = np.roll(self.boundary, -2)
 
@@ -226,22 +224,20 @@ class ContourSet(object):
                 corners_ += [tuple(corners[edge_+2])]
                 print('Add corner {}'.format(corners[edge_+2]))
             if (next_e0_ - edge_) >= 3:
-                corners_ += [tuple(corners[edge_+3])]
                 print('Add corner {}'.format(corners[edge_+3]))
+                corners_ += [tuple(corners[edge_+3])]#, tuple(corners[edge_])]
             return corners_
 
         oneline = lines.pop(0)
-        if not lines:
-            return oneline
+        #if not lines:
+        #    return oneline
 
         while len(lines):
             # Find which edge each segment starts/ends on
             edge = self._find_which_edge(oneline[-1])
             edge0 = np.array([self._find_which_edge(line[0]) for line in lines])
-            #edge1 = [self._find_which_edge(line[1]) for line in lines]
-            if not any(edge0 >= edge): #or any(edge1 >= edge)):
+            if not any(edge0 >= edge):
                 edge -= 4
-            #eligible = np.array(lines)[edge0 >= edge]
             eligible = [line for line, e0 in zip(lines, edge0) if e0 >= edge]
             next_line = eligible[edge0[edge0 >= edge].argmin()]
             next_e0 = edge0[edge0 >= edge].min()
@@ -250,11 +246,15 @@ class ContourSet(object):
             lines.remove(next_line)
             oneline += next_line
 
-        more_corners = get_more_corners(self._find_which_edge(oneline[0]), self._find_which_edge(oneline[-1]))
+        e0 = self._find_which_edge(oneline[0])
+        e1 = self._find_which_edge(oneline[-1])
+        if e1 > e0:
+            e1 -= 4
+        print('e0, e1', e0, e1)
+        more_corners = get_more_corners(e0, e1)
         print('more corners = ', more_corners)
-        oneline += more_corners
+        oneline += get_more_corners(e0, e1)
         oneline += [oneline[0]]
-        print('oneline ', oneline)
         return oneline
 
     def _close_curve(self, line):  # Remove during cleanup -----------------------------------
@@ -304,12 +304,17 @@ class ContourSet(object):
         pens = [setup_pen_kw(penkw=dict(color=self.colors[i])) for i in range(len(self.levels))]
         use_pen = pg.mkPen(color='k')
         for i in range(len(self.levels)):
+            print('level # {}, @ {}'.format(i, self.levels[i]))
             lines = fn.isocurve(self.z, self.levels[i], connected=True, extendToEdge=True)[::-1]
             lines = self._scale_contour_lines(lines)
             oneline = self._join_lines(lines)
+            print('oneline ', oneline)
 
             x, y = map(list, zip(*oneline))
             curve = pg.PlotDataItem(x, y, pen=use_pen)#pens[i])
+            #if i == len(self.levels)-1:
+            #    self.ax.addItem(curve, pen=pg.mkPen(color='r'))
+            #if i == len(self.levels)-2:
             self.ax.addItem(curve)
             if i == 0:
                 x0 = np.mean([point[0] for point in oneline])
@@ -320,8 +325,9 @@ class ContourSet(object):
                 fill = pg.FillBetweenItem(curve, curve_c, brush=pg.mkBrush(color=self.colors[i]))
                 self.ax.addItem(fill)
             else:  # i > 0:
+            #elif i == len(self.levels)-1:
                 fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
-                self.ax.addItem(fill)  # doesn't work well
+                self.ax.addItem(fill)
             prev_curve = curve
 
     def draw_unfilled(self):
