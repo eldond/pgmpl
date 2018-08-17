@@ -10,8 +10,6 @@ virtualenv:
   system_site_packages: true
 
 install:
- - sudo apt-get update
- - sudo apt-get -y install python-qt4
  - pip install -r requirements.txt
  - pip install codecov coverage
 
