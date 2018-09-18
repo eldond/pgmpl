@@ -36,7 +36,7 @@ class TestPgmplContour(unittest.TestCase):
     dx2 = x[np.newaxis, :] - x02
     dy2 = y[:, np.newaxis] - y02
     z = dx**2 + dy**2 + z0 + slant*(dx+dy)**2
-    z2 = dx2**2 + dy2**2 + (slant + 1.2) * (dx2 + dy2)**2
+    z2 = -(dx2**2 + dy2**2 + (slant + 1.2) * (dx2 + dy2)**2)
     z3 = dx**2 + dy**2 + (slant - 1.2) * (dx + dy)**2
     levels = [1.2, 1.5, 2, 2.5, 2.95]
     nlvl = len(levels) * 4
