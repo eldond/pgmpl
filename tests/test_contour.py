@@ -36,8 +36,8 @@ class TestPgmplContour(unittest.TestCase):
     dx2 = x[np.newaxis, :] - x02
     dy2 = y[:, np.newaxis] - y02
     z = dx**2 + dy**2 + z0 + slant*(dx+dy)**2
-    z2 = dx2**2 + dy2**2 + (slant + 0.56) * (dx2 + dy2)**2
-    z3 = dx**2 + dy**2 + (slant - 0.56) * (dx + dy)**2
+    z2 = dx2**2 + dy2**2 + (slant + 1.2) * (dx2 + dy2)**2
+    z3 = dx**2 + dy**2 + (slant - 1.2) * (dx + dy)**2
     levels = [1.2, 1.5, 2, 2.5, 2.95]
     nlvl = len(levels) * 4
 
@@ -116,6 +116,9 @@ class TestPgmplContour(unittest.TestCase):
         axs[2, 0].set_title('x, y, z')
         axs[2, 0].contourf(self.x, self.y, self.z)
 
+        axs[2, 1].set_title('x, y, z, nlvl')
+        axs[2, 1].contourf(self.x, self.y, self.z, self.nlvl)
+
         axs[3, 0].set_title('x, y, z2')
         axs[3, 0].contourf(self.x, self.y, self.z2)
 
@@ -141,6 +144,9 @@ class TestPgmplContour(unittest.TestCase):
 
         axsm[2, 0].set_title('x, y, z')
         axsm[2, 0].contourf(self.x, self.y, self.z)
+
+        axsm[2, 1].set_title('x, y, z, nlvl')
+        axsm[2, 1].contourf(self.x, self.y, self.z, self.nlvl)
 
         axsm[3, 0].set_title('x, y, z2')
         axsm[3, 0].contourf(self.x, self.y, self.z2)
