@@ -303,6 +303,8 @@ class ContourSet(object):
     def draw_filled(self):
         pens = [setup_pen_kw(penkw=dict(color=self.colors[i])) for i in range(len(self.levels))]
         use_pen = pg.mkPen(color='k')
+        curves = [None] * (len(self.levels))
+        joined_lines = [None] * (len(self.levels))
         for i in range(len(self.levels)):
             print('level # {}, @ {}'.format(i, self.levels[i]))
             lines = fn.isocurve(self.z, self.levels[i], connected=True, extendToEdge=True)[::-1]
@@ -310,25 +312,52 @@ class ContourSet(object):
             oneline = self._join_lines(lines)
             print('oneline ', oneline)
 
+            joined_lines[i] = oneline
             x, y = map(list, zip(*oneline))
-            curve = pg.PlotDataItem(x, y, pen=use_pen)#pens[i])
+            curves[i] = pg.PlotDataItem(x, y, pen=use_pen)#pens[i])
             #if i == len(self.levels)-1:
             #    self.ax.addItem(curve, pen=pg.mkPen(color='r'))
             #if i == len(self.levels)-2:
-            self.ax.addItem(curve)
-            if i == 0:
-                x0 = np.mean([point[0] for point in oneline])
-                y0 = np.mean([point[1] for point in oneline])
-                xc = [x0, x0 + 1e-12]
-                yc = [y0, y0 + 1e-12]
-                curve_c = pg.PlotDataItem(xc, yc, pen=pens[i])
-                fill = pg.FillBetweenItem(curve, curve_c, brush=pg.mkBrush(color=self.colors[i]))
-                self.ax.addItem(fill)
-            else:  # i > 0:
-            #elif i == len(self.levels)-1:
-                fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
-                self.ax.addItem(fill)
-            prev_curve = curve
+
+            # self.ax.addItem(curve)
+            # if i == 0:
+            #     x0 = np.mean([point[0] for point in oneline])
+            #     y0 = np.mean([point[1] for point in oneline])
+            #     xc = [x0, x0 + 1e-12]
+            #     yc = [y0, y0 + 1e-12]
+            #     curve_c = pg.PlotDataItem(xc, yc, pen=pens[i])
+            #     fill = pg.FillBetweenItem(curve, curve_c, brush=pg.mkBrush(color=self.colors[i]))
+            #     self.ax.addItem(fill)
+            # else:  # i > 0:
+            # #elif i == len(self.levels)-1:
+            #     fill = pg.FillBetweenItem(curve, prev_curve, brush=pg.mkBrush(color=self.colors[i]))
+            #     self.ax.addItem(fill)
+            # prev_curve = curve
+
+        # Get the curves at the edges of the array
+        x0 = np.mean([point[0] for point in joined_lines[1]])
+        y0 = np.mean([point[1] for point in joined_lines[1]])
+        dx0 = np.std([point[0] for point in joined_lines[1]])
+        dy0 = np.std([point[1] for point in joined_lines[1]])
+        x1 = np.mean([point[0] for point in joined_lines[-2]])
+        y1 = np.mean([point[1] for point in joined_lines[-2]])
+        dx1 = np.std([point[0] for point in joined_lines[-2]])
+        dy1 = np.std([point[1] for point in joined_lines[-2]])
+        if (dx1**2 + dy1**2) > (dx0**2 + dy0**2):
+            curves = [pg.PlotDataItem([x0, x0 + 1e-12], [y0, y0 + 1e-12], pen=pens[0])] + curves
+            #curves[-1] = pg.PlotDataItem(
+            #    np.array([self.x.min(), self.x.max()])[np.array([0, 0, 1, 1, 0])],
+            #    np.array([self.y.min(), self.y.max()])[np.array([0, 1, 1, 0, 0])], pen=pens[-1])
+        else:
+            curves = curves + [pg.PlotDataItem([x1, x1 + 1e-12], [y1, y1 + 1e-12], pen=pens[-1])]
+            #curves[0] = pg.PlotDataItem(
+            #    np.array([self.x.min(), self.x.max()])[0, 0, 1, 1, 0],
+            #    np.array([self.y.min(), self.y.max()])[0, 1, 1, 0, 0], pen=pens[0])
+
+        for j in range(len(self.levels)):
+            i = len(self.levels)-j-1
+            fill = pg.FillBetweenItem(curves[i], curves[i+1], brush=pg.mkBrush(color=self.colors[i]))
+            self.ax.addItem(fill)
 
     def draw_unfilled(self):
         lws, lss = self._extl(self.linewidths), self._extl(self.linestyles)
