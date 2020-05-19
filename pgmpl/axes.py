@@ -248,18 +248,42 @@ class Axes(pg.PlotItem):
         return QuadContourSet(self, *args, **kwargs)
 
     def set_xlabel(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_xlabel()
+
+        :param label: str
+        """
         self.setLabel('bottom', text=label)
 
     def set_ylabel(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_ylabel()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_ylabel()
+
+        :param label: str
+        """
         self.setLabel('left', text=label)
 
     def set_title(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_title()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_title()
+
+        :param label: str
+        """
         self.setTitle(label)
 
     def set_aspect(self, aspect, adjustable=None, **kw):
+        """
+        Sets plot axes aspect ratio
+
+        :param aspect: float or str
+            'equal': same as 1
+            'auto': unlocks aspect ratio so it can change as needed
+            number: sets aspect ratio to this value
+
+        :param adjustable: nothing but box has been implemented so far; sorry
+
+        :param kw: Accepts additional keywords to prevent interfacing problems, but can't use them yet.
+        """
         vb = self.getViewBox()
         if aspect == 'equal':
             vb.setAspectLocked(lock=True, ratio=1)
@@ -626,6 +650,7 @@ class AxesImage(pg.ImageItem):
 
     @staticmethod
     def check_inputs(**kw):
+        """Checks inputs and issues warnings as applicable"""
         if kw.pop('shape', None) is not None:
             warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
                           'so I had nothing to emulate.')
