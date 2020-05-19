@@ -36,7 +36,9 @@ Symbols['.'] = pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, con
 Symbols[','] = pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]), np.array([0, 0.01, 0, -0.01, 0]), connect='all')
 Symbols['_'] = pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all')
 Symbols['|'] = pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all')
-Symbols['x'] = pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]), np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all')
+Symbols['x'] = pg.arrayToQPath(
+    np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]), np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'
+)
 
 
 def dealias(**kws):
@@ -180,19 +182,11 @@ def symbol_translator(**kw):
     :return: string
         Code for the relevant pyqtgraph symbol.
     """
-    theta = np.linspace(0, 2 * np.pi, 36)
-
-    pyqt_symbol = {  # mpl symbol : pyqt4 symbol
-        '.': '.', # pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
-        ',': ',', #pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]), np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
-        'x': 'x', # pg.arrayToQPath(np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]), np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all')
-        '+': '+', '*': 'star', 'o': 'o', 'v': 't', '^': 't1', '>': 't2', '<': 't3',
-        'd': 'd', 's': 's', 'p': 'p', 'h': 'h',
-        '_': '_', #pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
-        '|': '|',
-        'None': None, 'none': None, None: None,
+    # mpl symbol : pyqt4 symbol
+    pyqt_symbol = {
+        '.': '.', ',': ',', 'x': 'x', '+': '+', '*': 'star', 'o': 'o', 'v': 't', '^': 't1', '>': 't2', '<': 't3',
+        'd': 'd', 's': 's', 'p': 'p', 'h': 'h', '_': '_', '|': '|', 'None': None, 'none': None, None: None,
     }.get(kw.get('marker', None), 'o')
-    print('pyqt_symbol', pyqt_symbol)
     return pyqt_symbol
 
 

@@ -76,10 +76,6 @@ class Axes(pg.PlotItem):
             self.prop_cycle_index += 1
             if self.prop_cycle_index > len(self.prop_cycle):
                 self.prop_cycle_index = 0
-        #print('args', args)
-
-        print('kwargs', kwargs)
-        print('translated kwargs', plotkw_translator(**kwargs))
         return super(Axes, self).plot(*args, **plotkw_translator(**kwargs))
 
     @staticmethod
@@ -178,7 +174,6 @@ class Axes(pg.PlotItem):
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
         if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
             plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
-        print('scatter plotkw', plotkw)
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def imshow(self, x=None, aspect=None, **kwargs):
