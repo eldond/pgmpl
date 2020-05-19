@@ -17,18 +17,14 @@ jobs:
        - "sh -e /etc/init.d/xvfb start"
        - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
        - export PGMPL_TEST_VERBOSE=1
-    - name: "python 3.6 pgmpl"
+    - name: "python 3.6 xvfb service pgmpl"
       dist: bionic
       python: 3.6
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
-        - sudo apt-get install xvfb
-      before_script:
-       - export DISPLAY=:99.0
-       - "sh -e /etc/init.d/xvfb start"
-       - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
-       - export PGMPL_TEST_VERBOSE=1
+      services:
+       - xvfb
     - name: "python 3.6 xvfb variant pgmpl"
       dist: bionic
       python: 3.6
@@ -38,7 +34,9 @@ jobs:
         - sudo apt-get install xvfb
       before_script:
        - Xvfb :99 &
+       - xvfb-run --server-args="-screen 0, 1024x768x24
        - export DISPLAY=:99
+
 # https://stackoverflow.com/a/35029430/6605826
 # system_site_packages limits py versions https://travis-ci.community/t/python-3-6-and-3-7-with-system-site-packages-enabled-fails-to-activate-on-xenial/1697
 
