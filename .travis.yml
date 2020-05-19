@@ -1,13 +1,13 @@
 language: python
 sudo: required
-dist: trusty
+dist: bionic
 python:
  - "2.7"
- - "3.5" 
  - "3.6"
  - "3.7"
 
 # https://stackoverflow.com/a/35029430/6605826
+# system_site_packages limits py versions https://travis-ci.community/t/python-3-6-and-3-7-with-system-site-packages-enabled-fails-to-activate-on-xenial/1697
 
 virtualenv:
   system_site_packages: true
