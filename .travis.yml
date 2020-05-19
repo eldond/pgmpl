@@ -23,6 +23,7 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
+        - sudo apt-get install xvfb
       before_script:
        - export DISPLAY=:99.0
        - xvfb
@@ -34,6 +35,7 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
+        - sudo apt-get install xvfb
       before_script:
        - xvfb
 # https://stackoverflow.com/a/35029430/6605826
