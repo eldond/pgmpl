@@ -110,9 +110,12 @@ class Axes(pg.PlotItem):
         :param verts: sequence of (x, y), optional
         :return: a pyqt path suitable for use with Axes.plot()'s symbol keyword.
         """
+        from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
         verts_x = np.array([vert[0] for vert in verts])
         verts_y = np.array([vert[1] for vert in verts])
-        return pg.arrayToQPath(verts_x, verts_y, connect='all')
+        key = 'custom_pgmpl_symbol_1'
+        Symbols[key] = pg.arrayToQPath(verts_x, verts_y, connect='all')
+        return key
 
     def scatter(self, x=None, y=None, **kwargs):
         """
@@ -171,7 +174,6 @@ class Axes(pg.PlotItem):
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
         if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
             plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
-
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def imshow(self, x=None, aspect=None, **kwargs):
@@ -190,8 +192,7 @@ class Axes(pg.PlotItem):
     def contourf(self, *args, **kwargs):
         printd('  pgmpl.axes.Axes.contourf()...')
         kwargs['filled'] = True
-        contours = QuadContourSet(self, *args, **kwargs)
-        return contours
+        return QuadContourSet(self, *args, **kwargs)
 
     def set_xlabel(self, label):
         """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""

@@ -86,6 +86,7 @@ class TestPgmplTranslate(unittest.TestCase):
         assert style_translator(linestyle="-") == QtCore.Qt.SolidLine
 
     def test_symbol_translator(self):
+        from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
         news = [None] * self.nt
         for i in range(self.nt):
             news[i] = symbol_translator(**self.plot_kw_tests[i])
@@ -95,7 +96,8 @@ class TestPgmplTranslate(unittest.TestCase):
         assert symbol_translator(marker='^') == 't1'
         custom_markers = '_x|,.'
         for custom in custom_markers:
-            assert isinstance(symbol_translator(marker=custom), QtGui.QPainterPath)
+            assert isinstance(symbol_translator(marker=custom), QtGui.QPainterPath) \
+                   or isinstance(Symbols.get(custom, None), QtGui.QPainterPath)
 
     def test_setup_pen_kw(self):
         newp = [None] * self.nt
