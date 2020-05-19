@@ -192,8 +192,7 @@ class Axes(pg.PlotItem):
     def contourf(self, *args, **kwargs):
         printd('  pgmpl.axes.Axes.contourf()...')
         kwargs['filled'] = True
-        contours = QuadContourSet(self, *args, **kwargs)
-        return contours
+        return QuadContourSet(self, *args, **kwargs)
 
     def set_xlabel(self, label):
         """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
