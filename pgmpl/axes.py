@@ -52,6 +52,7 @@ class Axes(pg.PlotItem):
             self.setYLink(self.sharey)
 
     def clear(self):
+        """Clears the axes"""
         printd('  Clearing Axes instance {}...'.format(self))
         super(Axes, self).clear()
         self.legend.clear()
@@ -61,9 +62,14 @@ class Axes(pg.PlotItem):
         """
         Translates arguments and keywords to matplotlib.axes.Axes.plot() method so they can be passed to
         pg.PlotItem.plot() instead.
+
         :param args: Plot arguments
+            They will be passed straight through to plot()
+
         :param kwargs: Plot keywords
-        :return: plotItem instance
+            They will be translated from mpl to pg conventions and then passed to plot()
+
+        :return: plotItem instance returned by pg.PlotItem.plot()
         """
         need_cycle = any([k not in kwargs.keys() for k in self.prop_cycle.keys])
         if need_cycle:
@@ -80,7 +86,21 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _prep_scatter_colors(n, **kwargs):
-        """Helper function to prepare colors for scatter plot"""
+        """
+        Helper function to prepare colors for scatter plot
+
+        :param n: int
+            Number of colors to prepare
+
+        :param kwargs: keywords for controlling color, like
+            c
+            edgecolors
+            alpha
+
+        :return: tuple
+            list of colors for primary usage (maybe for face, line, etc.)
+            list of colors for edges
+        """
         edgecolors = kwargs.pop('edgecolors', None)
         c = kwargs.pop('c', None)
         # Translate face colors
@@ -107,8 +127,11 @@ class Axes(pg.PlotItem):
     def _make_custom_verts(verts):
         """
         Makes a custom symbol from the verts keyword accepted by scatter
-        :param verts: sequence of (x, y), optional
-        :return: a pyqt path suitable for use with Axes.plot()'s symbol keyword.
+
+        :param verts: sequence of (x, y)
+
+        :return: str
+            The name of the new custom key. It has been "installed" into pyqtgraph's Symbols dictionary.
         """
         from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
         verts_x = np.array([vert[0] for vert in verts])
@@ -120,22 +143,52 @@ class Axes(pg.PlotItem):
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
-        :param x: array like with length n
-        :param y: array like with length n
-        :param s: scalar or array like with length n, optional
-        :param c: color, sequence, or sequence of color, optional
-        :param marker: string, optional
-        :param cmap: string, optional
-        :param norm: Normalize class instance, optional
-        :param vmin: scalar, optional
-        :param vmax: scalar, optional
-        :param alpha: scalar, optional
-        :param linewidths: scalar or array like with length n, optional
-        :param verts: sequence of (x, y), optional
-        :param edgecolors: color or sequence of color
+
+        :param x: array-like
+            Values for the X-axis, with length n
+
+        :param y: array-like
+            Values for the Y-axis, with length n
+
+        :param s: array-like or scalar [optional]
+            Size or sizes for the markers. If iterable, must have length n.
+
+        :param c: color, sequence, or sequence of color [optional]
+            Colors for the markers. If specifying more than one color, there must be n colors.
+
+        :param marker: string [optional]
+            Code for marker symbol, like 'o'
+
+        :param cmap: string [optional]
+            Matplotlib colormap name
+
+        :param norm: Normalize class instance [optional]
+            An instance of one of Matplotlib's normalization classes, like mpl.colors.Normalize
+            If not provided, a new instance of mpl.colors.Normalize will be created.
+
+        :param vmin: numeric scalar [optional]
+            Minimum value for color axis. Used to initialize mpl.colors.Normalize, if needed. Otherwise, ignored.
+
+        :param vmax: numeric scalar [optional]
+            Maximum value for color axis. Used to initialize mpl.colors.Normalize, if needed. Otherwise, ignored.
+
+        :param alpha: numeric scalar [optional]
+            Opacity, between 0 (invisible) and 1 (fully opaque)
+
+        :param linewidths: numeric scalar or array-like [optional]
+            If array-like, must match length n
+
+        :param verts: sequence of (x, y) [optional]
+            Used for creating custom symbols. Set marker=None to use this.
+
+        :param edgecolors: color specification or sequence of color specifications
+            Colors for edges
+
         :param data: dict, optional
-        :param kwargs:
-        :return: plotItem instance
+            Alternative way to specify some keywords. Must contain x and y.
+            Can also contain s, c, edgecolors, and linewidths, which will override any duplicates passed in directly.
+
+        :return: plotItem instance created by plot()
         """
         data = kwargs.pop('data', None)
         linewidths = kwargs.pop('linewidths', None)
