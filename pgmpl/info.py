@@ -9,7 +9,7 @@ installation. So, this information is placed here and imported into __init__.py 
 """
 
 # Define module
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 __maintainer__ = "David Eldon"
 __email__ = "eldond@fusion.gat.com"
 __status__ = "Development"
