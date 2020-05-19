@@ -154,10 +154,10 @@ class TestPgmplContour(unittest.TestCase):
         axsm[3, 1].set_title('x, y, z3')
         axsm[3, 1].contourf(self.x, self.y, self.z3)
 
-        # # Uncomment these to see figures during manual testing and development:
-        # pyplot.show()
-        # import pgmpl
-        # pgmpl.app.exec_()
+        # Uncomment these to see figures during manual testing and development:
+        pyplot.show()
+        import pgmpl
+        pgmpl.app.exec_()
 
     def test_contour_errors(self):
         ax = Axes()

@@ -122,23 +122,6 @@ class ContourSet(object):
         else:
             self.draw_unfilled()
 
-    @staticmethod ############### delete during cleanup ####################################################
-    def _isocurve2plotcurve(curve):
-        """
-        Converts an IsocuveItem instance to a PlotCurveItem instance so it can be used with FillBetweenItem
-
-        FAILS because the curves aren't sorted properly to allow good connections between segments. That is, a contour
-        can break where it intersects the edge of the plot/data range, and restart later where it re-enters. These entry
-        and exit points are reconnected arbitrarily or incorrectly.
-
-        :param curve: IsocurveItem instance
-        :return: PlotCurveItem with the same path
-        """
-        curve.generatePath()
-        new_curve = pg.PlotCurveItem()
-        new_curve.path = curve.path
-        return new_curve
-
     def _scale_contour_lines(self, lines):
         """
         Translates and stretches contour lines
