@@ -5,23 +5,25 @@ jobs:
     - name: "python 2.7 pgmpl"
       dist: trusty
       python: 2.7
-      virtualenv:
-        system_site_packages: true
+#      virtualenv:
+#        system_site_packages: true
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python-qt4
-    - name: "python 3.6 pgmpl"
+    - name: "python 3 pgmpl"
       dist: bionic
-      python: 3.6
+      python:
+        - "3.6"
+        - "3.7"
       before_install:
         - sudo apt-get update
-        - sudo apt-get -y install python3-qt5
+        - sudo apt-get -y install python3-pyqt5
 
 # https://stackoverflow.com/a/35029430/6605826
 # system_site_packages limits py versions https://travis-ci.community/t/python-3-6-and-3-7-with-system-site-packages-enabled-fails-to-activate-on-xenial/1697
 
-# virtualenv:
-#  system_site_packages: true
+virtualenv:
+  system_site_packages: true
 
 # apt-get commands depend on py version: https://stackoverflow.com/a/20621143/6605826
 install:
