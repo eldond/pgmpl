@@ -10,15 +10,32 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python-qt4
-    - name: "python 3 pgmpl"
+      before_script:
+       # From pyqtgraph's .travis.yml: https://github.com/pyqtgraph/pyqtgraph/blob/develop/.travis.yml
+       # We need to create a (fake) display on Travis, let's use a funny resolution
+       - export DISPLAY=:99.0
+       - "sh -e /etc/init.d/xvfb start"
+       - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
+       - export PGMPL_TEST_VERBOSE=1
+    - name: "python 3.6 pgmpl"
       dist: bionic
-      python:
-        - "3.6"
-        - "3.7"
+      python: 3.6
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
-
+      before_script:
+       - export DISPLAY=:99.0
+       - xvfb
+       - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
+       - export PGMPL_TEST_VERBOSE=1
+    - name: "python 3.7 pgmpl"
+      dist: bionic
+      python: 3.7
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get -y install python3-pyqt5
+      before_script:
+       - xvfb
 # https://stackoverflow.com/a/35029430/6605826
 # system_site_packages limits py versions https://travis-ci.community/t/python-3-6-and-3-7-with-system-site-packages-enabled-fails-to-activate-on-xenial/1697
 
@@ -32,14 +49,6 @@ install:
 # - if [[ $TRAVIS_PYTHON_VERSION > 3 ]]; then sudo apt-get -y install python3-qt5; fi
  - pip install -r requirements.txt
  - pip install codecov coverage
-
-before_script:
- # From pyqtgraph's .travis.yml: https://github.com/pyqtgraph/pyqtgraph/blob/develop/.travis.yml
- # We need to create a (fake) display on Travis, let's use a funny resolution
- - export DISPLAY=:99.0
- - "sh -e /etc/init.d/xvfb start"
- - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
- - export PGMPL_TEST_VERBOSE=1
 
 script:
  - coverage run -m unittest discover --pattern=*.py -s tests
