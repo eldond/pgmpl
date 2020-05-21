@@ -52,7 +52,11 @@ class Axes(pg.PlotItem):
             self.setYLink(self.sharey)
 
     def clear(self):
-        """Clears the axes"""
+        """
+        Clears the axes
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.clear.html
+        """
         printd('  Clearing Axes instance {}...'.format(self))
         super(Axes, self).clear()
         self.legend.clear()
@@ -62,6 +66,8 @@ class Axes(pg.PlotItem):
         """
         Translates arguments and keywords to matplotlib.axes.Axes.plot() method so they can be passed to
         pg.PlotItem.plot() instead.
+
+        See https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.plot.html
 
         :param args: Plot arguments
             They will be passed straight through to plot()
@@ -143,6 +149,8 @@ class Axes(pg.PlotItem):
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.scatter.html
 
         :param x: array-like
             Values for the X-axis, with length n
@@ -230,6 +238,17 @@ class Axes(pg.PlotItem):
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def imshow(self, x=None, aspect=None, **kwargs):
+        """
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.imshow.html
+
+        :param x: array
+
+        :param aspect: number or str passed to self.set_aspect()
+
+        :param kwargs: other keywords passed to AxesImage()
+
+        :return: AxesImage instance
+        """
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
         img = AxesImage(x, **kwargs)
@@ -237,12 +256,26 @@ class Axes(pg.PlotItem):
         return img
 
     def contour(self, *args, **kwargs):
+        """
+        Initializes a QuadContourSet instance for the current Axes with filled=False enforced
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.contour.html
+
+        :return: QuadContourSet instance
+        """
         printd('  pgmpl.axes.Axes.contour()...')
         kwargs['filled'] = False
         contours = QuadContourSet(self, *args, **kwargs)
         return contours
 
     def contourf(self, *args, **kwargs):
+        """
+        Initializes a QuadContourSet instance for the current Axes with filled=True enforced
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.contourf.html
+
+        :return: QuadContourSet instance
+        """
         printd('  pgmpl.axes.Axes.contourf()...')
         kwargs['filled'] = True
         return QuadContourSet(self, *args, **kwargs)
@@ -250,6 +283,8 @@ class Axes(pg.PlotItem):
     def set_xlabel(self, label):
         """
         Imitates basic use of matplotlib.axes.Axes.set_xlabel()
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html
 
         :param label: str
         """
@@ -259,6 +294,8 @@ class Axes(pg.PlotItem):
         """
         Imitates basic use of matplotlib.axes.Axes.set_ylabel()
 
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html
+
         :param label: str
         """
         self.setLabel('left', text=label)
@@ -267,6 +304,8 @@ class Axes(pg.PlotItem):
         """
         Imitates basic use of matplotlib.axes.Axes.set_title()
 
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_title.html
+
         :param label: str
         """
         self.setTitle(label)
@@ -274,6 +313,8 @@ class Axes(pg.PlotItem):
     def set_aspect(self, aspect, adjustable=None, **kw):
         """
         Sets plot axes aspect ratio
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_aspect.html
 
         :param aspect: float or str
             'equal': same as 1
@@ -301,12 +342,24 @@ class Axes(pg.PlotItem):
     def text(self, x, y, s, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.text.html
+
         :param x: scalar
+            X coordinate of displayed text
+
         :param y: scalar
+            Y coordinate of displayed text
+
         :param s: str
+            Text to show
+
         :param fontdict: dict, optional
+
         :param withdash: bool, optional
+
         :param kwargs:
+
         :return: Text instance
         """
         if kwargs.pop('withdash', False):
@@ -316,11 +369,17 @@ class Axes(pg.PlotItem):
         return text
 
     def axhline(self, value, **kwargs):
-        """Direct imitation of matplotlib axhline"""
+        """
+        Direct imitation of matplotlib axhline
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.axhline.html
+        """
         return self.addLine(y=value, **plotkw_translator(**kwargs))
 
     def axvline(self, value, **kwargs):
-        """Direct imitation of matplotlib axvline"""
+        """
+        Direct imitation of matplotlib axvline
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.axvline.html
+        """
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
     def _draw_errbar_caps(self, x, y, **capkw):
@@ -366,19 +425,28 @@ class Axes(pg.PlotItem):
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
         """
-        Helper function for errorbar.
-        Forces all data to be the same size and applies filters
-        :param x: Independent variable
-        :param y, xerr, yerr: Dependent variable and error bars (optional)
-        :param mask: bool array selecting which data to keep
-        :return: stuple of sanitized x, y, xerr, yerr
+        Helper function for errorbar. Does not map to a matplotlib method.
 
+        Forces all data to be the same size and applies filters
+
+        :param x: array
+            Independent variable
+
+        :param y, xerr, yerr: arrays
+            Dependent variable and error bars (optional)
+
+        :param mask: bool array
+            Selector for which data to keep
+
+        :return: tuple of sanitized x, y, xerr, yerr
         """
 
         def prep(v):
             """
             Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
+
             :param v: x, y, xerr, or yerr value or values
+
             :return: properly dimensioned and filtered array corresponding to v
             """
             if v is None:
@@ -396,6 +464,9 @@ class Axes(pg.PlotItem):
     def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.errorbar.html
+
         :return: pyqtgraph.ErrorBarItem instance
             Does not include the line through nominal values as would be included in matplotlib's errorbar; this is
             drawn, but it is a separate object.
@@ -489,6 +560,9 @@ class Axes(pg.PlotItem):
     def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.fill_between.html
+
         :return: list of pyqtgraph.FillBetweenItem instances
             If the where keyword is not used or has no effect, this will be a list of one item. If where splits the
             range into n segments, then the list will have n elements.
@@ -530,6 +604,7 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _check_set_lim_kw(**kw):
+        """Issues warnings for unused keywords and pops them out of kw"""
         if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_xlim/set_ylim is not handled yet')
         if kw.pop('auto', False):
@@ -538,7 +613,11 @@ class Axes(pg.PlotItem):
             warnings.warn('set_xlim/set_ylim ignores any extra keywords in **kw: {}'.format(kw.keys()))
 
     def set_xlim(self, left=None, right=None, **kw):
-        """Direct imitation of matplotlib set_xlim"""
+        """
+        Direct imitation of matplotlib set_xlim
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xlim.html
+        """
         if right is None and len(np.atleast_1d(left)) == 2:
             new_xlims = tuple(left)  # X limits were passed in as first argument
         elif right is not None and left is not None \
@@ -554,7 +633,11 @@ class Axes(pg.PlotItem):
         return new_xlims
 
     def set_ylim(self, bottom=None, top=None, **kw):
-        """Direct imitation of matplotlib set_ylim"""
+        """
+        Direct imitation of matplotlib set_ylim
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylim.html
+        """
         if top is None and len(np.atleast_1d(bottom)) == 2:
             new_ylims = tuple(bottom)  # Y limits were passed in as first argument
         elif top is not None and bottom is not None \
@@ -570,6 +653,17 @@ class Axes(pg.PlotItem):
         return new_ylims
 
     def set_xscale(self, value, **kwargs):
+        """
+        Imitates matplotlib set_xscale
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+
+        :param value: str
+            'linear', 'log, (supported)
+            'symlog', 'logit' (not yet supported by pgmpl but vaid in mpl)
+
+        :param kwargs: additional keywords are accepted but ignored
+        """
         if value == 'linear':
             self.setLogMode(x=False)
         elif value == 'log':
@@ -585,6 +679,17 @@ class Axes(pg.PlotItem):
             warnings.warn('Keywords to set_xscale were ignored.')
 
     def set_yscale(self, value, **kwargs):
+        """
+        Imitates matplotlib set_yscale
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+
+        :param value: str
+            'linear', 'log, (supported)
+            'symlog', 'logit' (not yet supported by pgmpl but vaid in mpl)
+
+        :param kwargs: additional keywords are accepted but ignored
+        """
         if value == 'linear':
             self.setLogMode(y=False)
         elif value == 'log':
@@ -601,6 +706,12 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
+    """
+    Imitates matplotlib.image.AxesImage
+
+    https://matplotlib.org/3.1.1/api/image_api.html#matplotlib.image.AxesImage
+    """
+
     def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
         cmap = kwargs.pop('cmap', None)
