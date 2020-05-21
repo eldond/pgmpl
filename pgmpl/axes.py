@@ -533,12 +533,12 @@ class AxesImage(pg.ImageItem):
         vmax = kwargs.pop('vmax', None)
         origin = kwargs.pop('origin', None)
 
-        xs = copy.copy(x)
-
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
+
+        xs = copy.copy(x)
 
         self.check_inputs(**kwargs)
 
