@@ -172,8 +172,7 @@ class Axes(pg.PlotItem):
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
-        if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
-            plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
+        plotkw['symbol'] = plotkw.get('symbol', None) or self._make_custom_verts(kwargs.pop('verts', None))
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def imshow(self, x=None, aspect=None, **kwargs):
@@ -246,15 +245,21 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
-    def _errbar_cap_mark(self, x, y, err, xy, capkw):
-        """Draws marks (|, _, <, >, ^, or v) at the ends of error bars"""
-        if err is not None and np.atleast_1d(err).max() > 0:
-            errx = err if xy == 'x' else 0
-            erry = err if xy != 'x' else 0
-            capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
-            self.plot(x - errx, y - erry, **capkw)
-            capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
-            self.plot(x + errx, y + erry, **capkw)
+    def _errbar_xcap_mark(self, x, y, errx, **capkw):
+        """Draws marks (|, <, or >) at the ends of x error bars"""
+        if errx is not None and np.atleast_1d(errx).max() > 0:
+            capkw['marker'] = '|<'[int(bool(capkw.pop('xlolims', None)))]
+            self.plot(x - errx, y, **capkw)
+            capkw['marker'] = '|>'[int(bool(capkw.pop('xuplims', None)))]
+            self.plot(x + errx, y, **capkw)
+
+    def _errbar_ycap_mark(self, x, y, erry, **capkw):
+        """Draws marks (|, <, or >) at the ends of x error bars"""
+        if erry is not None and np.atleast_1d(erry).max() > 0:
+            capkw['marker'] = '_v'[int(bool(capkw.pop('ylolims', None)))]
+            self.plot(x, y - erry, **capkw)
+            capkw['marker'] = '_^'[int(bool(capkw.pop('yuplims', None)))]
+            self.plot(x, y + erry, **capkw)
 
     def _draw_errbar_caps(self, x, y, **capkw):
         """
@@ -284,8 +289,8 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        self.errbar_cap_mark(x, y, xerr, 'x', capkw)
-        self.errbar_cap_mark(x, y, yerr, '', capkw)
+        self.errbar_xcap_mark(x, y, xerr, **capkw)
+        self.errbar_ycap_mark(x, y, yerr, **capkw)
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
