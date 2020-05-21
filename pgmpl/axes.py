@@ -290,8 +290,8 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        self.errbar_xcap_mark(x, y, xerr, **capkw)
-        self.errbar_ycap_mark(x, y, yerr, **capkw)
+        self._errbar_xcap_mark(x, y, xerr, **capkw)
+        self._errbar_ycap_mark(x, y, yerr, **capkw)
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
