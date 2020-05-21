@@ -542,6 +542,12 @@ class AxesImage(pg.ImageItem):
 
         self.check_inputs(**kwargs)
 
+        if origin in ['upper', None]:
+            xs = xs[::-1]
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+        else:
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
+
         if len(np.shape(xs)) == 3:
             xs = np.transpose(xs, (2, 0, 1))
         else:
@@ -549,12 +555,6 @@ class AxesImage(pg.ImageItem):
                 xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
                 ncol=kwargs.pop('N', 256), alpha=self.alpha,
             )).T.reshape([4] + tolist(xs.shape))
-
-        if origin in ['upper', None]:
-            xs = xs[::-1]
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
-        else:
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         super(AxesImage, self).__init__(np.transpose(xs))
         if extent is not None:
