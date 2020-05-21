@@ -531,6 +531,7 @@ class AxesImage(pg.ImageItem):
         self.alpha = kwargs.pop('alpha', None)
         vmin = kwargs.pop('vmin', None)
         vmax = kwargs.pop('vmax', None)
+        origin = kwargs.pop('origin', None)
 
         xs = copy.copy(x)
 
@@ -538,12 +539,6 @@ class AxesImage(pg.ImageItem):
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
-
-        if kwargs.pop('origin', None) in ['upper', None]:
-            xs = xs[::-1]
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
-        else:
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         self.check_inputs(**kwargs)
 
@@ -554,6 +549,12 @@ class AxesImage(pg.ImageItem):
                 xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
                 ncol=kwargs.pop('N', 256), alpha=self.alpha,
             )).T.reshape([4] + tolist(xs.shape))
+
+        if origin in ['upper', None]:
+            xs = xs[::-1]
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+        else:
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         super(AxesImage, self).__init__(np.transpose(xs))
         if extent is not None:
