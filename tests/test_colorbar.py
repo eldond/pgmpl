@@ -34,6 +34,7 @@ class TestPgmplColorbar(unittest.TestCase):
         from pgmpl.pyplot import subplots
         fig, ax = subplots(1)
         img = ax.imshow(self.a)
+        warnings_expected = 1
         with warnings.catch_warnings(record=True) as w:
             cb = fig.colorbar(img, fake_keyword_for_testing_unimplented_warning='blah')
         self.assertEqual(len(w), warnings_expected)
