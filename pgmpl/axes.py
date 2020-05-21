@@ -246,6 +246,16 @@ class Axes(pg.PlotItem):
         """Direct imitation of matplotlib axvline"""
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
+    def _errbar_cap_mark(self, x, y, err, xy, capkw):
+        """Draws marks (|, _, <, >, ^, or v) at the ends of error bars"""
+        if err is not None and np.atleast_1d(err).max() > 0:
+            errx = err if xy == 'x' else 0
+            erry = err if xy != 'x' else 0
+            capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
+            self.plot(x - errx, y - erry, **capkw)
+            capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
+            self.plot(x + errx, y + erry, **capkw)
+
     def _draw_errbar_caps(self, x, y, **capkw):
         """
         Helper function for errorbar.
@@ -274,17 +284,8 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        def errbar_cap_mark(err, xy):
-            if err is not None and np.atleast_1d(err).max() > 0:
-                errx = err if xy == 'x' else 0
-                erry = err if xy != 'x' else 0
-                capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
-                self.plot(x - errx, y - erry, **capkw)
-                capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
-                self.plot(x + errx, y + erry, **capkw)
-
-        errbar_cap_mark(xerr, 'x')
-        errbar_cap_mark(yerr, '')
+        self.errbar_cap_mark(x, y, xerr, 'x', capkw)
+        self.errbar_cap_mark(x, y, yerr, '', capkw)
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
