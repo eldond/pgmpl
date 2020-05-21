@@ -526,37 +526,33 @@ class Axes(pg.PlotItem):
 class AxesImage(pg.ImageItem):
     def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
-        cmap = kwargs.pop('cmap', None)
-        norm = kwargs.pop('norm', None)
-        alpha = kwargs.pop('alpha', None)
+        self.cmap = kwargs.pop('cmap', None)
+        self.norm = kwargs.pop('norm', None)
+        self.alpha = kwargs.pop('alpha', None)
         vmin = kwargs.pop('vmin', None)
         vmax = kwargs.pop('vmax', None)
-        extent = kwargs.pop('extent', None)
-        origin = kwargs.pop('origin', None)
+
+        xs = copy.copy(x)
 
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
 
-        xs = copy.copy(x)
+        if kwargs.pop('origin', None) in ['upper', None]:
+            xs = xs[::-1]
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+        else:
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         self.check_inputs(**kwargs)
-
-        if origin in ['upper', None]:
-            xs = xs[::-1]
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
-        else:
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         if len(np.shape(xs)) == 3:
             xs = np.transpose(xs, (2, 0, 1))
         else:
             xs = np.array(color_map_translator(
-                xs.flatten(), cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
+                xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=self.alpha,
             )).T.reshape([4] + tolist(xs.shape))
 
         super(AxesImage, self).__init__(np.transpose(xs))
@@ -565,11 +561,8 @@ class AxesImage(pg.ImageItem):
             self.translate(extent[0], extent[2])
             self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
 
-        self.cmap = cmap
-        self.norm = norm
-        self.alpha = alpha
-        self.vmin = x.min() if vmin is None else vmin
-        self.vmax = x.max() if vmax is None else vmax
+        self.vmin = vmin or x.min()
+        self.vmax = vmax or x.max()
 
     @staticmethod
     def check_inputs(**kw):
