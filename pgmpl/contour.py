@@ -40,8 +40,7 @@ class ContourSet(object):
         self.filled = kwargs.pop('filled', False)
         self.hatches = kwargs.pop('hatches', [None])
         self.extend = kwargs.pop('extend', 'neither')
-        if self.antialiased is None and self.filled:
-            self.antialiased = False
+        self.antialiased = False if self.antialiased is None and self.filled else self.antialiased
         self.nchunk = kwargs.pop('nchunk', 0)
         self.x, self.y, self.z, self.levels = self.choose_xyz_levels(*args)
         self.auto_range(self.z)
@@ -73,18 +72,14 @@ class ContourSet(object):
             Could be [z] or [x, y, z] or [z, L] or [x, y, z, L], and L could be an array of levels or a number of levels
         :return: tuple of arrays for x, y, z, and levels
         """
-        x = y = lvlinfo = None
+        assert 1 <= len(args) <= 4, 'choose_xyz_levels takes 1, 2, 3, or 4 arguments. Got {} args.'.format(len(args))
 
-        if len(args) == 1:
-            z = args[0]
-        elif len(args) == 2:
-            z, lvlinfo = args
-        elif len(args) == 3:
-            x, y, z = args
-        elif len(args) == 4:
-            x, y, z, lvlinfo = args
-        else:
-            raise TypeError('choose_xyz_levels takes 1, 2, 3, or 4 arguments. Got {} arguments.'.format(len(args)))
+        if len(args) in [1, 2]:  # Fill in x and y (None)
+            args = (None, None, *args)
+        if len(args) == 3:  # Fill in level info (None)
+            args = (*args, None)
+        # args must now be length 4
+        x, y, z, lvlinfo = args
 
         levels = lvlinfo if ((lvlinfo is not None) and np.iterable(lvlinfo)) else self.auto_pick_levels(z, lvlinfo)
 

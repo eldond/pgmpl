@@ -135,9 +135,7 @@ class Figure(pg.PlotWidget):
 
     def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        for unhandled in ['projection', 'polar']:
-            if kwargs.pop(unhandled, None) is not None:
-                raise NotImplementedError('{} keyword in add_subplot is not ready'.format(unhandled))
+        check_unimplemented_keywords(['projection', 'polar'], 'add_subplot')
         row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
@@ -220,3 +218,9 @@ class Figure(pg.PlotWidget):
         except AttributeError:
             # Sometimes this fails the first time, so give 'er the ol' double tap
             super(Figure, self).close()
+
+
+def check_unimplemented_keywords(unhandled, method, **kwargs):
+    for uh in unhandled:
+        if kwargs.pop(uh, None) is not None:
+            raise NotImplementedError('{} keyword in {} is not ready'.format(uh, method))

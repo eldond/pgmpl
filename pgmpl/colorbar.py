@@ -31,27 +31,20 @@ class ColorbarBase(object):
             ticklocation='auto', extend='neither', spacing='uniform', ticks=None, format=None, drawedges=False,
             filled=True, extendfrac=None, extendrect=False, label='',
     ):
-        printd('pgmpl.colorbar.ColorbarBase.__init__()...')
-        printd('  pgmpl.colorbar.ColorbarBase.__init__: self.mappable.vmin = {}, self.mappable.vmax = {}'.format(
-            self.mappable.vmin, self.mappable.vmax))
+        printd('ColorbarBase.__init__:mappable.vmin={},mappable.vmax={}'.format(self.mappable.vmin, self.mappable.vmax))
         a = np.linspace(0, 1, 256).reshape(256, 1)
+        printd('  pgmpl colorbar initializing in {} orientation'.format(orientation))
         if orientation == 'horizontal':
-            printd('  pgmpl colorbar initializing in horizontal orientation')
             ylim = [0, 1]
             xlim = [self.mappable.vmin, self.mappable.vmax]
             a = a.T
             show_ax = 'bottom'
         else:
-            printd('  pgmpl colorbar initializing in vertical orientation')
             xlim = [0, 1]
             ylim = [self.mappable.vmin, self.mappable.vmax]
             show_ax = 'right'
         extent = tuple(xlim + ylim)
-        ax.imshow(
-            a,
-            cmap=cmap, norm=norm, alpha=alpha,
-            origin='lower', extent=extent,
-        )
+        ax.imshow(a, cmap=cmap, norm=norm, alpha=alpha, origin='lower', extent=extent)
         ax.set_ylim(ylim)
         ax.set_xlim(xlim)
         for ax_side in ['top', 'bottom', 'right', 'left']:
