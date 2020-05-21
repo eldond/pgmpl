@@ -65,7 +65,7 @@ class ColorbarBase(object):
         """Warn about unhandled keywords"""
         unimplemented = [
             'values', 'boundaries', 'ticklocation', 'extend', 'spacing', 'ticks', 'format',
-            'drawedges', 'filled', 'extendfrac', 'extendrect'
+            'drawedges', 'filled', 'extendfrac', 'extendrect', 'fake_keyword_for_testing_unimplented_warning',
         ]
         for ui in unimplemented:
             if kw.pop(ui, None) is not None:
