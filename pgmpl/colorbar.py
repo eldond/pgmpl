@@ -26,21 +26,17 @@ from pgmpl.util import printd, tolist
 
 class ColorbarBase(object):
 
-    def __init__(
-            self, ax, orientation='vertical', **kw
-    ):
-        unimplemented = [
-            'values', 'boundaries', 'ticklocation', 'extend', 'spacing', 'ticks', 'format',
-            'drawedges', 'filled', 'extendfrac', 'extendrect'
-        ]
-        for ui in unimplemented:
-            if kw.pop(ui, None) is not None:
-                warnings.warn('Warning: keyword {} to ColorbarBase is not yet handled.'.format(ui))
+    def __init__(self, ax, **kw):
 
-        printd('ColorbarBase.__init__:mappable.vmin={},mappable.vmax={}'.format(self.mappable.vmin, self.mappable.vmax))
+        self.check_kw(**kw)
+        self.orientation = kw.pop('orientation', 'vertical')
+
+        printd(
+            'ColorbarBase.__init__: mappable.vmin = {}, mappable.vmax = {}, '
+            'orientation = {}'.format(self.mappable.vmin, self.mappable.vmax, self.orientation)
+        )
         a = np.linspace(0, 1, 256).reshape(256, 1)
-        printd('  pgmpl colorbar initializing in {} orientation'.format(orientation))
-        if orientation == 'horizontal':
+        if self.orientation == 'horizontal':
             ylim = [0, 1]
             xlim = [self.mappable.vmin, self.mappable.vmax]
             a = a.T
@@ -64,12 +60,23 @@ class ColorbarBase(object):
         ax.setLabel(show_ax, text=kw.get('label', ''))
         ax.setMouseEnabled(x=False, y=False)
 
+    @staticmethod
+    def check_kw(**kw):
+        """Warn about unhandled keywords"""
+        unimplemented = [
+            'values', 'boundaries', 'ticklocation', 'extend', 'spacing', 'ticks', 'format',
+            'drawedges', 'filled', 'extendfrac', 'extendrect'
+        ]
+        for ui in unimplemented:
+            if kw.pop(ui, None) is not None:
+                warnings.warn('Warning: keyword {} to ColorbarBase is not yet handled.'.format(ui))
+
 
 class Colorbar(ColorbarBase):
 
     def __init__(self, ax, mappable, **kw):
         printd('pgmpl.colorbar.Colorbar.__init__()...')
         self.mappable = mappable
-        kw['cmap'] = cmap = mappable.cmap
-        kw['norm'] = norm = mappable.norm
+        kw['cmap'] = mappable.cmap
+        kw['norm'] = mappable.norm
         super(Colorbar, self).__init__(ax, **kw)

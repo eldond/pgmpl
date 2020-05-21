@@ -68,9 +68,9 @@ class Legend:
         for i, handle in enumerate(tolist(handles)):
             printd('  {i:02d} handle name: {name:}, class: {cls:}, isVisible: {isvis:}'.format(
                 i=i,
-                name=handle.name() if hasattr(handle, 'name') else None,
-                cls=handle.__class__ if hasattr(handle, '__class__') else ' not found ',
-                isvis=handle.isVisible() if hasattr(handle, 'isVisible') else None,
+                name=getattr(handle, 'name', None),
+                cls=getattr(handle, '__class__', ' not found '),
+                isvis=getattr(handle, 'isVisible', None),
             ))
 
     def get_visible_handles(self):

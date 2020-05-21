@@ -175,7 +175,8 @@ class Axes(pg.PlotItem):
         plotkw['symbol'] = plotkw.get('symbol', None) or self._make_custom_verts(kwargs.pop('verts', None))
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
-    def imshow(self, x=None, aspect=None, **kwargs):
+    def imshow(self, x=None, **kwargs):
+        aspect = kwargs.pop('aspect', None)
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
         img = AxesImage(x, **kwargs)
@@ -466,34 +467,28 @@ class Axes(pg.PlotItem):
         if len(kw.keys()):
             warnings.warn('set_xlim/set_ylim ignores any extra keywords in **kw: {}'.format(kw.keys()))
 
+    @staticmethod
+    def _interpret_lims(a, b):
+        c = None
+        if b is None and len(np.atleast_1d(a)) == 2:
+            c = tuple(a)  # X limits were passed in as first argument
+        elif b is not None and a is not None \
+                and len(np.atleast_1d(a)) == 1 and len(np.atleast_1d(b)) == 1:
+            c = (a, b)
+        return c
+
     def set_xlim(self, left=None, right=None, **kw):
         """Direct imitation of matplotlib set_xlim"""
-        if right is None and len(np.atleast_1d(left)) == 2:
-            new_xlims = tuple(left)  # X limits were passed in as first argument
-        elif right is not None and left is not None \
-                and len(np.atleast_1d(left)) == 1 and len(np.atleast_1d(right)) == 1:
-            new_xlims = (left, right)
-        else:
-            new_xlims = None
-
+        new_xlims = self._interpret_lims(left, right)
         self._check_set_lim_kw(**kw)
-
         if new_xlims is not None:
             self.setXRange(new_xlims[0], new_xlims[1])
         return new_xlims
 
     def set_ylim(self, bottom=None, top=None, **kw):
         """Direct imitation of matplotlib set_ylim"""
-        if top is None and len(np.atleast_1d(bottom)) == 2:
-            new_ylims = tuple(bottom)  # Y limits were passed in as first argument
-        elif top is not None and bottom is not None \
-                and len(np.atleast_1d(bottom)) == 1 and len(np.atleast_1d(top)) == 1:
-            new_ylims = (bottom, top)
-        else:
-            new_ylims = None
-
+        new_ylims = self._interpret_lims(bottom, top)
         self._check_set_lim_kw(**kw)
-
         if new_ylims is not None:
             self.setYRange(new_ylims[0], new_ylims[1])
         return new_ylims
@@ -503,10 +498,8 @@ class Axes(pg.PlotItem):
             self.setLogMode(x=False)
         elif value == 'log':
             self.setLogMode(x=True)
-        elif value == 'symlog':
-            warnings.warn('symlog scaling is not supported')
-        elif value == 'logit':
-            warnings.warn('logistic transform scaling is not supported')
+        elif value in ['symlog', 'logit']:
+            warnings.warn('symlog and logistic transform scalings are not supported')
         else:
             warnings.warn('Unrecognized scale value received by set_xscale: {}. '
                           'Please try again with "linear" or "log".'.format(value))
@@ -518,10 +511,8 @@ class Axes(pg.PlotItem):
             self.setLogMode(y=False)
         elif value == 'log':
             self.setLogMode(y=True)
-        elif value == 'symlog':
-            warnings.warn('symlog scaling is not supported')
-        elif value == 'logit':
-            warnings.warn('logistic transform scaling is not supported')
+        elif value in ['symlog', 'logit']:
+            warnings.warn('symlog and logistic transform scalings are not supported')
         else:
             warnings.warn('Unrecognized scale value received by set_yscale: {}. '
                           'Please try again with "linear" or "log".'.format(value))
