@@ -135,7 +135,7 @@ class Figure(pg.PlotWidget):
 
     def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        check_unimplemented_keywords(['projection', 'polar'], 'add_subplot')
+        check_unimplemented_keywords(['projection', 'polar'], 'add_subplot', **kwargs)
         row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
