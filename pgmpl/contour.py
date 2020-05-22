@@ -40,8 +40,7 @@ class ContourSet(object):
         self.filled = kwargs.pop('filled', False)
         self.hatches = kwargs.pop('hatches', [None])
         self.extend = kwargs.pop('extend', 'neither')
-        if self.antialiased is None and self.filled:
-            self.antialiased = False
+        self.antialiased = False if self.antialiased is None and self.filled else self.antialiased
         self.nchunk = kwargs.pop('nchunk', 0)
         self.x, self.y, self.z, self.levels = self.choose_xyz_levels(*args)
         self.auto_range(self.z)
@@ -74,7 +73,6 @@ class ContourSet(object):
         :return: tuple of arrays for x, y, z, and levels
         """
         x = y = lvlinfo = None
-
         if len(args) == 1:
             z = args[0]
         elif len(args) == 2:

@@ -233,11 +233,10 @@ class Axes(pg.PlotItem):
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
         plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
-        if plotkw.get('symbol', None) is None:  # Shouldn't happen unless user sets None explicitly b/c default is 'o'
-            plotkw['symbol'] = self._make_custom_verts(kwargs.pop('verts', None))
+        plotkw['symbol'] = plotkw.get('symbol', None) or self._make_custom_verts(kwargs.pop('verts', None))
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
-    def imshow(self, x=None, aspect=None, **kwargs):
+    def imshow(self, x=None, **kwargs):
         """
         https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.imshow.html
 
@@ -249,6 +248,7 @@ class Axes(pg.PlotItem):
 
         :return: AxesImage instance
         """
+        aspect = kwargs.pop('aspect', None)
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
         img = AxesImage(x, **kwargs)
@@ -382,6 +382,22 @@ class Axes(pg.PlotItem):
         """
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
+    def _errbar_xcap_mark(self, x, y, errx, **capkw):
+        """Draws marks (|, <, or >) at the ends of x error bars"""
+        if errx is not None and np.atleast_1d(errx).max() > 0:
+            capkw['marker'] = '|<'[int(bool(capkw.pop('xlolims', None)))]
+            self.plot(x - errx, y, **capkw)
+            capkw['marker'] = '|>'[int(bool(capkw.pop('xuplims', None)))]
+            self.plot(x + errx, y, **capkw)
+
+    def _errbar_ycap_mark(self, x, y, erry, **capkw):
+        """Draws marks (|, <, or >) at the ends of x error bars"""
+        if erry is not None and np.atleast_1d(erry).max() > 0:
+            capkw['marker'] = '_v'[int(bool(capkw.pop('ylolims', None)))]
+            self.plot(x, y - erry, **capkw)
+            capkw['marker'] = '_^'[int(bool(capkw.pop('yuplims', None)))]
+            self.plot(x, y + erry, **capkw)
+
     def _draw_errbar_caps(self, x, y, **capkw):
         """
         Helper function for errorbar.
@@ -410,17 +426,8 @@ class Axes(pg.PlotItem):
         if capthick is not None:
             capkw['markeredgewidth'] = capthick
 
-        def errbar_cap_mark(err, xy):
-            if err is not None and np.atleast_1d(err).max() > 0:
-                errx = err if xy == 'x' else 0
-                erry = err if xy != 'x' else 0
-                capkw['marker'] = {'x': '<', '': 'v'}[xy] if capkw.pop(xy+'lolims', None) else {'x': '|', '': '_'}[xy]
-                self.plot(x - errx, y - erry, **capkw)
-                capkw['marker'] = {'x': '>', '': '^'}[xy] if capkw.pop(xy+'uplims', None) else {'x': '|', '': '_'}[xy]
-                self.plot(x + errx, y + erry, **capkw)
-
-        errbar_cap_mark(xerr, 'x')
-        errbar_cap_mark(yerr, '')
+        self._errbar_xcap_mark(x, y, xerr, **capkw)
+        self._errbar_ycap_mark(x, y, yerr, **capkw)
 
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
@@ -612,42 +619,29 @@ class Axes(pg.PlotItem):
         if len(kw.keys()):
             warnings.warn('set_xlim/set_ylim ignores any extra keywords in **kw: {}'.format(kw.keys()))
 
+    @staticmethod
+    def _interpret_lims(a, b):
+        """Interprets the first two arguments/keywords which give limits in some form or other"""
+        c = None
+        if b is None and len(np.atleast_1d(a)) == 2:
+            c = tuple(a)  # X limits were passed in as first argument
+        elif b is not None and a is not None \
+                and len(np.atleast_1d(a)) == 1 and len(np.atleast_1d(b)) == 1:
+            c = (a, b)
+        return c
+
     def set_xlim(self, left=None, right=None, **kw):
-        """
-        Direct imitation of matplotlib set_xlim
-
-        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xlim.html
-        """
-        if right is None and len(np.atleast_1d(left)) == 2:
-            new_xlims = tuple(left)  # X limits were passed in as first argument
-        elif right is not None and left is not None \
-                and len(np.atleast_1d(left)) == 1 and len(np.atleast_1d(right)) == 1:
-            new_xlims = (left, right)
-        else:
-            new_xlims = None
-
+        """Direct imitation of matplotlib set_xlim"""
+        new_xlims = self._interpret_lims(left, right)
         self._check_set_lim_kw(**kw)
-
         if new_xlims is not None:
             self.setXRange(new_xlims[0], new_xlims[1])
         return new_xlims
 
     def set_ylim(self, bottom=None, top=None, **kw):
-        """
-        Direct imitation of matplotlib set_ylim
-
-        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylim.html
-        """
-        if top is None and len(np.atleast_1d(bottom)) == 2:
-            new_ylims = tuple(bottom)  # Y limits were passed in as first argument
-        elif top is not None and bottom is not None \
-                and len(np.atleast_1d(bottom)) == 1 and len(np.atleast_1d(top)) == 1:
-            new_ylims = (bottom, top)
-        else:
-            new_ylims = None
-
+        """Direct imitation of matplotlib set_ylim"""
+        new_ylims = self._interpret_lims(bottom, top)
         self._check_set_lim_kw(**kw)
-
         if new_ylims is not None:
             self.setYRange(new_ylims[0], new_ylims[1])
         return new_ylims
@@ -668,10 +662,8 @@ class Axes(pg.PlotItem):
             self.setLogMode(x=False)
         elif value == 'log':
             self.setLogMode(x=True)
-        elif value == 'symlog':
-            warnings.warn('symlog scaling is not supported')
-        elif value == 'logit':
-            warnings.warn('logistic transform scaling is not supported')
+        elif value in ['symlog', 'logit']:
+            warnings.warn('symlog and logistic transform scalings are not supported')
         else:
             warnings.warn('Unrecognized scale value received by set_xscale: {}. '
                           'Please try again with "linear" or "log".'.format(value))
@@ -694,10 +686,8 @@ class Axes(pg.PlotItem):
             self.setLogMode(y=False)
         elif value == 'log':
             self.setLogMode(y=True)
-        elif value == 'symlog':
-            warnings.warn('symlog scaling is not supported')
-        elif value == 'logit':
-            warnings.warn('logistic transform scaling is not supported')
+        elif value in ['symlog', 'logit']:
+            warnings.warn('symlog and logistic transform scalings are not supported')
         else:
             warnings.warn('Unrecognized scale value received by set_yscale: {}. '
                           'Please try again with "linear" or "log".'.format(value))
@@ -714,12 +704,11 @@ class AxesImage(pg.ImageItem):
 
     def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
-        cmap = kwargs.pop('cmap', None)
-        norm = kwargs.pop('norm', None)
-        alpha = kwargs.pop('alpha', None)
+        self.cmap = kwargs.pop('cmap', None)
+        self.norm = kwargs.pop('norm', None)
+        self.alpha = kwargs.pop('alpha', None)
         vmin = kwargs.pop('vmin', None)
         vmax = kwargs.pop('vmax', None)
-        extent = kwargs.pop('extent', None)
         origin = kwargs.pop('origin', None)
 
         if data is not None:
@@ -733,18 +722,16 @@ class AxesImage(pg.ImageItem):
 
         if origin in ['upper', None]:
             xs = xs[::-1]
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
         else:
-            if extent is None:
-                extent = (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
         if len(np.shape(xs)) == 3:
             xs = np.transpose(xs, (2, 0, 1))
         else:
             xs = np.array(color_map_translator(
-                xs.flatten(), cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=alpha,
+                xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256), alpha=self.alpha,
             )).T.reshape([4] + tolist(xs.shape))
 
         super(AxesImage, self).__init__(np.transpose(xs))
@@ -753,11 +740,8 @@ class AxesImage(pg.ImageItem):
             self.translate(extent[0], extent[2])
             self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
 
-        self.cmap = cmap
-        self.norm = norm
-        self.alpha = alpha
-        self.vmin = x.min() if vmin is None else vmin
-        self.vmax = x.max() if vmax is None else vmax
+        self.vmin = vmin or x.min()
+        self.vmax = vmax or x.max()
 
     @staticmethod
     def check_inputs(**kw):

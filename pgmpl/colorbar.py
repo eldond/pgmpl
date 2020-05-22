@@ -26,30 +26,28 @@ from pgmpl.util import printd, tolist
 
 class ColorbarBase(object):
 
-    def __init__(
-            self, ax, cmap=None, norm=None, alpha=None, values=None, boundaries=None, orientation='vertical',
-            ticklocation='auto', extend='neither', spacing='uniform', ticks=None, format=None, drawedges=False,
-            filled=True, extendfrac=None, extendrect=False, label='',
-    ):
-        printd('pgmpl.colorbar.ColorbarBase.__init__()...')
-        printd('  pgmpl.colorbar.ColorbarBase.__init__: self.mappable.vmin = {}, self.mappable.vmax = {}'.format(
-            self.mappable.vmin, self.mappable.vmax))
+    def __init__(self, ax, **kw):
+
+        self.check_kw(**kw)
+        self.orientation = kw.pop('orientation', 'vertical')
+
+        printd(
+            'ColorbarBase.__init__: mappable.vmin = {}, mappable.vmax = {}, '
+            'orientation = {}'.format(self.mappable.vmin, self.mappable.vmax, self.orientation)
+        )
         a = np.linspace(0, 1, 256).reshape(256, 1)
-        if orientation == 'horizontal':
-            printd('  pgmpl colorbar initializing in horizontal orientation')
+        if self.orientation == 'horizontal':
             ylim = [0, 1]
             xlim = [self.mappable.vmin, self.mappable.vmax]
             a = a.T
             show_ax = 'bottom'
         else:
-            printd('  pgmpl colorbar initializing in vertical orientation')
             xlim = [0, 1]
             ylim = [self.mappable.vmin, self.mappable.vmax]
             show_ax = 'right'
         extent = tuple(xlim + ylim)
         ax.imshow(
-            a,
-            cmap=cmap, norm=norm, alpha=alpha,
+            a, cmap=kw.get('cmap', None), norm=kw.get('norm', None), alpha=kw.get('alpha', None),
             origin='lower', extent=extent,
         )
         ax.set_ylim(ylim)
@@ -59,8 +57,19 @@ class ColorbarBase(object):
                 ax.showAxis(ax_side)
             else:
                 ax.hideAxis(ax_side)
-        ax.setLabel(show_ax, text=label)
+        ax.setLabel(show_ax, text=kw.get('label', ''))
         ax.setMouseEnabled(x=False, y=False)
+
+    @staticmethod
+    def check_kw(**kw):
+        """Warn about unhandled keywords"""
+        unimplemented = [
+            'values', 'boundaries', 'ticklocation', 'extend', 'spacing', 'ticks', 'format',
+            'drawedges', 'filled', 'extendfrac', 'extendrect', 'fake_keyword_for_testing_unimplented_warning',
+        ]
+        for ui in unimplemented:
+            if kw.pop(ui, None) is not None:
+                warnings.warn('Warning: keyword {} to ColorbarBase is not yet handled.'.format(ui))
 
 
 class Colorbar(ColorbarBase):
@@ -68,6 +77,6 @@ class Colorbar(ColorbarBase):
     def __init__(self, ax, mappable, **kw):
         printd('pgmpl.colorbar.Colorbar.__init__()...')
         self.mappable = mappable
-        kw['cmap'] = cmap = mappable.cmap
-        kw['norm'] = norm = mappable.norm
+        kw['cmap'] = mappable.cmap
+        kw['norm'] = mappable.norm
         super(Colorbar, self).__init__(ax, **kw)
