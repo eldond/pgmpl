@@ -124,22 +124,25 @@ class Figure(pg.PlotWidget):
                 )
         return
 
+    def _deleted_axes_protection(self, method=None):
+        """Checks whether axes have been deleted by Qt and sets self.axes to None if they have"""
+        try:
+            tolist(self.axes)
+        except RuntimeError:
+            m = ' ({})'.format(method) if method is not None else ''
+            print('Warning: Qt has deleted the axes; figure had a residual reference to a bad Qt object.{}'.format(m))
+            self.axes = None
+
     def add_subplot(self, nrows, ncols, index, **kwargs):
         """Imitation of matplotlib.figure.Figure.add_subplot"""
-        for unhandled in ['projection', 'polar']:
-            if kwargs.pop(unhandled, None) is not None:
-                raise NotImplementedError('{} keyword in add_subplot is not ready'.format(unhandled))
+        check_unimplemented_keywords(['projection', 'polar'], method='add_subplot', **kwargs)
         row = int(np.floor((index-1)/ncols))
         if row > (nrows-1):
             raise ValueError('index {} would be on row {}, but the last row is {}!'.format(index, row, nrows-1))
         col = (index-1) % ncols
         ax = Axes(nrows=nrows, ncols=ncols, index=index, **kwargs)
         self.layout.addItem(ax, row+1, col)
-        try:
-            tolist(self.axes)
-        except RuntimeError:
-            print('Warning: Qt has deleted the axes; figure had a residual reference to a bad Qt object. (add_subplot)')
-            self.axes = None
+        self._deleted_axes_protection('add_subplot')
         self.axes = ax if self.axes is None else tolist(self.axes) + [ax]
         self.fig_colspan = max([ncols, self.fig_colspan])
         self.refresh_suptitle()
@@ -201,12 +204,9 @@ class Figure(pg.PlotWidget):
         Imitation of matplotlib gca()
         :return: Current axes for this figure, creating them if necessary
         """
+        self._deleted_axes_protection('gca')
         if self.axes is not None:
-            try:
-                ax = list(flatten(np.atleast_1d(self.axes)))[-1]
-            except RuntimeError:  # Happens if Qt has deleted the Axes
-                print('Warning: Qt has deleted the axes; figure had a residual reference to a bad Qt object. (gca)')
-                self.axes = None
+            ax = list(flatten(np.atleast_1d(self.axes)))[-1]
         if self.axes is None:
             ax = self.add_subplot(1, 1, 1)
         return ax
@@ -218,3 +218,18 @@ class Figure(pg.PlotWidget):
         except AttributeError:
             # Sometimes this fails the first time, so give 'er the ol' double tap
             super(Figure, self).close()
+
+
+def check_unimplemented_keywords(unhandled, **kwargs):
+    """
+    Raises NotImplementedError if keywords include any from a list of unhandled ones (with values other than None)
+
+    :param unhandled: list of strings
+        List of unhandled keywords
+
+    :param kwargs:
+        Keywords to check
+    """
+    for uh in unhandled:
+        if kwargs.pop(uh, None) is not None:
+            raise NotImplementedError('{} keyword in {} is not ready'.format(uh, kwargs.get('method', '?')))

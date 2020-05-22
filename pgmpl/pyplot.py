@@ -45,14 +45,12 @@ def pick_share(share, ii, jj, axs_):
     :return: Axes instance or None
         The Axes instance to be linked.
     """
-    if ii == 0 and jj == 0:
-        return None
-    if share in ['all', True]:
+    if share in ['all', True] and ((ii > 0) or (jj > 0)):
         return axs_[0, 0]
-    elif share in ['col']:
-        return axs_[0, jj] if ii > 0 else None
-    elif share in ['row']:
-        return axs_[ii, 0] if jj > 0 else None
+    elif share in ['col'] and ii > 0:
+        return axs_[0, jj]
+    elif share in ['row'] and jj > 0:
+        return axs_[ii, 0]
     else:
         return None
 
