@@ -21,12 +21,23 @@ from pgmpl.util import printd
 def figure(*args, **kwargs):
     """
     Imitates matplotlib.pyplot.figure, but creates a PyQtGraph window with the pgmpl.Figure class
+
     :return: pgmpl.Figure instance
     """
     return Figure(*args, **kwargs)
 
 
 def axes(fig=None, **kwargs):
+    """
+    Imitates matplotlib.pyplot.axes by creating a pgmpl.Axes instance
+
+    :param fig: pgmpl.Figure instance
+        If specified, the axes go in this figure; otherwise, they go in gcf()
+
+    :param kwargs: Keywords to pass to fig.add_subplot()
+
+    :return: pgmpl.Axes instance
+    """
     if fig is None:
         fig = gcf()
     ax = fig.add_subplot(1, 1, 1, **kwargs)
@@ -36,12 +47,16 @@ def axes(fig=None, **kwargs):
 def pick_share(share, ii, jj, axs_):
     """
     Helper function for selecting which axes to link. Should be called separately for sharex and sharey.
+
     :param share: string
         What type of sharing is going on?
+
     :param ii, jj: ints
         Coordinates of current plot in plot grid
+
     :param axs_: 2D array of Axes instances
         The plot Axes
+
     :return: Axes instance or None
         The Axes instance to be linked.
     """
@@ -58,7 +73,9 @@ def pick_share(share, ii, jj, axs_):
 def _set_gridspec(fig, **gridspec_kw):
     """
     Utility for setting up gridspec
+
     :param fig: Figure instance
+
     :param gridspec_kw: dictionary of keywords for gridspec/subplotparams
     """
     gridkw = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
