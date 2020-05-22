@@ -221,6 +221,15 @@ class Figure(pg.PlotWidget):
 
 
 def check_unimplemented_keywords(unhandled, **kwargs):
+    """
+    Raises NotImplementedError if keywords include any from a list of unhandled ones (with values other than None)
+
+    :param unhandled: list of strings
+        List of unhandled keywords
+
+    :param kwargs:
+        Keywords to check
+    """
     for uh in unhandled:
         if kwargs.pop(uh, None) is not None:
             raise NotImplementedError('{} keyword in {} is not ready'.format(uh, kwargs.get('method', '?')))

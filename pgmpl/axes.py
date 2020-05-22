@@ -469,6 +469,7 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _interpret_lims(a, b):
+        """Interprets the first two arguments/keywords which give limits in some form or other"""
         c = None
         if b is None and len(np.atleast_1d(a)) == 2:
             c = tuple(a)  # X limits were passed in as first argument

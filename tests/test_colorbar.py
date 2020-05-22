@@ -31,6 +31,7 @@ class TestPgmplColorbar(unittest.TestCase):
             print(*args)
 
     def test_colorbar(self):
+        """Tests that fig.colorbar executes without exceptions and returns the expected class"""
         from pgmpl.pyplot import subplots
         fig, ax = subplots(1)
         img = ax.imshow(self.a)
@@ -39,14 +40,14 @@ class TestPgmplColorbar(unittest.TestCase):
         fig.close()
 
     def test_colorbar_warnings(self):
+        """Tests that appropriate warnings are issued by fig.colorbar()"""
         from pgmpl.pyplot import subplots
         fig, ax = subplots(1)
         img = ax.imshow(self.a)
         # Check that warnings are issued
         with warnings.catch_warnings(record=True) as w:
-            cb = fig.colorbar(img, fake_keyword_for_testing_unimplented_warning='blah')
+            fig.colorbar(img, fake_keyword_for_testing_unimplented_warning='blah')
         assert any(['fake_keyword_for_testing_unimplented_warning' in str(ww) for ww in w])
-        assert isinstance(cb, Colorbar)
         fig.close()
 
     def setUp(self):
