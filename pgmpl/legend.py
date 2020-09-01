@@ -170,5 +170,6 @@ class Legend:
 
         :param item:
         """
-        if item in self.items_added:
-            self.items_added.remove(item)
+        item_present = np.array([item == item_info[0] for item_info in self.items_added])
+        for idx in np.where(item_present)[0][::-1]:
+            self.items_added.pop(idx)
