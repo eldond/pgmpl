@@ -52,6 +52,11 @@ class Axes(pg.PlotItem):
             self.setYLink(self.sharey)
 
     def clear(self):
+        """
+        Clears the axes
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.clear.html
+        """
         printd('  Clearing Axes instance {}...'.format(self))
         super(Axes, self).clear()
         self.legend.clear()
@@ -61,9 +66,16 @@ class Axes(pg.PlotItem):
         """
         Translates arguments and keywords to matplotlib.axes.Axes.plot() method so they can be passed to
         pg.PlotItem.plot() instead.
+
+        See https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.plot.html
+
         :param args: Plot arguments
+            They will be passed straight through to plot()
+
         :param kwargs: Plot keywords
-        :return: plotItem instance
+            They will be translated from mpl to pg conventions and then passed to plot()
+
+        :return: plotItem instance returned by pg.PlotItem.plot()
         """
         need_cycle = any([k not in kwargs.keys() for k in self.prop_cycle.keys])
         if need_cycle:
@@ -80,7 +92,21 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _prep_scatter_colors(n, **kwargs):
-        """Helper function to prepare colors for scatter plot"""
+        """
+        Helper function to prepare colors for scatter plot
+
+        :param n: int
+            Number of colors to prepare
+
+        :param kwargs: keywords for controlling color, like
+            c
+            edgecolors
+            alpha
+
+        :return: tuple
+            list of colors for primary usage (maybe for face, line, etc.)
+            list of colors for edges
+        """
         edgecolors = kwargs.pop('edgecolors', None)
         c = kwargs.pop('c', None)
         # Translate face colors
@@ -107,8 +133,11 @@ class Axes(pg.PlotItem):
     def _make_custom_verts(verts):
         """
         Makes a custom symbol from the verts keyword accepted by scatter
-        :param verts: sequence of (x, y), optional
-        :return: a pyqt path suitable for use with Axes.plot()'s symbol keyword.
+
+        :param verts: sequence of (x, y)
+
+        :return: str
+            The name of the new custom key. It has been "installed" into pyqtgraph's Symbols dictionary.
         """
         from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
         verts_x = np.array([vert[0] for vert in verts])
@@ -120,22 +149,54 @@ class Axes(pg.PlotItem):
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
-        :param x: array like with length n
-        :param y: array like with length n
-        :param s: scalar or array like with length n, optional
-        :param c: color, sequence, or sequence of color, optional
-        :param marker: string, optional
-        :param cmap: string, optional
-        :param norm: Normalize class instance, optional
-        :param vmin: scalar, optional
-        :param vmax: scalar, optional
-        :param alpha: scalar, optional
-        :param linewidths: scalar or array like with length n, optional
-        :param verts: sequence of (x, y), optional
-        :param edgecolors: color or sequence of color
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.scatter.html
+
+        :param x: array-like
+            Values for the X-axis, with length n
+
+        :param y: array-like
+            Values for the Y-axis, with length n
+
+        :param s: array-like or scalar [optional]
+            Size or sizes for the markers. If iterable, must have length n.
+
+        :param c: color, sequence, or sequence of color [optional]
+            Colors for the markers. If specifying more than one color, there must be n colors.
+
+        :param marker: string [optional]
+            Code for marker symbol, like 'o'
+
+        :param cmap: string [optional]
+            Matplotlib colormap name
+
+        :param norm: Normalize class instance [optional]
+            An instance of one of Matplotlib's normalization classes, like mpl.colors.Normalize
+            If not provided, a new instance of mpl.colors.Normalize will be created.
+
+        :param vmin: numeric scalar [optional]
+            Minimum value for color axis. Used to initialize mpl.colors.Normalize, if needed. Otherwise, ignored.
+
+        :param vmax: numeric scalar [optional]
+            Maximum value for color axis. Used to initialize mpl.colors.Normalize, if needed. Otherwise, ignored.
+
+        :param alpha: numeric scalar [optional]
+            Opacity, between 0 (invisible) and 1 (fully opaque)
+
+        :param linewidths: numeric scalar or array-like [optional]
+            If array-like, must match length n
+
+        :param verts: sequence of (x, y) [optional]
+            Used for creating custom symbols. Set marker=None to use this.
+
+        :param edgecolors: color specification or sequence of color specifications
+            Colors for edges
+
         :param data: dict, optional
-        :param kwargs:
-        :return: plotItem instance
+            Alternative way to specify some keywords. Must contain x and y.
+            Can also contain s, c, edgecolors, and linewidths, which will override any duplicates passed in directly.
+
+        :return: plotItem instance created by plot()
         """
         data = kwargs.pop('data', None)
         linewidths = kwargs.pop('linewidths', None)
@@ -176,6 +237,17 @@ class Axes(pg.PlotItem):
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
     def imshow(self, x=None, **kwargs):
+        """
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.imshow.html
+
+        :param x: array
+
+        :param aspect: number or str passed to self.set_aspect()
+
+        :param kwargs: other keywords passed to AxesImage()
+
+        :return: AxesImage instance
+        """
         aspect = kwargs.pop('aspect', None)
         if aspect is not None:
             self.set_aspect(aspect, adjustable='box')
@@ -184,29 +256,75 @@ class Axes(pg.PlotItem):
         return img
 
     def contour(self, *args, **kwargs):
+        """
+        Initializes a QuadContourSet instance for the current Axes with filled=False enforced
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.contour.html
+
+        :return: QuadContourSet instance
+        """
         printd('  pgmpl.axes.Axes.contour()...')
         kwargs['filled'] = False
         contours = QuadContourSet(self, *args, **kwargs)
         return contours
 
     def contourf(self, *args, **kwargs):
+        """
+        Initializes a QuadContourSet instance for the current Axes with filled=True enforced
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.contourf.html
+
+        :return: QuadContourSet instance
+        """
         printd('  pgmpl.axes.Axes.contourf()...')
         kwargs['filled'] = True
         return QuadContourSet(self, *args, **kwargs)
 
     def set_xlabel(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_xlabel()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_xlabel()
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html
+
+        :param label: str
+        """
         self.setLabel('bottom', text=label)
 
     def set_ylabel(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_ylabel()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_ylabel()
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html
+
+        :param label: str
+        """
         self.setLabel('left', text=label)
 
     def set_title(self, label):
-        """Imitates basic use of matplotlib.axes.Axes.set_title()"""
+        """
+        Imitates basic use of matplotlib.axes.Axes.set_title()
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_title.html
+
+        :param label: str
+        """
         self.setTitle(label)
 
     def set_aspect(self, aspect, adjustable=None, **kw):
+        """
+        Sets plot axes aspect ratio
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_aspect.html
+
+        :param aspect: float or str
+            'equal': same as 1
+            'auto': unlocks aspect ratio so it can change as needed
+            number: sets aspect ratio to this value
+
+        :param adjustable: nothing but box has been implemented so far; sorry
+
+        :param kw: Accepts additional keywords to prevent interfacing problems, but can't use them yet.
+        """
         vb = self.getViewBox()
         if aspect == 'equal':
             vb.setAspectLocked(lock=True, ratio=1)
@@ -224,12 +342,24 @@ class Axes(pg.PlotItem):
     def text(self, x, y, s, **kwargs):
         """
         Imitates matplotlib.axes.Axes.text
+
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.text.html
+
         :param x: scalar
+            X coordinate of displayed text
+
         :param y: scalar
+            Y coordinate of displayed text
+
         :param s: str
+            Text to show
+
         :param fontdict: dict, optional
+
         :param withdash: bool, optional
+
         :param kwargs:
+
         :return: Text instance
         """
         if kwargs.pop('withdash', False):
@@ -239,11 +369,17 @@ class Axes(pg.PlotItem):
         return text
 
     def axhline(self, value, **kwargs):
-        """Direct imitation of matplotlib axhline"""
+        """
+        Direct imitation of matplotlib axhline
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.axhline.html
+        """
         return self.addLine(y=value, **plotkw_translator(**kwargs))
 
     def axvline(self, value, **kwargs):
-        """Direct imitation of matplotlib axvline"""
+        """
+        Direct imitation of matplotlib axvline
+        https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.axvline.html
+        """
         return self.addLine(x=value, **plotkw_translator(**kwargs))
 
     def _errbar_xcap_mark(self, x, y, errx, **capkw):
@@ -296,19 +432,28 @@ class Axes(pg.PlotItem):
     @staticmethod
     def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
         """
-        Helper function for errorbar.
-        Forces all data to be the same size and applies filters
-        :param x: Independent variable
-        :param y, xerr, yerr: Dependent variable and error bars (optional)
-        :param mask: bool array selecting which data to keep
-        :return: stuple of sanitized x, y, xerr, yerr
+        Helper function for errorbar. Does not map to a matplotlib method.
 
+        Forces all data to be the same size and applies filters
+
+        :param x: array
+            Independent variable
+
+        :param y, xerr, yerr: arrays
+            Dependent variable and error bars (optional)
+
+        :param mask: bool array
+            Selector for which data to keep
+
+        :return: tuple of sanitized x, y, xerr, yerr
         """
 
         def prep(v):
             """
             Prepares a value so it has the appropriate dimensions with proper filtering to respect errorevery keyword
+
             :param v: x, y, xerr, or yerr value or values
+
             :return: properly dimensioned and filtered array corresponding to v
             """
             if v is None:
@@ -326,6 +471,9 @@ class Axes(pg.PlotItem):
     def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.errorbar.html
+
         :return: pyqtgraph.ErrorBarItem instance
             Does not include the line through nominal values as would be included in matplotlib's errorbar; this is
             drawn, but it is a separate object.
@@ -419,6 +567,9 @@ class Axes(pg.PlotItem):
     def fill_between(self, x=None, y1=None, y2=0, **kwargs):
         """
         Imitates matplotlib.axes.Axes.fill_between
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.fill_between.html
+
         :return: list of pyqtgraph.FillBetweenItem instances
             If the where keyword is not used or has no effect, this will be a list of one item. If where splits the
             range into n segments, then the list will have n elements.
@@ -460,6 +611,7 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _check_set_lim_kw(**kw):
+        """Issues warnings for unused keywords and pops them out of kw"""
         if not kw.pop('emit', True):
             warnings.warn('emit keyword to set_xlim/set_ylim is not handled yet')
         if kw.pop('auto', False):
@@ -495,6 +647,17 @@ class Axes(pg.PlotItem):
         return new_ylims
 
     def set_xscale(self, value, **kwargs):
+        """
+        Imitates matplotlib set_xscale
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+
+        :param value: str
+            'linear', 'log, (supported)
+            'symlog', 'logit' (not yet supported by pgmpl but vaid in mpl)
+
+        :param kwargs: additional keywords are accepted but ignored
+        """
         if value == 'linear':
             self.setLogMode(x=False)
         elif value == 'log':
@@ -508,6 +671,17 @@ class Axes(pg.PlotItem):
             warnings.warn('Keywords to set_xscale were ignored.')
 
     def set_yscale(self, value, **kwargs):
+        """
+        Imitates matplotlib set_yscale
+
+        https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+
+        :param value: str
+            'linear', 'log, (supported)
+            'symlog', 'logit' (not yet supported by pgmpl but vaid in mpl)
+
+        :param kwargs: additional keywords are accepted but ignored
+        """
         if value == 'linear':
             self.setLogMode(y=False)
         elif value == 'log':
@@ -522,6 +696,12 @@ class Axes(pg.PlotItem):
 
 
 class AxesImage(pg.ImageItem):
+    """
+    Imitates matplotlib.image.AxesImage
+
+    https://matplotlib.org/3.1.1/api/image_api.html#matplotlib.image.AxesImage
+    """
+
     def __init__(self, x=None, **kwargs):
         data = kwargs.pop('data', None)
         self.cmap = kwargs.pop('cmap', None)
@@ -565,6 +745,7 @@ class AxesImage(pg.ImageItem):
 
     @staticmethod
     def check_inputs(**kw):
+        """Checks inputs and issues warnings as applicable"""
         if kw.pop('shape', None) is not None:
             warnings.warn('Axes.imshow ignored keyword: shape. I could not get this working with matplotlib, '
                           'so I had nothing to emulate.')

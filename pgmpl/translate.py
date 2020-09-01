@@ -42,6 +42,17 @@ Symbols['x'] = pg.arrayToQPath(
 
 
 def dealias(**kws):
+    """
+    Checks for alias of a keyword (like 'ls' for linestyle) and updates keywords so that the primary is defined.
+    That is, if kws contains 'ls', the result will contain 'linestyle' with the value defined by 'lw'. This
+    eliminates the need to check through all the aliases later; other functions can rely on finding the primary
+    keyword. Also, the aliases are all removed so they don't confuse other functions.
+
+    :param kws: keywords to dealias
+
+    :return: dict
+        Dictionary with all aliases replaced by primary keywords (ls is replaced by linestyle, for example)
+    """
     missing_value_mark = 'This value is missing; it is not just None. We want to allow for the possibility that ' \
                          'keyword=None is treated differently than a missing keyword in some function, because a ' \
                          'function might not accept unrecognized keywords.'
@@ -77,8 +88,10 @@ def defaults_from_rcparams(plotkw):
     """
     Given a dictionary of Matplotlib style plotting keywords, any missing keywords (color, linestyle, etc.) will be
     added using defaults determined by Matplotlib's rcParams. Please dealias plotkw first.
+
     :param plotkw: dict
          Dictionary of Matplotlib style plot keywords
+
     :return: dict
         Input dictionary with missing keywords filled in using defaults
     """
@@ -105,9 +118,11 @@ def defaults_from_rcparams(plotkw):
 def color_translator(**kw):
     """
     Translates colors specified in the Matplotlib system into pyqtgraph color descriptions
+
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which color may be specified. The entire set of mpl plot
         keywords may be passed in, although only color-relevant ones will be used.
+
     :return: iterable
         An RGBA color description (each from 0 to 255) for use with pyqtgraph
     """
@@ -130,16 +145,33 @@ def color_translator(**kw):
 def color_map_translator(x, **kw):
     """
     Translates colors for a matplotlib colormap and a dataset, such as would be used for scatter, imshow, contour, etc.
+
     :param x: numeric scalar or iterable
         Data to be mapped. Very boring if scalar.
+
     :param cmap: string
-    :param norm: matplotlib normalization class. Defaults to new instance of mpl.colors.Normalize if None
-    :param vmin: number: lower limit passed to Normalize if norm is None
-    :param vmax: number: lower limit passed to Normalize if norm is None
+        Color map nape, passed to matplotlib.cm.get_cmap()
+
+    :param norm: matplotlib normalization class
+        Defaults to new instance of mpl.colors.Normalize
+
+    :param vmin: numeric
+        Lower limit passed to new Normalize instance if norm is None; ignored if norm is provided.
+
+    :param vmax: numeric
+        Lower limit passed to new Normalize instance if norm is None; ignored if norm is provided.
+
     :param clip: bool
-    :param ncol: int: passed to Colormap to set number of colors
-    :param alpha: float: opacity from 0 to 1 or None
-    :return: List of pyqtgraph-compatible color specifications with length matching x
+        Passed to Normalize if a new Normalize instance is created. Otherwise, not used.
+
+    :param ncol: int
+        passed to Colormap to set number of colors
+
+    :param alpha: float:
+        opacity from 0 to 1 or None
+
+    :return: list
+        List of pyqtgraph-compatible color specifications with length matching x
     """
     printd('color_map_translator...')
     norm = kw.pop('norm', None)
@@ -176,9 +208,11 @@ def style_translator(**kw):
 def symbol_translator(**kw):
     """
     Translates Matplotlib markers into pyqtgraph symbols.
+
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which marker may be specified. The entire set of mpl plot
         keywords may be passed in, although only linestyle-relevant ones will be used.
+
     :return: string
         Code for the relevant pyqtgraph symbol.
     """
@@ -193,7 +227,9 @@ def symbol_translator(**kw):
 def symbol_edge_setup(pgkw, plotkw):
     """
     Manage keywords related to symbol edges
+
     :param pgkw: Dictionary of new keywords to pass to pyqtgraph functions
+
     :param plotkw: Dictionary of matplotlib style keywords (translation in progress)
     """
     default_mec = plotkw.get('color', None) if plotkw.get('marker', '') in ['x', '+', '.', ',', '|', '_'] else None
@@ -232,10 +268,12 @@ def setup_pen_kw(penkw={}, **kw):
 
     :param penkw: dict
         Dictionary of pre-translated pyqtgraph keywords to pass to pen
+
     :param kw: dict
         Dictionary of Matplotlib style plot keywords in which line plot relevant settings may be specified. The entire
         set of mpl plot keywords may be passed in, although only the keywords related to displaying line plots will be
         used here.
+
     :return: pyqtgraph pen instance
         A pen which can be input with the pen keyword to many pyqtgraph functions
     """
@@ -264,8 +302,10 @@ def setup_pen_kw(penkw={}, **kw):
 def plotkw_translator(**plotkw):
     """
     Translates matplotlib plot keyword dictionary into a keyword dictionary suitable for pyqtgraph plot functions
+
     :param plotkw: dict
         Dictionary of matplotlib plot() keywords
+
     :return: dict
         Dictionary of pyqtgraph plot keywords
     """
