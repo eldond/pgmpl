@@ -57,6 +57,8 @@ class TestPgmplLegend(unittest.TestCase):
         ax2.plot(self.x, self.y, color='r', label='y(x) plot red')
         ax2.plot(self.x, -self.y, color='b', label='y(x) plot blue')
         ax2.legend(labels='blah')
+        leg.addItem(line, name='yx plot again')
+        leg.removeItem(line)
 
         self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
 
