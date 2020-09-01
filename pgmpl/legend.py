@@ -163,3 +163,13 @@ class Legend:
             self.leg.scene().removeItem(self.leg)  # https://stackoverflow.com/a/42794442/6605826
         except AttributeError:
             printd('  Could not clear legend (maybe it is already invisible?')
+
+    def removeItem(self, item):
+        """
+        Remove an item from the legend
+
+        :param item:
+        """
+        item_present = np.array([item == item_info[0] for item_info in self.items_added])
+        for idx in np.where(item_present)[0][::-1]:
+            self.items_added.pop(idx)

@@ -57,8 +57,16 @@ class TestPgmplLegend(unittest.TestCase):
         ax2.plot(self.x, self.y, color='r', label='y(x) plot red')
         ax2.plot(self.x, -self.y, color='b', label='y(x) plot blue')
         ax2.legend(labels='blah')
+        leg.addItem(line, name='yx plot again')
+        leg.removeItem(line)
 
         self.printv('test_axes_Legend: ax = {}, leg = {}'.format(ax, leg))
+
+    def test_manual_legend(self):
+        ax = Axes()
+        line = ax.plot(self.x, self.y)
+        line2 = ax.plot(self.x, self.y * 2, color='r')
+        ax.legend([line, line2], ['line 1', 'line 2'])
 
     def test_axes_legend_warnings(self):
         ax = Axes()
