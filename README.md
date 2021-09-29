@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/eldond/pgmpl.svg?branch=master)](https://travis-ci.org/eldond/pgmpl)
+[![Build Status](https://app.travis-ci.com/eldond/pgmpl.svg?branch=master)](https://app.travis-ci.com/github/eldond/pgmpl)
 [![codecov](https://codecov.io/gh/eldond/pgmpl/branch/master/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl/branch/master)
 [![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=master)](https://bettercodehub.com/)
 (branch = master)
 
-[![Build Status](https://travis-ci.org/eldond/pgmpl.svg?branch=dev)](https://travis-ci.org/eldond/pgmpl)
+[![Build Status](https://app.travis-ci.com/eldond/pgmpl.svg?branch=dev)](https://app.travis-ci.com/github/eldond/pgmpl)
 [![codecov](https://codecov.io/gh/eldond/pgmpl/branch/dev/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl/branch/dev)
 [![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=dev)](https://bettercodehub.com/)
 (branch = dev)
