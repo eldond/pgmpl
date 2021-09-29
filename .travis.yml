@@ -33,6 +33,8 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
+      before_script:
+        - export PGMPL_TEST_VERBOSE=1
       services:
        - xvfb
 ##  This doesn't work because of a backwards-incompatible change in PyQt5, so pyqtgraph can't import sip from PyQt5
