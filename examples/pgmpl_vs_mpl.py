@@ -27,7 +27,7 @@ else:
     use_pgmpl = False
 
 if use_pgmpl:
-    from PyQt4 import QtGui
+    from pyqtgraph import QtGui
     import pgmpl as mpl
     import pgmpl.pyplot as plt
     import pgmpl
