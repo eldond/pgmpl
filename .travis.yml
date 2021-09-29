@@ -2,37 +2,50 @@ language: python
 sudo: required
 jobs:
   include:
-    - name: "python 2.7 qt4 trusty pgmpl"
-      dist: trusty
-      python: 2.7
-#      virtualenv:
-#        system_site_packages: true
-      before_install:
-        - sudo apt-get update
-        - sudo apt-get -y install python-qt4
-      before_script:
-       # From pyqtgraph's .travis.yml: https://github.com/pyqtgraph/pyqtgraph/blob/develop/.travis.yml
-       # We need to create a (fake) display on Travis, let's use a funny resolution
-       - export DISPLAY=:99.0
-       - "sh -e /etc/init.d/xvfb start"
-       - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
-       - export PGMPL_TEST_VERBOSE=1
-    - name: "python 2.7 qt5 bionic pgmpl"
-      dist: bionic
-      python: 2.7
-      before_install:
-        - sudo apt-get update
-        - sudo apt-get -y install python-pyqt5
-      services:
-       - xvfb
+##   Python 2.7 tests are dropped because they are no longer important after py2 end of life
+#    - name: "python 2.7 qt4 trusty pgmpl"
+#      dist: trusty
+#      python: 2.7
+##      virtualenv:
+##        system_site_packages: true
+#      before_install:
+#        - sudo apt-get update
+#        - sudo apt-get -y install python-qt4
+#      before_script:
+#       # From pyqtgraph's .travis.yml: https://github.com/pyqtgraph/pyqtgraph/blob/develop/.travis.yml
+#       # We need to create a (fake) display on Travis, let's use a funny resolution
+#       - export DISPLAY=:99.0
+#       - "sh -e /etc/init.d/xvfb start"
+#       - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
+#       - export PGMPL_TEST_VERBOSE=1
+##   Python 2.7 tests are dropped because they are no longer important after py2 end of life
+#    - name: "python 2.7 qt5 bionic pgmpl"
+#      dist: bionic
+#      python: 2.7
+#      before_install:
+#        - sudo apt-get update
+#        - sudo apt-get -y install python-pyqt5
+#      services:
+#       - xvfb
     - name: "python 3.6 qt5 bionic pgmpl"
       dist: bionic
       python: 3.6
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
+      before_script:
+        - export PGMPL_TEST_VERBOSE=1
       services:
        - xvfb
+##  This doesn't work because of a backwards-incompatible change in PyQt5, so pyqtgraph can't import sip from PyQt5
+#    - name: "python 3.8 qt5 focal pgmpl"
+#      dist: focal
+#      python: 3.8
+#      before_install:
+#        - sudo apt-get update
+#        - sudo apt-get -y install python3-pyqt5
+#      services:
+#       - xvfb
 
 # https://stackoverflow.com/a/35029430/6605826
 # system_site_packages limits py versions https://travis-ci.community/t/python-3-6-and-3-7-with-system-site-packages-enabled-fails-to-activate-on-xenial/1697
