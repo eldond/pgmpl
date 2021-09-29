@@ -27,7 +27,7 @@ else:
     use_pgmpl = False
 
 if use_pgmpl:
-    from pyqtgraph import QtGui
+    from pyqtgraph import QtCore
     import pgmpl as mpl
     import pgmpl.pyplot as plt
     import pgmpl
@@ -51,30 +51,38 @@ def sample_data():
 
 def demo_plot():
     x, y1, y2, y3 = sample_data()
-    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row', gridspec_kw={'left': 0.25, 'right': 0.95}, dpi=300)
+    fig, axs = plt.subplots(3, 2, sharex='col', sharey='row')  # , gridspec_kw={'left': 0.15, 'right': 0.95, 'top': 0.95}, dpi=100)
     for ax in axs[-1, :]:
         ax.set_xlabel('x')
     for ax in axs[:, 0]:
         ax.set_ylabel('y')
 
+    axs[0, 0].set_title('plot()')
     axs[0, 0].plot(x, y1)
+
+    axs[0, 1].set_title('plot(), color cycle')
     axs[0, 1].plot(x, y2)
     axs[0, 1].plot(x, y3)
 
+    axs[1, 0].set_title('plot(linestyle=..., color=...)')
     axs[1, 0].plot(x, y1, color='r')
     axs[1, 0].plot(x, y2, color='k')
     axs[1, 0].plot(x, y2+y1, linestyle='--', color='g')
     axs[1, 0].plot(x, y3, linestyle='-.', color='b')
 
-    axs[1, 1].errorbar(x, y1, abs(y1) * 0.1, color='b')
-    axs[1, 1].errorbar(x, -y2, abs(y2) * 0.1, xerr=0.1, color='r')
+    axs[1, 1].set_title('errorbar() with & without xerr')
+    decimate = np.arange(0, len(x)-1, 10)
+    axs[1, 1].errorbar(x[decimate], y1[decimate], abs(y1[decimate]) * 0.25, color='b')
+    axs[1, 1].errorbar(x[decimate], y1[decimate]-y2[decimate], abs(y2[decimate]) * 0.25, xerr=0.25, color='r')
 
+    axs[2, 0].set_title('plot(marker=...)')
     axs[2, 0].plot(x, y1, color='m', marker='o')
-    axs[2, 1].plot(x, y2, linestyle=' ', color='k', marker='+')
-    axs[2, 1].plot(x, y3, linestyle=' ', color='k', marker='x')
+    axs[2, 0].plot(x, y2, linestyle=' ', color='k', marker='+')
+    axs[2, 0].plot(x, y3, linestyle=' ', color='k', marker='x')
 
-    axs[1, 0].axvline(np.mean(x), linestyle=':', color='k')
-    axs[1, 0].axhline(np.mean(y1), linestyle='-', color='k')
+    axs[2, 1].set_title('axvline and axhline')
+    axs[2, 1].axvline(np.mean(x), linestyle=':', color='k')
+    axs[2, 1].axhline(np.mean(y1), linestyle='-', color='k')
 
     if not use_pgmpl:
         fig.show()
