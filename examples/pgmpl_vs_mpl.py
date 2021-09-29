@@ -34,7 +34,10 @@ if use_pgmpl:
 
 else:
     import matplotlib as mpl
-    mpl.use('Qt4Agg')
+    if sys.version_info[0] < 3:
+        mpl.use('Qt4Agg')
+    else:
+        mpl.use('Qt5Agg')
     import matplotlib.pyplot as plt
 
 
