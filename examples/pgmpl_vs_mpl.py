@@ -52,6 +52,7 @@ def sample_data():
 def demo_plot():
     x, y1, y2, y3 = sample_data()
     fig, axs = plt.subplots(3, 2, sharex='col', sharey='row')  # , gridspec_kw={'left': 0.15, 'right': 0.95, 'top': 0.95}, dpi=100)
+    fig.suptitle('Drawn using ' + ('pgmpl' if use_pgmpl else 'matplotlib'))
     for ax in axs[-1, :]:
         ax.set_xlabel('x')
     for ax in axs[:, 0]:
