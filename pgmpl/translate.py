@@ -32,13 +32,18 @@ from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
 
 # Install custom symbols
 theta = np.linspace(0, 2 * np.pi, 36)
-Symbols['.'] = pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all')
-Symbols[','] = pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]), np.array([0, 0.01, 0, -0.01, 0]), connect='all')
-Symbols['_'] = pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all')
-Symbols['|'] = pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all')
-Symbols['x'] = pg.arrayToQPath(
-    np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]), np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all'
-)
+custom_symbols = {
+    '.': pg.arrayToQPath(np.cos(theta) * 0.125, np.sin(theta) * 0.125, connect='all'),
+    ',': pg.arrayToQPath(np.array([-0.01, 0, 0.01, 0, -0.01]), np.array([0, 0.01, 0, -0.01, 0]), connect='all'),
+    '_': pg.arrayToQPath(np.array([-0.5, 0.5]), np.array([0, 0]), connect='all'),
+    '|': pg.arrayToQPath(np.array([0, 0]), np.array([-0.5, 0.5]), connect='all'),
+    'x': pg.arrayToQPath(
+        np.array([-0.5, 0.5, 0, 0.5, -0.5, 0]), np.array([-0.5, 0.5, 0, -0.5, 0.5, 0]), connect='all',
+    ),
+}
+for symb in custom_symbols:
+    if symb not in Symbols:
+        Symbols[symb] = custom_symbols[symb]
 
 
 def dealias(**kws):
