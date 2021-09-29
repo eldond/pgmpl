@@ -28,8 +28,8 @@ jobs:
     - name: "python 3.6 qt5 bionic pgmpl"
       dist: bionic
       python: 3.6
-        virtualenv:
-          system_site_packages: true
+      virtualenv:
+        system_site_packages: true
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pyqt5
