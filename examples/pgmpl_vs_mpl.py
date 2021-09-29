@@ -1,6 +1,6 @@
 #!/bin/sh
 ''':'
-exec python2.7 "$0" "$@"
+exec python3 "$0" "$@"
 
 The single quotes on this docstring are a way to trick bash
     https://www.rodneybeede.com/How_to_use_command_line_arguments_with_shebang__usr_bin_env_python.html
