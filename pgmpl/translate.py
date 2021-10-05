@@ -27,7 +27,7 @@ except ImportError:  # Older Matplotlib versions were organized differently
     to_rgba = colorConverter.to_rgba
 
 # pgmpl imports
-from pgmpl.util import set_debug, printd, tolist
+from pgmpl.util import printd, tolist
 from pyqtgraph.graphicsItems.ScatterPlotItem import Symbols
 
 # Install custom symbols

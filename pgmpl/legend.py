@@ -22,7 +22,7 @@ import pyqtgraph as pg
 # pgmpl
 # noinspection PyUnresolvedReferences
 import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
-from pgmpl.util import printd, tolist, is_numeric
+from pgmpl.util import printd, tolist
 
 
 class Legend:
