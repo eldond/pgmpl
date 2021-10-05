@@ -707,24 +707,27 @@ class AxesImage(pg.ImageItem):
         self.cmap = kwargs.pop('cmap', None)
         self.norm = kwargs.pop('norm', None)
         self.alpha = kwargs.pop('alpha', None)
-        vmin = kwargs.pop('vmin', None)
-        vmax = kwargs.pop('vmax', None)
         origin = kwargs.pop('origin', None)
 
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
-
-        xs = copy.copy(x)
+        vmin = kwargs.pop('vmin', x.min())
+        vmax = kwargs.pop('vmax', x.max())
 
         self.check_inputs(**kwargs)
+        self._set_up_imange_extent(xs=copy.copy(x))
 
+    def _set_up_imange_extent(self, xs):
+        """
+        Handles setup of image extent, translate, and scale
+        """
         if origin in ['upper', None]:
             xs = xs[::-1]
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
+            extent = kwargs.pop('extent', None) or (-0.5, xs.shape[1]-0.5, -(xs.shape[0]-0.5), -(0-0.5))
         else:
-            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
+            extent = kwargs.pop('extent', None) or (-0.5, xs.shape[1]-0.5, -0.5, xs.shape[0]-0.5)
 
         if len(np.shape(xs)) == 3:
             xs = np.transpose(xs, (2, 0, 1))
@@ -735,13 +738,9 @@ class AxesImage(pg.ImageItem):
             )).T.reshape([4] + tolist(xs.shape))
 
         super(AxesImage, self).__init__(np.transpose(xs))
-        if extent is not None:
-            self.resetTransform()
-            self.translate(extent[0], extent[2])
-            self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
-
-        self.vmin = vmin or x.min()
-        self.vmax = vmax or x.max()
+        self.resetTransform()
+        self.translate(extent[0], extent[2])
+        self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
 
     @staticmethod
     def check_inputs(**kw):
