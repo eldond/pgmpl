@@ -161,6 +161,19 @@ class Axes(pg.PlotItem):
             # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         return x, y, kwargs
 
+    @staticmethod
+    def _setup_scatter_symbol_pen(brush_edges, linewidths):
+        """Sets up the pen for drawing symbols on scatter plot"""
+        sympen_kw = [{'color': cc} for cc in brush_edges]
+        if linewidths is not None:
+            n = len(brush_edges)
+            if (len(tolist(linewidths)) == 1) and (n > 1):
+                # Make list of lw the same length as x for cases where only one setting value was provided
+                linewidths = tolist(linewidths) * n
+            for i in range(n):
+                sympen_kw[i]['width'] = linewidths[i]
+        return [pg.mkPen(**spkw) for spkw in sympen_kw]
+
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
@@ -214,17 +227,12 @@ class Axes(pg.PlotItem):
         :return: plotItem instance created by plot()
         """
         x, y, kwargs = self._interpret_xy_scatter_data(x, y, **kwargs)
-        linewidths = kwargs.pop('linewidths', None)
         n = len(x)
-
+        linewidths = kwargs.pop('linewidths', None)
         brush_colors, brush_edges = self._prep_scatter_colors(n, **kwargs)
 
         for popit in ['cmap', 'norm', 'vmin', 'vmax', 'alpha', 'edgecolors', 'c']:
             kwargs.pop(popit, None)  # Make sure all the color keywords are gone now that they've been used.
-
-        # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
-        if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
-            linewidths = tolist(linewidths) * n
 
         # Catch & translate other keywords
         kwargs['markersize'] = kwargs.pop('s', 10)
@@ -232,13 +240,10 @@ class Axes(pg.PlotItem):
         plotkw = plotkw_translator(**kwargs)
 
         # Fill in keywords we already prepared
-        sympen_kw = [{'color': cc} for cc in brush_edges]
-        if linewidths is not None:
-            for i in range(n):
-                sympen_kw[i]['width'] = linewidths[i]
+        plotkw['symbolPen'] = self._setup_scatter_symbol_pen(brush_edges, linewidths)
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
-        plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
+
         plotkw['symbol'] = plotkw.get('symbol', None) or self._make_custom_verts(kwargs.pop('verts', None))
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
