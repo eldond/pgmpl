@@ -430,7 +430,7 @@ class Axes(pg.PlotItem):
         self._errbar_ycap_mark(x, y, yerr, **capkw)
 
     @staticmethod
-    def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
+    def _sanitize_errbar_data(*args, mask=None):
         """
         Helper function for errorbar. Does not map to a matplotlib method.
 
@@ -447,6 +447,9 @@ class Axes(pg.PlotItem):
 
         :return: tuple of sanitized x, y, xerr, yerr
         """
+
+        x, y, xerr, yerr = (tolist(args) + [None] * (4 - len(args)))[:5]
+
 
         def prep(v):
             """
@@ -468,6 +471,33 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
+    def _interpret_xy_data_input(self, *args, **kwargs):
+        """
+        Interprets x, and y arguments and xerr, yerr, and data keywords
+
+        :return: tuple containing
+            x, y, xerr, yerr
+        """
+        data = kwargs.pop('data', None)
+        x, y, xerr, yerr = (tolist(args) + [None] * (4 - len(args)))[:5]
+
+        if data is not None:
+            x = data.get('x', None)
+            y = data.get('y', None)
+            xerr = data.get('xerr', None)
+            yerr = data.get('yerr', None)
+        return x, y, xerr, yerr
+
+    def _process_errorbar_keywords(self, **kwargs):
+        """Separate keywords affecting error bars from those affecting nominal values & translate to pyqtgraph"""
+        ekwargs = copy.deepcopy(kwargs)
+        if kwargs.get('ecolor', None) is not None:
+            ekwargs['color'] = kwargs.pop('ecolor')
+        if kwargs.get('elinewidth', None) is not None:
+            ekwargs['linewidth'] = kwargs.pop('elinewidth')
+        epgkw = plotkw_translator(**ekwargs)
+        return epgkw
+
     def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
@@ -479,21 +509,10 @@ class Axes(pg.PlotItem):
             drawn, but it is a separate object.
         """
         kwargs = dealias(**kwargs)
-        data = kwargs.pop('data', None)
-
-        if data is not None:
-            x = data.get('x', None)
-            y = data.get('y', None)
-            xerr = data.get('xerr', None)
-            yerr = data.get('yerr', None)
+        x, y, xerr, yerr = self._interpret_xy_data_input(x, y, xerr, yerr, **kwargs)
 
         # Separate keywords into those that affect a line through the data and those that affect the errorbars
-        ekwargs = copy.deepcopy(kwargs)
-        if kwargs.get('ecolor', None) is not None:
-            ekwargs['color'] = kwargs.pop('ecolor')
-        if kwargs.get('elinewidth', None) is not None:
-            ekwargs['linewidth'] = kwargs.pop('elinewidth')
-        epgkw = plotkw_translator(**ekwargs)
+        epgkw = self._process_errorbar_keywords(**kwargs)
         w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
                       for i in range(len(np.atleast_1d(x)))])
 
@@ -502,7 +521,7 @@ class Axes(pg.PlotItem):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
-        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, w)
+        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, mask=w)
 
         errb = pg.ErrorBarItem(
             x=xp, y=yp, height=0 if yerr is None else yerrp*2, width=0 if xerr is None else xerrp*2, **epgkw
