@@ -101,7 +101,7 @@ class TestPgmplAxes(unittest.TestCase):
                 data={'x': a, 'unrecognized': 'thingy'}, shape=np.shape(a), imlim=55, interpolation='nearest',
                 filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)  # 8 warnings
             # Verify that warnings were made.
-            warn_list = '\n'.join([f"{i+1}: {ww.message} in {ww.filename}:{ww.lineno}" for i, ww in enumerate(w)])
+            warnlist = '\n'.join([f"{i+1}: {ww.message} in {ww.filename}:{ww.lineno}" for i, ww in enumerate(w)])
             if len(w) != warnings_expected:
                 print(f'\nExpected {warnings_expected} warnings and detected {len(w)} warnings:\n{warnlist}\n')
             self.assertEqual(len(w), warnings_expected, 'Number of warnings does not match expectation')
