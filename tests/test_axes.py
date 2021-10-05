@@ -11,10 +11,16 @@ import os
 import unittest
 import numpy as np
 import warnings
+import pyqtgraph
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.axes import Axes
+
+pgv = list(pyqtgraph.__version__.split('.'))
+pgv + [0] * (3 - len(pgv))
+pgv_major, pgv_minor, pgv_patch = pgv
+pgvmm = f'{pgv_major}.{pgv_minor}'
 
 
 class TestPgmplAxes(unittest.TestCase):
@@ -92,7 +98,7 @@ class TestPgmplAxes(unittest.TestCase):
         a = self.rgb2d
         ax = Axes()
 
-        warnings_expected = 8
+        warnings_expected = {'0.10': 8, '0.11': 8, '0.12': 10}[pgvmm]
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
