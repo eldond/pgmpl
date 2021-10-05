@@ -17,9 +17,8 @@ from matplotlib import rcParams
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.util import set_debug
-from pgmpl.translate import defaults_from_rcparams, color_translator, style_translator, symbol_translator, \
-    setup_pen_kw, plotkw_translator, dealias, color_map_translator
-
+from pgmpl.translate import color_translator, style_translator, symbol_translator, color_map_translator
+from pgmpl.tools import defaults_from_rcparams, setup_pen_kw, plotkw_translator, dealias
 
 class TestPgmplTranslate(unittest.TestCase):
     """

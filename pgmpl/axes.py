@@ -24,9 +24,11 @@ from collections import defaultdict
 # pgmpl
 # noinspection PyUnresolvedReferences
 import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
-from pgmpl.translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
+from pgmpl.translate import color_translator, color_map_translator
+from pgmpl.tools import setup_pen_kw, plotkw_translator
 from pgmpl.legend import Legend
 from pgmpl.util import printd, tolist, is_numeric
+from pgmpl.tools import dealias
 from pgmpl.text import Text
 from pgmpl.contour import QuadContourSet
 
