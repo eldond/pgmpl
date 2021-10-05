@@ -707,37 +707,44 @@ class AxesImage(pg.ImageItem):
         self.cmap = kwargs.pop('cmap', None)
         self.norm = kwargs.pop('norm', None)
         self.alpha = kwargs.pop('alpha', None)
-        origin = kwargs.pop('origin', None)
 
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
-        vmin = kwargs.pop('vmin', x.min())
-        vmax = kwargs.pop('vmax', x.max())
 
+        self.vmin = kwargs.pop('vmin', x.min())
+        self.vmax = kwargs.pop('vmax', x.max())
         self.check_inputs(**kwargs)
-        self._set_up_imange_extent(xs=copy.copy(x))
+        self._set_up_imange_extent(x=copy.copy(x), **kwargs)
 
-    def _set_up_imange_extent(self, xs):
+    def _set_up_imange_extent(self, x, **kwargs):
         """
         Handles setup of image extent, translate, and scale
         """
+        origin = kwargs.pop('origin', None)
+
         if origin in ['upper', None]:
-            xs = xs[::-1]
-            extent = kwargs.pop('extent', None) or (-0.5, xs.shape[1]-0.5, -(xs.shape[0]-0.5), -(0-0.5))
+            x = x[::-1]
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
         else:
-            extent = kwargs.pop('extent', None) or (-0.5, xs.shape[1]-0.5, -0.5, xs.shape[0]-0.5)
+            extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
-        if len(np.shape(xs)) == 3:
-            xs = np.transpose(xs, (2, 0, 1))
+        if len(np.shape(x)) == 3:
+            x = np.transpose(x, (2, 0, 1))
         else:
-            xs = np.array(color_map_translator(
-                xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=self.alpha,
-            )).T.reshape([4] + tolist(xs.shape))
+            x = np.array(color_map_translator(
+                x.flatten(),
+                cmap=self.cmap,
+                norm=self.norm,
+                vmin=self.vmin,
+                vmax=self.vmax,
+                clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256),
+                alpha=self.alpha,
+            )).T.reshape([4] + tolist(x.shape))
 
-        super(AxesImage, self).__init__(np.transpose(xs))
+        super(AxesImage, self).__init__(np.transpose(x))
         self.resetTransform()
         self.translate(extent[0], extent[2])
         self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
