@@ -146,6 +146,20 @@ class Axes(pg.PlotItem):
         Symbols[key] = pg.arrayToQPath(verts_x, verts_y, connect='all')
         return key
 
+    def _interpret_xy_scatter_data(self, *args, **kwargs):
+        x, y = (tolist(args) + [None] * (2 - len(args)))[:3]
+        data = kwargs.pop('data', None)
+        if data is not None:
+            x = data.get('x')
+            y = data.get('y')
+            kwargs['s'] = data.get('s', None)
+            kwargs['c'] = data.get('c', None)
+            kwargs['edgecolors'] = data.get('edgecolors', None)
+            kwargs['linewidths'] = data.get('linewidths', None)
+            # The following keywords are apparently valid within `data`,
+            # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
+        return x, y, kwargs
+
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
@@ -198,17 +212,8 @@ class Axes(pg.PlotItem):
 
         :return: plotItem instance created by plot()
         """
-        data = kwargs.pop('data', None)
+        x, y, kwargs = self._interpret_xy_scatter_data(x, y, **kwargs)
         linewidths = kwargs.pop('linewidths', None)
-        if data is not None:
-            x = data.get('x')
-            y = data.get('y')
-            kwargs['s'] = data.get('s', None)
-            kwargs['c'] = data.get('c', None)
-            kwargs['edgecolors'] = data.get('edgecolors', None)
-            linewidths = data.get('linewidths', None)
-            # The following keywords are apparently valid within `data`,
-            # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
         n = len(x)
 
         brush_colors, brush_edges = self._prep_scatter_colors(n, **kwargs)
@@ -471,7 +476,7 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
-    def _interpret_xy_data_input(self, *args, **kwargs):
+    def _interpret_xy_errorbar_data(self, *args, **kwargs):
         """
         Interprets x, and y arguments and xerr, yerr, and data keywords
 
@@ -509,7 +514,7 @@ class Axes(pg.PlotItem):
             drawn, but it is a separate object.
         """
         kwargs = dealias(**kwargs)
-        x, y, xerr, yerr = self._interpret_xy_data_input(x, y, xerr, yerr, **kwargs)
+        x, y, xerr, yerr = self._interpret_xy_errorbar_data(x, y, xerr, yerr, **kwargs)
 
         # Separate keywords into those that affect a line through the data and those that affect the errorbars
         epgkw = self._process_errorbar_keywords(**kwargs)
