@@ -47,7 +47,7 @@ class Figure(pg.PlotWidget):
         self.resizeEvent = self.resize_event
         dpi = rcParams['figure.dpi'] if dpi is None else dpi
         figsize = rcParams['figure.figsize'] if figsize is None else figsize
-        self.width, self.height = np.array(figsize)*dpi
+        self.width, self.height = (np.array(figsize)*dpi).astype(int)
         self.resize(self.width, self.height)
         for init_to_none in ['axes', 'suptitle_label']:
             setattr(self, init_to_none, None)

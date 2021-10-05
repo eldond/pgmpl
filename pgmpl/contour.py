@@ -120,7 +120,7 @@ class ContourSet(object):
         x0, y0, x1, y1 = self.x.min(), self.y.min(), self.x.max(), self.y.max()
         for contour in contours:
             contour.translate(x0, y0)  # https://stackoverflow.com/a/51109935/6605826
-            contour.scale((x1 - x0) / np.shape(self.z)[0], (y1 - y0) / np.shape(self.z)[1])
+            contour.scale(int(round((x1 - x0) / np.shape(self.z)[0])), int(round((y1 - y0) / np.shape(self.z)[1])))
             self.ax.addItem(contour)
 
 

@@ -101,7 +101,12 @@ class TestPgmplAxes(unittest.TestCase):
                 data={'x': a, 'unrecognized': 'thingy'}, shape=np.shape(a), imlim=55, interpolation='nearest',
                 filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)  # 8 warnings
             # Verify that warnings were made.
-            assert len(w) == warnings_expected
+            if len(w) != warnings_expected:
+                print(f'\n\nExpected {warnings_expected} warnings, not {len(w)}. These warnings were detected:\n')
+
+                print('\n'.join([f"{i+1}: {ww.message} in {ww.filename}:{ww.lineno}" for i, ww in enumerate(w)]))
+                print('\n')
+            self.assertEqual(len(w), warnings_expected, 'Number of warnings does not match expectation')
         assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
         self.printv('      test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
                     'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))

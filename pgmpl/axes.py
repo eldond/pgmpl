@@ -148,7 +148,7 @@ class Axes(pg.PlotItem):
 
     @staticmethod
     def _interpret_xy_scatter_data(*args, **kwargs):
-        x, y = (tolist(args) + [None] * (2 - len(args)))[:3]
+        x, y = (list(args) + [None] * (2 - len(args)))[:3]
         data = kwargs.pop('data', None)
         if data is not None:
             x = data.get('x')
@@ -459,7 +459,7 @@ class Axes(pg.PlotItem):
         :return: tuple of sanitized x, y, xerr, yerr
         """
 
-        x, y, xerr, yerr = (tolist(args) + [None] * (4 - len(args)))[:5]
+        x, y, xerr, yerr = (list(args) + [None] * (4 - len(args)))[:5]
 
 
         def prep(v):
@@ -490,7 +490,7 @@ class Axes(pg.PlotItem):
             x, y, xerr, yerr
         """
         data = kwargs.pop('data', None)
-        x, y, xerr, yerr = (tolist(args) + [None] * (4 - len(args)))[:5]
+        x, y, xerr, yerr = (list(args) + [None] * (4 - len(args)))[:5]
 
         if data is not None:
             x = data.get('x', None)
@@ -777,7 +777,7 @@ class AxesImage(pg.ImageItem):
         super(AxesImage, self).__init__(np.transpose(x))
         self.resetTransform()
         self.translate(extent[0], extent[2])
-        self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
+        self.scale(int(round((extent[1] - extent[0]) / self.width())), int(round((extent[3] - extent[2]) / self.height())))
 
     @staticmethod
     def check_inputs(**kw):
