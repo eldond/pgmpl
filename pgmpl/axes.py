@@ -146,7 +146,8 @@ class Axes(pg.PlotItem):
         Symbols[key] = pg.arrayToQPath(verts_x, verts_y, connect='all')
         return key
 
-    def _interpret_xy_scatter_data(self, *args, **kwargs):
+    @staticmethod
+    def _interpret_xy_scatter_data(*args, **kwargs):
         x, y = (tolist(args) + [None] * (2 - len(args)))[:3]
         data = kwargs.pop('data', None)
         if data is not None:
