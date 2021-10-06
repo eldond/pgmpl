@@ -92,6 +92,7 @@ class Figure(pg.PlotWidget):
     def set_subplotpars(self, pars):
         """
         Sets margins and spacing between Axes. Not a direct matplotlib imitation.
+
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
@@ -99,11 +100,10 @@ class Figure(pg.PlotWidget):
             # Either no pars were provided or the layout has already been set to None because the figure is closing.
             # Don't do any margin adjustments.
             return
-        if pars is not None:
-            self.margins = {
-                'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
-                'hspace': pars.hspace, 'wspace': pars.wspace,
-            }
+        self.margins = {
+            'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
+            'hspace': pars.hspace, 'wspace': pars.wspace,
+        }
         if self.margins is not None:
             if self.tight:
                 self.layout.setContentsMargins(
@@ -149,8 +149,7 @@ class Figure(pg.PlotWidget):
         return ax
 
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
-        if ax is None:
-            ax = self.add_subplot(1, 1, 1) if self.axes is None else np.atleast_1d(self.axes).flatten()[-1]
+        ax = ax or self.gca()
         if cax is None:
             orientation = kwargs.get('orientation', 'vertical')
             row = int(np.floor((ax.index - 1) / ax.ncols))
@@ -199,16 +198,17 @@ class Figure(pg.PlotWidget):
         event.accept()
         return
 
-    def gca(self):
+    def gca(self, **kwargs):
         """
         Imitation of matplotlib gca()
+
         :return: Current axes for this figure, creating them if necessary
         """
         self._deleted_axes_protection('gca')
         if self.axes is not None:
             ax = list(flatten(np.atleast_1d(self.axes)))[-1]
         if self.axes is None:
-            ax = self.add_subplot(1, 1, 1)
+            ax = self.add_subplot(1, 1, 1, **kwargs)
         return ax
 
     def close(self):
