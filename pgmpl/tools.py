@@ -38,7 +38,7 @@ def dealias(**kws):
     alias_lists = {  # If there is more than one alias, then the first one in the list is used
         'linewidth': ['lw'],
         'linestyle': ['ls'],
-        'markeredgewith': ['mew'],
+        'markeredgewidth': ['mew'],
         'markeredgecolor': ['mec'],
         'markerfacecolor': ['mfc'],
         'markersize': ['ms'],
