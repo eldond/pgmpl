@@ -94,6 +94,11 @@ class TestPgmplFigure(unittest.TestCase):
         fig.colorbar(img)
         fig.close()
 
+    def test_catch_deleted_axes(self):
+        """Set up the case where gca() is used when Qt has deleted the axes and test robustness"""
+        fig = Figure()
+        ax = fig.add_subplot(1, 1, 1)
+
     def setUp(self):
         test_id = self.id()
         test_name = '.'.join(test_id.split('.')[-2:])

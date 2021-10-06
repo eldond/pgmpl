@@ -25,7 +25,8 @@ from pgmpl.translate import color_translator, style_translator, symbol_translato
 def dealias(**kws):
     """
     Checks for alias of a keyword (like 'ls' for linestyle) and updates keywords so that the primary is defined.
-    That is, if kws contains 'ls', the result will contain 'linestyle' with the value defined by 'lw'. This
+
+    That is, if kws contains 'ls', the result will contain 'linestyle' with the value defined by 'ls'. This
     eliminates the need to check through all the aliases later; other functions can rely on finding the primary
     keyword. Also, the aliases are all removed so they don't confuse other functions.
 
@@ -34,9 +35,6 @@ def dealias(**kws):
     :return: dict
         Dictionary with all aliases replaced by primary keywords (ls is replaced by linestyle, for example)
     """
-    missing_value_mark = 'This value is missing; it is not just None. We want to allow for the possibility that ' \
-                         'keyword=None is treated differently than a missing keyword in some function, because a ' \
-                         'function might not accept unrecognized keywords.'
     alias_lists = {  # If there is more than one alias, then the first one in the list is used
         'linewidth': ['lw'],
         'linestyle': ['ls'],
@@ -53,15 +51,14 @@ def dealias(**kws):
         'horizontalalignment': ['ha'],
     }
     for primary, aliases in list(alias_lists.items()):  # https://stackoverflow.com/a/13998534/6605826
-        aliasv = {alias: kws.pop(alias, missing_value_mark) for alias in aliases}
-        not_missing = [v != missing_value_mark for v in aliasv.values()]
-        if primary not in kws.keys() and any(not_missing):
-            # The aliases only need be considered if the primary is missing.
-            aliasu = np.atleast_1d(list(aliasv.keys()))[np.atleast_1d(not_missing)][0]
-            kws[primary] = aliasv[aliasu]
-            printd("  assigned kws['{}'] = kws.pop('{}')".format(primary, aliasu))
-        else:
-            printd(' did not asssign {}'.format(primary))
+        for alias in aliases:
+            if alias in kws:
+                if primary not in kws.keys():
+                    kws[primary] = kws.pop(alias)
+                    printd("  assigned kws['{}'] = kws.pop('{}')".format(primary, alias))
+                else:
+                    kws.pop(alias)
+                    printd(' did not asssign {}'.format(primary))
     return kws
 
 
@@ -124,18 +121,14 @@ def setup_pen_kw(penkw={}, **kw):
         'linewidth': 'width',
     }
     for direct in direct_translations_pen:
-        if direct in kw and kw[direct] is not None:
-            penkw[direct_translations_pen[direct]] = kw[direct]
+        penkw[direct_translations_pen[direct]] = kw.pop(direct, None)
 
-    # Handle colors
-    newc = color_translator(**kw)
-    if newc is not None:
-        penkw['color'] = newc  # If no color information was defined, leave this alone to allow default colors
+    # Handle colors and styles
+    penkw['color'] = color_translator(**kw)
+    penkw['style'] = style_translator(**kw)
 
-    # Line style
-    news = style_translator(**kw)
-    if news is not None:
-        penkw['style'] = news
+    # Prune values of None
+    penkw = {k: v for k, v in penkw.items() if v is not None}
 
     return pg.mkPen(**penkw) if len(penkw.keys()) else None
 
