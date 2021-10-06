@@ -1,11 +1,11 @@
-[![Build Status](https://app.travis-ci.com/eldond/pgmpl.svg?branch=master)](https://app.travis-ci.com/github/eldond/pgmpl)
-[![codecov](https://codecov.io/gh/eldond/pgmpl/branch/master/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl/branch/master)
-[![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=master)](https://bettercodehub.com/)
-(branch = master)
+[![Build Status](https://app.travis-ci.com/eldond/pgmpl.svg?branch=stable)](https://app.travis-ci.com/github/eldond/pgmpl)
+[![codecov](https://codecov.io/gh/eldond/pgmpl/branch/stable/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl/branch/stable)
+[![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=stable)](https://bettercodehub.com/)
+(branch = stable)
 
 [![Build Status](https://app.travis-ci.com/eldond/pgmpl.svg?branch=dev)](https://app.travis-ci.com/github/eldond/pgmpl)
 [![codecov](https://codecov.io/gh/eldond/pgmpl/branch/dev/graph/badge.svg)](https://codecov.io/gh/eldond/pgmpl/branch/dev)
-[![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=dev)](https://bettercodehub.com/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/eldond/pgmpl?branch=dev)](https://bettercodehub.com/results/eldond/pgmpl)
 (branch = dev)
 
 PgMpl
