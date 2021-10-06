@@ -148,6 +148,19 @@ class Figure(pg.PlotWidget):
         self.refresh_suptitle()
         return ax
 
+    def _try_remove_from_layout(self, obj):
+        """
+        Try to remove an item from the layout, catching the naughty `Exception`
+
+        :param obj: object
+        """
+        if obj is not None:
+            # noinspection PyBroadException
+            try:
+                self.layout.removeItem(obj)
+            except Exception:  # pyqtgraph raises this type, so we can't be narrower
+                pass
+
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
         ax = ax or self.gca()
         if cax is None:
@@ -164,11 +177,7 @@ class Figure(pg.PlotWidget):
             else:
                 sub_layout.layout.setColumnFixedWidth(1, 50)  # https://stackoverflow.com/a/36897295/6605826
 
-            # noinspection PyBroadException
-            try:
-                self.layout.removeItem(ax)
-            except Exception:
-                pass
+            self._try_remove_from_layout(ax)
             self.layout.addItem(sub_layout, row + 1, col)
         return Colorbar(cax, mappable, **kwargs)
 
@@ -179,12 +188,7 @@ class Figure(pg.PlotWidget):
         self.refresh_suptitle()
 
     def refresh_suptitle(self):
-        if self.suptitle_label is not None:
-            # noinspection PyBroadException
-            try:
-                self.layout.removeItem(self.suptitle_label)
-            except Exception:  # pyqtgraph raises this type, so we can't be narrower
-                pass
+        self._try_remove_from_layout(self.suptitle_label)
         self.suptitle_label = self.layout.addLabel(self.suptitle_text, 0, 0, 1, self.fig_colspan)
 
     def closeEvent(self, event):
