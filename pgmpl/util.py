@@ -50,4 +50,3 @@ def is_numeric(value):
         return True
     except TypeError:
         return False
-

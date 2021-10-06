@@ -11,10 +11,16 @@ import os
 import unittest
 import numpy as np
 import warnings
+import pyqtgraph
 
 # pgmpl
 from pgmpl import __init__  # __init__ does setup stuff like making sure a QApp exists
 from pgmpl.axes import Axes
+
+pgv = list(pyqtgraph.__version__.split('.'))
+pgv + [0] * (3 - len(pgv))
+pgv_major, pgv_minor, pgv_patch = pgv
+pgvmm = f'{pgv_major}.{pgv_minor}'
 
 
 class TestPgmplAxes(unittest.TestCase):
@@ -92,7 +98,7 @@ class TestPgmplAxes(unittest.TestCase):
         a = self.rgb2d
         ax = Axes()
 
-        warnings_expected = 8
+        warnings_expected = {'0.10': 8, '0.11': 8, '0.12': 10}[pgvmm]
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
@@ -101,10 +107,15 @@ class TestPgmplAxes(unittest.TestCase):
                 data={'x': a, 'unrecognized': 'thingy'}, shape=np.shape(a), imlim=55, interpolation='nearest',
                 filternorm=2, filterrad=5.0, resample=True, url='google.com', blah=True)  # 8 warnings
             # Verify that warnings were made.
-            assert len(w) == warnings_expected
+            warnlist = '\n'.join([f"{i+1}: {ww.message} in {ww.filename}:{ww.lineno}" for i, ww in enumerate(w)])
+            if len(w) != warnings_expected:
+                print(f'\nExpected {warnings_expected} warnings and detected {len(w)} warnings:\n{warnlist}\n')
+            self.assertEqual(len(w), warnings_expected, 'Number of warnings does not match expectation')
         assert isinstance(img, AxesImage)  # It should still return the instance using the implemented keywords.
-        self.printv('      test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented keywords '
-                    'and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img))
+        self.printv(
+            '      test_axes_imshow_warnings: tried to call Axes.imshow instance using unimplemented '
+            'keywords and got {}/{} warnings. img = {}'.format(len(w), warnings_expected, img)
+        )
 
     def test_axes_warnings(self):
         ax = Axes()

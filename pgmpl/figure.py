@@ -47,7 +47,7 @@ class Figure(pg.PlotWidget):
         self.resizeEvent = self.resize_event
         dpi = rcParams['figure.dpi'] if dpi is None else dpi
         figsize = rcParams['figure.figsize'] if figsize is None else figsize
-        self.width, self.height = np.array(figsize)*dpi
+        self.width, self.height = (np.array(figsize)*dpi).astype(int)
         self.resize(self.width, self.height)
         for init_to_none in ['axes', 'suptitle_label']:
             setattr(self, init_to_none, None)
@@ -92,6 +92,7 @@ class Figure(pg.PlotWidget):
     def set_subplotpars(self, pars):
         """
         Sets margins and spacing between Axes. Not a direct matplotlib imitation.
+
         :param pars: SubplotParams instance
             The subplotpars keyword to __init__ goes straight to here.
         """
@@ -99,11 +100,10 @@ class Figure(pg.PlotWidget):
             # Either no pars were provided or the layout has already been set to None because the figure is closing.
             # Don't do any margin adjustments.
             return
-        if pars is not None:
-            self.margins = {
-                'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
-                'hspace': pars.hspace, 'wspace': pars.wspace,
-            }
+        self.margins = {
+            'left': pars.left, 'top': pars.top, 'right': pars.right, 'bottom': pars.bottom,
+            'hspace': pars.hspace, 'wspace': pars.wspace,
+        }
         if self.margins is not None:
             if self.tight:
                 self.layout.setContentsMargins(
@@ -148,9 +148,21 @@ class Figure(pg.PlotWidget):
         self.refresh_suptitle()
         return ax
 
+    def _try_remove_from_layout(self, obj):
+        """
+        Try to remove an item from the layout, catching the naughty `Exception`
+
+        :param obj: object
+        """
+        if obj is not None:
+            # noinspection PyBroadException
+            try:
+                self.layout.removeItem(obj)
+            except Exception:  # pyqtgraph raises this type, so we can't be narrower
+                pass
+
     def colorbar(self, mappable, cax=None, ax=None, **kwargs):
-        if ax is None:
-            ax = self.add_subplot(1, 1, 1) if self.axes is None else np.atleast_1d(self.axes).flatten()[-1]
+        ax = ax or self.gca()
         if cax is None:
             orientation = kwargs.get('orientation', 'vertical')
             row = int(np.floor((ax.index - 1) / ax.ncols))
@@ -165,11 +177,7 @@ class Figure(pg.PlotWidget):
             else:
                 sub_layout.layout.setColumnFixedWidth(1, 50)  # https://stackoverflow.com/a/36897295/6605826
 
-            # noinspection PyBroadException
-            try:
-                self.layout.removeItem(ax)
-            except Exception:
-                pass
+            self._try_remove_from_layout(ax)
             self.layout.addItem(sub_layout, row + 1, col)
         return Colorbar(cax, mappable, **kwargs)
 
@@ -180,12 +188,7 @@ class Figure(pg.PlotWidget):
         self.refresh_suptitle()
 
     def refresh_suptitle(self):
-        if self.suptitle_label is not None:
-            # noinspection PyBroadException
-            try:
-                self.layout.removeItem(self.suptitle_label)
-            except Exception:  # pyqtgraph raises this type, so we can't be narrower
-                pass
+        self._try_remove_from_layout(self.suptitle_label)
         self.suptitle_label = self.layout.addLabel(self.suptitle_text, 0, 0, 1, self.fig_colspan)
 
     def closeEvent(self, event):
@@ -199,16 +202,17 @@ class Figure(pg.PlotWidget):
         event.accept()
         return
 
-    def gca(self):
+    def gca(self, **kwargs):
         """
         Imitation of matplotlib gca()
+
         :return: Current axes for this figure, creating them if necessary
         """
         self._deleted_axes_protection('gca')
         if self.axes is not None:
             ax = list(flatten(np.atleast_1d(self.axes)))[-1]
         if self.axes is None:
-            ax = self.add_subplot(1, 1, 1)
+            ax = self.add_subplot(1, 1, 1, **kwargs)
         return ax
 
     def close(self):

@@ -94,6 +94,32 @@ class TestPgmplFigure(unittest.TestCase):
         fig.colorbar(img)
         fig.close()
 
+    def test_catch_deleted_axes(self):
+        """Set up the case where gca() is used when Qt has deleted the axes and test robustness"""
+        import sip
+        # Add an axes instance to a figure
+        fig = Figure()
+        ax = fig.add_subplot(1, 1, 1)
+        # Confirm that gca() recovers this set of axes with no problem and that the figure knows about them
+        ax2 = fig.gca()
+        self.assertIs(ax, ax2)
+        self.assertIsNotNone(fig.axes)
+        # Try to delete the axes in Qt, not going through pgmpl in a way that would tell it of the deletion
+        sip.delete(ax)
+        # Check that fig's reference to the deleted axes is erased by the _deleted_axes_protection() method
+        fig._deleted_axes_protection('testing')
+        self.assertIsNone(fig.axes)
+
+        # Try again, less directly
+        ax = fig.add_subplot(1, 1, 1)
+        ax2 = fig.gca()
+        self.assertIs(ax, ax2)
+        self.assertIsNotNone(fig.axes)
+        sip.delete(ax)
+        # Confirm that gca() can't find the old axes anymore, because the deleted axes protection found the problem
+        ax3 = fig.gca()
+        self.assertIsNot(ax, ax3)
+
     def setUp(self):
         test_id = self.id()
         test_name = '.'.join(test_id.split('.')[-2:])

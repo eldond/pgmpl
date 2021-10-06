@@ -24,9 +24,11 @@ from collections import defaultdict
 # pgmpl
 # noinspection PyUnresolvedReferences
 import pgmpl.__init__  # __init__ does setup stuff like making sure a QApp exists
-from pgmpl.translate import plotkw_translator, color_translator, setup_pen_kw, color_map_translator, dealias
+from pgmpl.translate import color_translator, color_map_translator
+from pgmpl.tools import setup_pen_kw, plotkw_translator
 from pgmpl.legend import Legend
 from pgmpl.util import printd, tolist, is_numeric
+from pgmpl.tools import dealias
 from pgmpl.text import Text
 from pgmpl.contour import QuadContourSet
 
@@ -146,6 +148,34 @@ class Axes(pg.PlotItem):
         Symbols[key] = pg.arrayToQPath(verts_x, verts_y, connect='all')
         return key
 
+    @staticmethod
+    def _interpret_xy_scatter_data(*args, **kwargs):
+        x, y = (list(args) + [None] * (2 - len(args)))[:3]
+        data = kwargs.pop('data', None)
+        if data is not None:
+            x = data.get('x')
+            y = data.get('y')
+            kwargs['s'] = data.get('s', None)
+            kwargs['c'] = data.get('c', None)
+            kwargs['edgecolors'] = data.get('edgecolors', None)
+            kwargs['linewidths'] = data.get('linewidths', None)
+            # The following keywords are apparently valid within `data`,
+            # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
+        return x, y, kwargs
+
+    @staticmethod
+    def _setup_scatter_symbol_pen(brush_edges, linewidths):
+        """Sets up the pen for drawing symbols on scatter plot"""
+        sympen_kw = [{'color': cc} for cc in brush_edges]
+        if linewidths is not None:
+            n = len(brush_edges)
+            if (len(tolist(linewidths)) == 1) and (n > 1):
+                # Make list of lw the same length as x for cases where only one setting value was provided
+                linewidths = tolist(linewidths) * n
+            for i in range(n):
+                sympen_kw[i]['width'] = linewidths[i]
+        return [pg.mkPen(**spkw) for spkw in sympen_kw]
+
     def scatter(self, x=None, y=None, **kwargs):
         """
         Translates arguments and keywords for matplotlib.axes.Axes.scatter() method so they can be passed to pyqtgraph.
@@ -198,27 +228,13 @@ class Axes(pg.PlotItem):
 
         :return: plotItem instance created by plot()
         """
-        data = kwargs.pop('data', None)
-        linewidths = kwargs.pop('linewidths', None)
-        if data is not None:
-            x = data.get('x')
-            y = data.get('y')
-            kwargs['s'] = data.get('s', None)
-            kwargs['c'] = data.get('c', None)
-            kwargs['edgecolors'] = data.get('edgecolors', None)
-            linewidths = data.get('linewidths', None)
-            # The following keywords are apparently valid within `data`,
-            # but they'd conflict with `c`, so they've been neglected:   color facecolor facecolors
+        x, y, kwargs = self._interpret_xy_scatter_data(x, y, **kwargs)
         n = len(x)
-
+        linewidths = kwargs.pop('linewidths', None)
         brush_colors, brush_edges = self._prep_scatter_colors(n, **kwargs)
 
         for popit in ['cmap', 'norm', 'vmin', 'vmax', 'alpha', 'edgecolors', 'c']:
             kwargs.pop(popit, None)  # Make sure all the color keywords are gone now that they've been used.
-
-        # Make the lists of symbol settings the same length as x for cases where only one setting value was provided
-        if linewidths is not None and (len(tolist(linewidths)) == 1) and (n > 1):
-            linewidths = tolist(linewidths) * n
 
         # Catch & translate other keywords
         kwargs['markersize'] = kwargs.pop('s', 10)
@@ -226,13 +242,10 @@ class Axes(pg.PlotItem):
         plotkw = plotkw_translator(**kwargs)
 
         # Fill in keywords we already prepared
-        sympen_kw = [{'color': cc} for cc in brush_edges]
-        if linewidths is not None:
-            for i in range(n):
-                sympen_kw[i]['width'] = linewidths[i]
+        plotkw['symbolPen'] = self._setup_scatter_symbol_pen(brush_edges, linewidths)
         plotkw['pen'] = None
         plotkw['symbolBrush'] = [pg.mkBrush(color=cc) for cc in brush_colors]
-        plotkw['symbolPen'] = [pg.mkPen(**spkw) for spkw in sympen_kw]
+
         plotkw['symbol'] = plotkw.get('symbol', None) or self._make_custom_verts(kwargs.pop('verts', None))
         return super(Axes, self).plot(x=x, y=y, **plotkw)
 
@@ -430,7 +443,7 @@ class Axes(pg.PlotItem):
         self._errbar_ycap_mark(x, y, yerr, **capkw)
 
     @staticmethod
-    def _sanitize_errbar_data(x, y=None, xerr=None, yerr=None, mask=None):
+    def _sanitize_errbar_data(*args, mask=None):
         """
         Helper function for errorbar. Does not map to a matplotlib method.
 
@@ -447,6 +460,9 @@ class Axes(pg.PlotItem):
 
         :return: tuple of sanitized x, y, xerr, yerr
         """
+
+        x, y, xerr, yerr = (list(args) + [None] * (4 - len(args)))[:5]
+
 
         def prep(v):
             """
@@ -468,6 +484,33 @@ class Axes(pg.PlotItem):
 
         return prep(x), prep(y), prep(xerr), prep(yerr)
 
+    def _interpret_xy_errorbar_data(self, *args, **kwargs):
+        """
+        Interprets x, and y arguments and xerr, yerr, and data keywords
+
+        :return: tuple containing
+            x, y, xerr, yerr
+        """
+        data = kwargs.pop('data', None)
+        x, y, xerr, yerr = (list(args) + [None] * (4 - len(args)))[:5]
+
+        if data is not None:
+            x = data.get('x', None)
+            y = data.get('y', None)
+            xerr = data.get('xerr', None)
+            yerr = data.get('yerr', None)
+        return x, y, xerr, yerr
+
+    def _process_errorbar_keywords(self, **kwargs):
+        """Separate keywords affecting error bars from those affecting nominal values & translate to pyqtgraph"""
+        ekwargs = copy.deepcopy(kwargs)
+        if kwargs.get('ecolor', None) is not None:
+            ekwargs['color'] = kwargs.pop('ecolor')
+        if kwargs.get('elinewidth', None) is not None:
+            ekwargs['linewidth'] = kwargs.pop('elinewidth')
+        epgkw = plotkw_translator(**ekwargs)
+        return epgkw
+
     def errorbar(self, x=None, y=None, yerr=None, xerr=None, **kwargs):
         """
         Imitates matplotlib.axes.Axes.errorbar
@@ -479,21 +522,10 @@ class Axes(pg.PlotItem):
             drawn, but it is a separate object.
         """
         kwargs = dealias(**kwargs)
-        data = kwargs.pop('data', None)
-
-        if data is not None:
-            x = data.get('x', None)
-            y = data.get('y', None)
-            xerr = data.get('xerr', None)
-            yerr = data.get('yerr', None)
+        x, y, xerr, yerr = self._interpret_xy_errorbar_data(x, y, xerr, yerr, **kwargs)
 
         # Separate keywords into those that affect a line through the data and those that affect the errorbars
-        ekwargs = copy.deepcopy(kwargs)
-        if kwargs.get('ecolor', None) is not None:
-            ekwargs['color'] = kwargs.pop('ecolor')
-        if kwargs.get('elinewidth', None) is not None:
-            ekwargs['linewidth'] = kwargs.pop('elinewidth')
-        epgkw = plotkw_translator(**ekwargs)
+        epgkw = self._process_errorbar_keywords(**kwargs)
         w = np.array([True if i % int(round(kwargs.pop('errorevery', 1))) == 0 else False
                       for i in range(len(np.atleast_1d(x)))])
 
@@ -502,7 +534,7 @@ class Axes(pg.PlotItem):
             self.plot(x, y, **kwargs)
 
         # Draw the errorbars
-        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, w)
+        xp, yp, xerrp, yerrp = self._sanitize_errbar_data(x, y, xerr, yerr, mask=w)
 
         errb = pg.ErrorBarItem(
             x=xp, y=yp, height=0 if yerr is None else yerrp*2, width=0 if xerr is None else xerrp*2, **epgkw
@@ -707,41 +739,47 @@ class AxesImage(pg.ImageItem):
         self.cmap = kwargs.pop('cmap', None)
         self.norm = kwargs.pop('norm', None)
         self.alpha = kwargs.pop('alpha', None)
-        vmin = kwargs.pop('vmin', None)
-        vmax = kwargs.pop('vmax', None)
-        origin = kwargs.pop('origin', None)
 
         if data is not None:
             x = data['x']
             if len(data.keys()) > 1:
                 warnings.warn('Axes.imshow does not extract keywords from data yet (just x).')
 
-        xs = copy.copy(x)
-
+        self.vmin = kwargs.pop('vmin', x.min())
+        self.vmax = kwargs.pop('vmax', x.max())
         self.check_inputs(**kwargs)
+        self._set_up_imange_extent(x=copy.copy(x), **kwargs)
+
+    def _set_up_imange_extent(self, x, **kwargs):
+        """
+        Handles setup of image extent, translate, and scale
+        """
+        origin = kwargs.pop('origin', None)
 
         if origin in ['upper', None]:
-            xs = xs[::-1]
+            x = x[::-1]
             extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -(x.shape[0]-0.5), -(0-0.5))
         else:
             extent = kwargs.pop('extent', None) or (-0.5, x.shape[1]-0.5, -0.5, x.shape[0]-0.5)
 
-        if len(np.shape(xs)) == 3:
-            xs = np.transpose(xs, (2, 0, 1))
+        if len(np.shape(x)) == 3:
+            x = np.transpose(x, (2, 0, 1))
         else:
-            xs = np.array(color_map_translator(
-                xs.flatten(), cmap=self.cmap, norm=self.norm, vmin=vmin, vmax=vmax, clip=kwargs.pop('clip', False),
-                ncol=kwargs.pop('N', 256), alpha=self.alpha,
-            )).T.reshape([4] + tolist(xs.shape))
+            x = np.array(color_map_translator(
+                x.flatten(),
+                cmap=self.cmap,
+                norm=self.norm,
+                vmin=self.vmin,
+                vmax=self.vmax,
+                clip=kwargs.pop('clip', False),
+                ncol=kwargs.pop('N', 256),
+                alpha=self.alpha,
+            )).T.reshape([4] + tolist(x.shape))
 
-        super(AxesImage, self).__init__(np.transpose(xs))
-        if extent is not None:
-            self.resetTransform()
-            self.translate(extent[0], extent[2])
-            self.scale((extent[1] - extent[0]) / self.width(), (extent[3] - extent[2]) / self.height())
-
-        self.vmin = vmin or x.min()
-        self.vmax = vmax or x.max()
+        super(AxesImage, self).__init__(np.transpose(x))
+        self.resetTransform()
+        self.translate(extent[0], extent[2])
+        self.scale(int(round((extent[1] - extent[0]) / self.width())), int(round((extent[3] - extent[2]) / self.height())))
 
     @staticmethod
     def check_inputs(**kw):
