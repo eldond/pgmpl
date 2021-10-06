@@ -110,9 +110,24 @@ class TestPgmplTranslate(unittest.TestCase):
             newk[i] = plotkw_translator(**self.plot_kw_tests[i])
 
     def test_dealias(self):
-        test_dict = {'lw': 5, 'ls': '--', 'mec': 'r', 'markeredgewidth': 1, 'blah': 0}
-        correct_answer = {'linewidth': 5, 'linestyle': '--', 'markeredgecolor': 'r', 'markeredgewidth': 1, 'blah': 0}
+        test_dict = {
+            'lw': 5,
+            'ls': '--',
+            'mec': 'r',
+            'markeredgewidth': 1, 'mew': 2,  # The primary and the alias are defined; alias should be ignored
+            'blah': 0,
+            'test_alias1': 1, 'test_alias2': 2,  # Two aliases are defined for the same primary; should ignore 2nd
+        }
+        correct_answer = {
+            'linewidth': 5,
+            'linestyle': '--',
+            'markeredgecolor': 'r',
+            'markeredgewidth': 1,
+            'blah': 0,
+            'fake_test_keyword_with_two_aliases': 1,
+        }
         test_answer = dealias(**test_dict)
+        self.assertEqual(correct_answer, test_answer)
         assert correct_answer == test_answer  # https://stackoverflow.com/a/5635309/6605826
 
         assert dealias(lw=8) == {'linewidth': 8}

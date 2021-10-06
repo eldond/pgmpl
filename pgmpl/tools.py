@@ -49,6 +49,7 @@ def dealias(**kws):
         'facecolor': ['fc'],
         'verticalalignment': ['va'],
         'horizontalalignment': ['ha'],
+        'fake_test_keyword_with_two_aliases': ['test_alias1', 'test_alias2']
     }
     for primary, aliases in list(alias_lists.items()):  # https://stackoverflow.com/a/13998534/6605826
         for alias in aliases:
